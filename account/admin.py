@@ -10,10 +10,10 @@ class RoleAdmin(admin.ModelAdmin):
 
 @admin.register(User)
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('full_name', 'mobile_number', 'email', 'is_active', 'is_staff')
+    list_display = ('name', 'phone', 'email', 'is_active', 'is_staff')
     list_filter = ('is_active', 'is_staff', 'roles')
-    search_fields = ('full_name', 'mobile_number', 'email')
+    search_fields = ('name', 'phone', 'email')
     filter_horizontal = ('roles',)
-    ordering = ('full_name',)
+    ordering = ('name',)
 
 

@@ -1,0 +1,98 @@
+from rest_framework import serializers
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth.hashers import make_password
+
+from account.choices import CONFLICT_ROLE_PAIRS
+from account.models import User, Role
+from account.utils import get_or_update_role_cache
+from utils.models import OTPVerification
+
+
+class RegistrationSerializer(serializers.ModelSerializer):
+    roles = serializers.ListField(child=serializers.CharField(), write_only=True)
+
+    class Meta:
+        model = User
+        fields = ['name', 'email', 'phone', 'password', 'roles']
+        extra_kwargs = {
+            'password': {'write_only': True},  # Ensure password is write-only
+        }
+
+    def validate_phone(self, value):
+        # Check if the phone number is associated with a verified OTP
+        try:
+            otp_record = OTPVerification.objects.get(phone_number=value)
+            if not otp_record.is_verified:
+                raise serializers.ValidationError("Phone number is not verified.")
+            if otp_record.is_expired():
+                raise serializers.ValidationError("OTP for this phone number has expired. Please request a new OTP.")
+        except OTPVerification.DoesNotExist:
+            raise serializers.ValidationError("Phone number has not been verified. Please verify your phone number first.")
+        return value
+
+    def validate_roles(self, roles):
+        """Fetch role mappings from cache (refresh if expired)."""
+        role_mapping = get_or_update_role_cache()
+
+        # Validate roles
+        role_ids = []
+        for role in roles:
+            if role in role_mapping:
+                role_ids.append(role_mapping[role])
+            else:
+                raise serializers.ValidationError(f"Invalid role: {role}")
+
+        # Conflict role restrictions
+        for conflict_roles, error_message in CONFLICT_ROLE_PAIRS:
+            if conflict_roles.issubset(set(roles)):
+                raise serializers.ValidationError(error_message)
+
+        return roles
+
+    def create(self, validated_data):
+        """Create a user with hashed password and assigned roles."""
+        roles = validated_data.pop("roles", [])  # Get role IDs
+        validated_data['password'] = make_password(validated_data['password'])  # Hash the password
+
+        user = User.objects.create(**validated_data)
+        user.roles.set(roles)
+
+        return user
+
+class LoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs):
+        phone = attrs.get('phone')
+        password = attrs.get('password')
+
+        user = User.objects.filter(phone=phone).first()
+        if not user:
+            raise serializers.ValidationError({"error": "User with this phone does not exist."})
+
+            # Check if the provided password matches the one stored for the user
+        if not user.check_password(password):
+            raise serializers.ValidationError({"error": "Incorrect password."})
+
+        # Issue token on successful login
+        refresh = RefreshToken.for_user(user)
+        attrs['tokens'] = {
+            'access': str(refresh.access_token),
+            'refresh': str(refresh)
+        }
+        return attrs
+
+
+# Serializer for updating user details
+class UserUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['name', 'email', 'phone',]
+
+
+# Serializer for listing users
+class UserListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'name', 'email', 'role', 'phone']

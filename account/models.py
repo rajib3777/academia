@@ -1,19 +1,20 @@
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
+from django.utils.translation import gettext_lazy as _
 from django.db import models
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, mobile_number, password=None, **extra_fields):
-        if not mobile_number:
+    def create_user(self, phone, password=None, **extra_fields):
+        if not phone:
             raise ValueError("Mobile number is required")
-        user = self.model(mobile_number=mobile_number, **extra_fields)
+        user = self.model(phone=phone, **extra_fields)
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, mobile_number, password=None, **extra_fields):
+    def create_superuser(self, phone, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        return self.create_user(mobile_number, password, **extra_fields)
+        return self.create_user(phone, password, **extra_fields)
 
 
 class Role(models.Model):
@@ -31,24 +32,42 @@ class Role(models.Model):
         return self.name
 
 
-class User(AbstractBaseUser, PermissionsMixin):
-    full_name = models.CharField(max_length=255)
-    mobile_number = models.CharField(max_length=15, unique=True)
-    email = models.EmailField(null=True, blank=True)
+class User(AbstractUser):
+    first_name = None
+    last_name = None
+    username = None
+    name = models.CharField(_("Name of User"), blank=True, max_length=255)
+    email = models.EmailField(_("email address"), unique=True, null=True, blank=True)
     roles = models.ManyToManyField(Role, related_name="users")
+    phone = models.CharField(_("Mobile number"), max_length=15, unique=True)
+    otp = models.CharField(max_length=6, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    USERNAME_FIELD = 'mobile_number'
-    REQUIRED_FIELDS = ['full_name']
+    USERNAME_FIELD = 'phone'
+    REQUIRED_FIELDS = ['name']
 
     objects = CustomUserManager()
 
+    class Meta:
+        verbose_name = _("user")
+        verbose_name_plural = _("users")
+        ordering = ["id"]
+
+    def is_admin(self):
+        return self.roles.filter(name="admin").exists()
+
     def is_teacher(self):
         return self.roles.filter(name="teacher").exists()
+
+    def is_teacher_staff(self):
+        return self.roles.filter(name="staff").exists()
+
+    def is_student(self):
+        return self.roles.filter(name="student").exists()
 
     def is_academy_owner(self):
         return self.roles.filter(name="academy").exists()
 
     def __str__(self):
-        return self.full_name
+        return self.name
