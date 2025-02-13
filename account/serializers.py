@@ -31,8 +31,9 @@ class RegistrationSerializer(serializers.ModelSerializer):
         return value
 
     def validate_roles(self, roles):
-        """Fetch role mappings from cache (refresh if expired)."""
-        role_mapping = get_or_update_role_cache()
+        role_mapping = get_or_update_role_cache() # Fetch role mappings from cache (refresh if expired).
+        roles = set(roles[0].lower().split(',')) # Convert a list of comma-separated role strings into a flat set of roles. Set for faster lookup.
+        roles.discard('') # remove blank from the set
 
         # Validate roles
         role_ids = []
@@ -47,7 +48,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
             if conflict_roles.issubset(set(roles)):
                 raise serializers.ValidationError(error_message)
 
-        return roles
+        return role_ids
 
     def create(self, validated_data):
         """Create a user with hashed password and assigned roles."""

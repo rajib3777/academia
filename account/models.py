@@ -26,7 +26,7 @@ class Role(models.Model):
         ('staff', 'Staff'),
         ('academy', 'Academy'),
     ]
-    name = models.CharField(max_length=10, choices=ROLE_CHOICES)
+    name = models.CharField(max_length=10, unique=True, choices=ROLE_CHOICES)
 
     def __str__(self):
         return self.name
@@ -36,7 +36,7 @@ class User(AbstractUser):
     first_name = None
     last_name = None
     username = None
-    name = models.CharField(_("Name of User"), blank=True, max_length=255)
+    name = models.CharField(_("Name of User"), max_length=255)
     email = models.EmailField(_("email address"), unique=True, null=True, blank=True)
     roles = models.ManyToManyField(Role, related_name="users")
     phone = models.CharField(_("Mobile number"), max_length=15, unique=True)

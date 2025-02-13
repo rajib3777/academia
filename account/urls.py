@@ -6,5 +6,5 @@ urlpatterns = [
     path('login/', LoginSerializer, name='login'),
     path('users/', UserListAPIView.as_view(), name='user-list'),
     path('user/<int:pk>/', UserUpdateAPIView.as_view(), name='user-update'),
-    path('register/', RegistrationAPIView.as_view(), name='register'),
+    path('registration/', RegistrationAPIView.as_view(), name='registration'),
 ]
