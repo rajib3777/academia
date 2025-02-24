@@ -1,0 +1,38 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Classmate Makemigrations",
+      "type": "shell",
+      "command": "python manage.py makemigrations",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "detail": "Creates new migrations based on the changes detected in your models"
+    },
+    {
+      "label": "Classmate Migrate",
+      "type": "shell",
+      "command": "python manage.py migrate",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "detail": "Applies migrations to the database"
+    },
+    {
+      "label": "Classmate Run Server",
+      "type": "shell",
+      "command": "python manage.py runserver",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "detail": "Starts the Django development server"
+    }
+  ]
+}
