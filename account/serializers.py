@@ -92,8 +92,16 @@ class UserUpdateSerializer(serializers.ModelSerializer):
         fields = ['name', 'email', 'phone',]
 
 
+class RoleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Role
+        fields = ['id', 'name']
+
+
 # Serializer for listing users
 class UserListSerializer(serializers.ModelSerializer):
+    roles = RoleSerializer(many=True)
+
     class Meta:
         model = User
-        fields = ['id', 'name', 'email', 'role', 'phone']
+        fields = ['id', 'name', 'phone', 'email', 'roles']

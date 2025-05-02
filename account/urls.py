@@ -1,5 +1,5 @@
 from django.urls import path
-from account.apis import LoginAPIView, UserUpdateAPIView, UserListAPIView, RegistrationAPIView
+from account.apis import LoginAPIView, UserUpdateAPIView, UserListAPIView, RegistrationAPIView, RoleListAPIView
 
 app_name = "users"
 urlpatterns = [
@@ -7,4 +7,6 @@ urlpatterns = [
     path('users/', UserListAPIView.as_view(), name='user-list'),
     path('user/<int:pk>/', UserUpdateAPIView.as_view(), name='user-update'),
     path('registration/', RegistrationAPIView.as_view(), name='registration'),
+    path('roles/', RoleListAPIView.as_view(), name='role-list'),
+
 ]

@@ -2,6 +2,17 @@
   "version": "2.0.0",
   "tasks": [
     {
+      "label": "Classmate virtual environment",
+      "type": "shell",
+      "command": "venv/scripts/activate",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "detail": "Activates the virtual environment"
+    },
+    {
       "label": "Classmate Makemigrations",
       "type": "shell",
       "command": "python manage.py makemigrations",

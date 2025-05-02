@@ -1,20 +1,20 @@
-from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
-from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, permissions
+from rest_framework import status
+from rest_framework.filters import SearchFilter, OrderingFilter
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.generics import ListAPIView, UpdateAPIView
-from account.models import User
-from account.serializers import LoginSerializer, UserUpdateSerializer, UserListSerializer, RegistrationSerializer
-
-from account.models import User
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from account.utils import UserListPaginationClass
+from account.serializers import LoginSerializer, UserUpdateSerializer, UserListSerializer, RegistrationSerializer, RoleSerializer
+from account.models import User, Role
 
 
 class RegistrationAPIView(APIView):
-    permission_classes = [permissions.AllowAny]  # Allow anyone to access registration
+    permission_classes = [AllowAny]  # Allow anyone to access registration
 
     def post(self, request, *args, **kwargs):
         serializer = RegistrationSerializer(data=request.data)
@@ -26,7 +26,7 @@ class RegistrationAPIView(APIView):
 
 # API for User Login
 class LoginAPIView(APIView):
-    permission_classes = [permissions.AllowAny]  # Allow anyone to access this view
+    permission_classes = [AllowAny]  # Allow anyone to access this view
 
     def post(self, request, *args, **kwargs):
         serializer = LoginSerializer(data=request.data)
@@ -39,15 +39,39 @@ class LoginAPIView(APIView):
 class UserUpdateAPIView(UpdateAPIView):
     queryset = User.objects.all()
     serializer_class = UserUpdateSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         # Allow users to update their own profile only
         return self.queryset.filter(id=self.request.user.id)
 
 
-# API for Listing Users
 class UserListAPIView(ListAPIView):
-    queryset = User.objects.all()
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     serializer_class = UserListSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    pagination_class = UserListPaginationClass
+    filter_backends = [SearchFilter, OrderingFilter, DjangoFilterBackend]
+    # Searchable fields
+    search_fields = ['name', 'email', 'phone', 'roles__name']
+    # Filterable fields (exact, icontains match)
+    filterset_fields = {
+        'name': ['exact', 'icontains'],
+        'email': ['exact', 'icontains'],
+        'phone': ['exact', 'icontains'],
+        'roles__name': ['exact'],
+    }
+    # Ordering fields
+    ordering_fields = ['name', 'roles__name']
+    ordering = ['name']  # Default ordering
+   
+    def get_queryset(self):
+        queryset = User.objects.prefetch_related('roles').filter(is_active=True)
+        return queryset
+
+
+class RoleListAPIView(ListAPIView):
+    queryset = Role.objects.all()
+    serializer_class = RoleSerializer
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]

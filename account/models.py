@@ -28,6 +28,9 @@ class Role(models.Model):
     ]
     name = models.CharField(max_length=10, unique=True, choices=ROLE_CHOICES)
 
+    class Meta:
+        ordering = ['id']
+
     def __str__(self):
         return self.name
 
