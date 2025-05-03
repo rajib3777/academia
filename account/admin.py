@@ -1,19 +1,52 @@
 from django.contrib import admin
 from account.models import User, Role
 from classmate.admin import ClassMateAdmin
+from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.utils.translation import gettext_lazy as _
 
 @admin.register(Role)
 class RoleAdmin(admin.ModelAdmin):
     list_display = ('name',)
     search_fields = ('name',)
-
+    
 
 @admin.register(User)
-class UserAdmin(admin.ModelAdmin):
-    list_display = ('name', 'phone', 'email', 'is_active', 'is_staff')
+class UserAdmin(BaseUserAdmin):
+    model = User
+    list_display = ('name', 'phone', 'email', 'is_active', 'is_staff', 'get_roles', 'get_groups')
     list_filter = ('is_active', 'is_staff', 'roles')
     search_fields = ('name', 'phone', 'email')
-    filter_horizontal = ('roles',)
     ordering = ('name',)
+    readonly_fields = ('otp',)
+
+    fieldsets = (
+        (_("Basic Info"), {'fields': [('name', 'email', 'phone', 'otp')]}),
+        (_("Permissions"), {'fields': [('is_active', 'is_staff', 'is_superuser'), ('roles'), ('groups')]}),
+        (_("Password"), {'fields': ('password',)}),
+        (_("Important Dates"), {'fields': ('last_login',)}),
+    )
+
+    add_fieldsets = (
+        (_("Create User"), {
+            'classes': ('wide',),
+            'fields': [
+                ('name', 'phone', 'email',),
+                ('password1', 'password2', ),
+                ('is_active', 'is_staff', 'is_superuser',),
+                ('roles', ),
+                ('groups', ),
+            ],
+        }),
+    )
+
+    filter_horizontal = ('roles', 'groups',)
+
+    def get_roles(self, obj):
+        return ", ".join(role.name for role in obj.roles.all())
+    get_roles.short_description = "Roles"
+
+    def get_groups(self, obj):
+        return ", ".join(group.name for group in obj.groups.all())
+    get_groups.short_description = "Groups"
 
 
