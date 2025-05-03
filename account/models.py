@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 from django.db import models
+from account.utils import phone_validator
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone, password=None, **extra_fields):
@@ -42,7 +43,7 @@ class User(AbstractUser):
     name = models.CharField(_("Name of User"), max_length=255)
     email = models.EmailField(_("email address"), unique=True, null=True, blank=True)
     roles = models.ManyToManyField(Role, related_name="users")
-    phone = models.CharField(_("Mobile number"), max_length=15, unique=True)
+    phone = models.CharField(_("Mobile number"), max_length=15, unique=True, validators=[phone_validator])
     otp = models.CharField(max_length=6, null=True, blank=True)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)

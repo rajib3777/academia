@@ -2,21 +2,46 @@ from django.contrib import admin
 from academy.models import Academy, Course, Batch
 from classmate.admin import ClassMateAdmin
 
+
+# Inline for Course inside Academy
+class CourseInline(admin.StackedInline):
+    model = Course
+    extra = 1
+    fields = ('name', 'description', 'fee')
+    show_change_link = True
+
+
 @admin.register(Academy)
 class AcademyAdmin(ClassMateAdmin):
     list_display = ('name', 'contact_number', 'email', 'user')
-    list_filter = ('user',)
-    search_fields = ('name', 'contact_number', 'email')
+    list_filter = ('user', 'name',)
+    search_fields = ('name', 'user__username', 'contact_number', 'email')
     ordering = ('name',)
+    inlines = [CourseInline]
+
+
+# Inline for Batch inside Course
+class BatchInline(admin.TabularInline):
+    model = Batch
+    extra = 1  # Number of blank inlines to display
+    fields = ('name', 'start_date', 'end_date')
+    show_change_link = True
 
 
 @admin.register(Course)
 class CourseAdmin(ClassMateAdmin):
-    list_display = ('name', 'fee', 'start_date', 'end_date', 'academy')
+    list_display = ('name', 'fee', 'academy')
     list_filter = ('academy',)
     search_fields = ('name', 'academy__name')
-    ordering = ('start_date',)
+    ordering = ('name',)
+    inlines = [BatchInline]
 
+    date_hierarchy = 'created_at'  # Works only on: DateField or DateTimeField.
+    # This will add a date filter on the right side of the admin page
+    # to filter the list of objects by date.
+    # It will show the date hierarchy based on the created_at field.
+    # You can change 'created_at' to any DateField or DateTimeField in your model.
+    
 
 @admin.register(Batch)
 class BatchAdmin(ClassMateAdmin):
@@ -24,3 +49,4 @@ class BatchAdmin(ClassMateAdmin):
     list_filter = ('course',)
     search_fields = ('name', 'course__name')
     ordering = ('start_date',)
+    date_hierarchy = 'start_date'
