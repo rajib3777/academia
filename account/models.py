@@ -37,10 +37,7 @@ class Role(models.Model):
 
 
 class User(AbstractUser):
-    first_name = None
-    last_name = None
-    username = None
-    name = models.CharField(_("Name of User"), max_length=255)
+    """Custom user model that uses phone number as the unique identifier."""
     email = models.EmailField(_("email address"), unique=True, null=True, blank=True)
     roles = models.ManyToManyField(Role, related_name="users")
     phone = models.CharField(_("Mobile number"), max_length=15, unique=True, validators=[phone_validator])
@@ -48,8 +45,8 @@ class User(AbstractUser):
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
 
-    USERNAME_FIELD = 'phone'
-    REQUIRED_FIELDS = ['name']
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['phone']
 
     objects = CustomUserManager()
 
@@ -74,4 +71,4 @@ class User(AbstractUser):
         return self.roles.filter(name="academy").exists()
 
     def __str__(self):
-        return self.name
+        return self.username

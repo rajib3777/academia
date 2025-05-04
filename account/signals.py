@@ -40,14 +40,14 @@ def populate_roles_and_superuser(sender, **kwargs):
     try:
         # Create superuser if not exists
         superuser_phone = "01787829893"
-        superuser_name = "Milon"
+        superuser_username = "milon"
         superuser_password = "adminmilon"
 
         if not User.objects.filter(phone=superuser_phone).exists():
             superuser = User.objects.create_superuser(
                 phone=superuser_phone,
                 password=superuser_password,
-                name=superuser_name
+                username=superuser_username
             )
             superuser.roles.add(Role.objects.get(name="admin"))  # Assign admin role
             print(f'Superuser created: {superuser_phone}')

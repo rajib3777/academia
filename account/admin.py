@@ -13,14 +13,14 @@ class RoleAdmin(admin.ModelAdmin):
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     model = User
-    list_display = ('name', 'phone', 'email', 'is_active', 'is_staff', 'get_roles', 'get_groups')
+    list_display = ('username', 'phone', 'email', 'is_active', 'is_staff', 'get_roles', 'get_groups')
     list_filter = ('is_active', 'is_staff', 'roles')
-    search_fields = ('name', 'phone', 'email')
-    ordering = ('name',)
+    search_fields = ('username', 'phone', 'email')
+    ordering = ('username',)
     readonly_fields = ('otp',)
 
     fieldsets = (
-        (_("Basic Info"), {'fields': [('name', 'email', 'phone', 'otp')]}),
+        (_("Basic Info"), {'fields': [('username', 'email', 'phone', 'otp')]}),
         (_("Permissions"), {'fields': [('is_active', 'is_staff', 'is_superuser'), ('roles'), ('groups')]}),
         (_("Password"), {'fields': ('password',)}),
         (_("Important Dates"), {'fields': ('last_login',)}),
@@ -30,7 +30,7 @@ class UserAdmin(BaseUserAdmin):
         (_("Create User"), {
             'classes': ('wide',),
             'fields': [
-                ('name', 'phone', 'email',),
+                ('username', 'phone', 'email',),
                 ('password1', 'password2', ),
                 ('is_active', 'is_staff', 'is_superuser',),
                 ('roles', ),

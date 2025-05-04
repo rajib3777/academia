@@ -6,11 +6,15 @@ from account.utils import phone_validator
 
 
 class Academy(ClassMateModel):
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, unique=True)
+    description = models.TextField(null=True, blank=True)
+    logo = models.ImageField(upload_to='academy_logos/', null=True, blank=True)
+    website = models.URLField(null=True, blank=True)
     address = models.TextField()
+    # city = models.CharField(max_length=100)
     contact_number = models.CharField(max_length=15, validators=[phone_validator])
     email = models.EmailField(null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.PROTECT, limit_choices_to={'roles__name': 'academy'})
+    owner = models.ForeignKey(User, on_delete=models.PROTECT, limit_choices_to={'roles__name': 'academy'})
 
 
     def __str__(self):

@@ -15,16 +15,16 @@ class CourseInline(admin.StackedInline):
 
 @admin.register(Academy)
 class AcademyAdmin(ClassMateAdmin):
-    list_display = ('name', 'contact_number', 'email', 'user')
-    list_filter = ('user', 'name',)
-    search_fields = ('name', 'user__username', 'contact_number', 'email')
+    list_display = ('name', 'contact_number', 'email', 'owner')
+    list_filter = ('owner', 'name',)
+    search_fields = ('name', 'owner__username', 'contact_number', 'email')
     ordering = ('name',)
     inlines = [CourseInline]
     form = AcademyAdminForm
 
     fields = [
-        ('user', 'name', 'contact_number', 'email',),
-        ('address',),
+        ('owner', 'name', 'contact_number', 'email',),
+        ('description', 'address',),
     ]
 
 
