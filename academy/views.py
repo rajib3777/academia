@@ -1,5 +1,6 @@
 from rest_framework import generics
 from django.db.models import Q
+from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
@@ -9,7 +10,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import ProtectedError
 from academy.models import Academy, Course, Batch
 from academy.serializers import AcademySerializer, CourseSerializer, BatchSerializer
-from classmate.permissions import AuthenticatedGenericView, IsSuperUserOrAdmin
+from classmate.permissions import AuthenticatedGenericView, IsSuperUserOrAdmin, IsAcademyOwner
 from classmate.utils import StandardResultsSetPagination
 
 # ----------- ACADEMY VIEWS -----------
@@ -86,11 +87,6 @@ class AcademyRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, IsSuperUserO
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
 
-        # Prevent name conflict
-        name = serializer.validated_data.get('name')
-        if name and Academy.objects.exclude(pk=instance.pk).filter(name__iexact=name).exists():
-            raise ValidationError({'name': 'An academy with this name already exists.'})
-
         self.perform_update(serializer)
         return Response({
             'message': 'Academy updated successfully!'
@@ -112,6 +108,20 @@ class AcademyRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, IsSuperUserO
             'message': 'Academy deleted successfully.'
         }, status=status.HTTP_204_NO_CONTENT)
 
+
+class UpdateAcademyFromUserAPIView(IsAcademyOwner, APIView):
+    def put(self, request):
+        try:
+            academy = Academy.objects.get(owner=request.user)
+        except Academy.DoesNotExist:
+            return Response({'detail': 'Academy not found for this user.'}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = AcademySerializer(academy, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
 # ----------- COURSE VIEWS -----------
 class CourseListCreateAPIView(AuthenticatedGenericView, generics.ListCreateAPIView):

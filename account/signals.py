@@ -39,18 +39,83 @@ def populate_roles_and_superuser(sender, **kwargs):
 
     try:
         # Create superuser if not exists
-        superuser_phone = "01787829893"
         superuser_username = "milon"
         superuser_password = "adminmilon"
+        superuser_phone = "01787829893"
 
-        if not User.objects.filter(phone=superuser_phone).exists():
+        if not User.objects.filter(username=superuser_username).exists():
             superuser = User.objects.create_superuser(
-                phone=superuser_phone,
+                username=superuser_username,
                 password=superuser_password,
-                username=superuser_username
+                phone=superuser_phone,
+                
             )
             superuser.roles.add(Role.objects.get(name="admin"))  # Assign admin role
-            print(f'Superuser created: {superuser_phone}')
+            print(f'Superuser created: {superuser_username}')
+
+        # Create admin if not exists
+        admin_username = "admin"
+        admin_password = "adminmilon"
+        admin_phone = "01787829891"
+
+        if not User.objects.filter(username=admin_username).exists():
+            admin = User.objects.create_superuser(
+                username=admin_username,
+                password=admin_password,
+                phone=admin_phone,
+                is_superuser=False,
+                is_staff=True
+            )
+            admin.roles.add(Role.objects.get(name="admin"))  # Assign admin role
+            print(f'Admin created: {admin_username}')
+
+        # Create academy if not exists
+        academy_username = "test_academy"
+        academy_password = "adminmilon"
+        academy_phone = "01787829892"
+
+        if not User.objects.filter(username=academy_username).exists():
+            academy = User.objects.create_superuser(
+                username=academy_username,
+                password=academy_password,
+                phone=academy_phone,
+                is_superuser=False,
+                is_staff=False
+            )
+            academy.roles.add(Role.objects.get(name="academy"))  # Assign admin role
+            print(f'Test academy created: {academy_username}')
+
+        # Create teacher if not exists
+        teacher_username = "test_teacher"
+        teacher_phone = "01787829894"
+        teacher_password = "adminmilon"
+
+        if not User.objects.filter(username=teacher_username).exists():
+            superuser = User.objects.create_superuser(
+                username=teacher_username,
+                password=teacher_password,
+                phone=teacher_phone,
+                is_superuser=False,
+                is_staff=False
+            )
+            superuser.roles.add(Role.objects.get(name="teacher"))  # Assign teacher role
+            print(f'Test teacher created: {teacher_username}')
+
+        # Create student if not exists
+        student_username = "test_student"
+        student_password = "adminmilon"
+        student_phone = "01787829895"
+
+        if not User.objects.filter(username=student_username).exists():
+            superuser = User.objects.create_superuser(
+                username=student_username,
+                password=student_password,
+                phone=student_phone,
+                is_superuser=False,
+                is_staff=False
+            )
+            superuser.roles.add(Role.objects.get(name="student"))  # Assign student role
+            print(f'Test student created: {student_username}')
 
     except (OperationalError, ProgrammingError):
         pass  # Avoid errors during first migrations

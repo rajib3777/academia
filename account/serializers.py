@@ -65,12 +65,13 @@ class LoginSerializer(serializers.Serializer):
     password = serializers.CharField(write_only=True)
 
     def validate(self, attrs):
-        phone = attrs.get('phone')
+        username = attrs.get('username')
+
         password = attrs.get('password')
 
-        user = User.objects.filter(phone=phone).first()
+        user = User.objects.get(username=username)
         if not user:
-            raise serializers.ValidationError({"error": "User with this phone does not exist."})
+            raise serializers.ValidationError({"error": "User does not exist."})
 
             # Check if the provided password matches the one stored for the user
         if not user.check_password(password):

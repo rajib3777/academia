@@ -59,20 +59,12 @@ class IsAcademyOwnerAndOwnsObjectOrAdmin(BasePermission):
         return False
 
 
-class ReadOnlyUnlessAdminOrAcademyOwner(BasePermission):
-    """
-    Allow safe (read-only) methods to any authenticated user with proper role.
-    Allow modifying methods only to admin or academy owner.
-    """
-
+class IsAcademyOwner(BasePermission):
     def has_permission(self, request, view):
         user = request.user
-        if request.method in SAFE_METHODS:
-            return user.is_authenticated
 
         return (
-            user.is_authenticated and
-            (user.is_superuser or user.is_admin() or user.is_academy_owner())
+            user.is_authenticated and user.is_academy_owner()
         )
     
 

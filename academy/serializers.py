@@ -25,4 +25,12 @@ class AcademySerializer(serializers.ModelSerializer):
     class Meta:
         model = Academy
         fields = ['id', 'name', 'description', 'logo', 'website', 'address', 'contact_number', 'email', 'owner', 'courses']
-        read_only_fields = ['id']
+        read_only_fields = ['id', 'owner']
+
+
+    def validate_name(self, value):
+        # Check if the name already exists for a different academy
+        academy_id = self.instance.id if self.instance else None
+        if Academy.objects.exclude(id=academy_id).filter(name__iexact=value).exists():
+            raise serializers.ValidationError("Academy with this name already exists.")
+        return value
