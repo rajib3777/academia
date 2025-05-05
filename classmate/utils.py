@@ -1,10 +1,11 @@
+import sentry_sdk
 from rest_framework.views import exception_handler as drf_exception_handler
 from rest_framework.exceptions import ValidationError
 from django.http import Http404
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
-
+from django.conf import settings
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
@@ -38,6 +39,9 @@ def custom_exception_handler(exc, context):
     # Let DRF handle the exception first
     response = drf_exception_handler(exc, context)
 
+    if settings.SENTRY and settings.SENTRY_DSN:
+        # Log the exception to Sentry
+        sentry_sdk.capture_exception(exc)
 
     # Explicitly handle Django Http404
     if isinstance(exc, Http404):
@@ -73,7 +77,7 @@ def custom_exception_handler(exc, context):
             },
             status=response.status_code
         )
-
+    
     # Fallback for unhandled 500 errors
     return Response(
         {
