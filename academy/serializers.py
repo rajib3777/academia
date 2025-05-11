@@ -5,17 +5,26 @@ from .models import Academy, Course, Batch
 class BatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Batch
-        fields = ['id', 'name', 'course', 'start_date', 'end_date']
+        fields = ['id', 'name', 'start_date', 'end_date']
         read_only_fields = ['id']
 
 
 class CourseSerializer(serializers.ModelSerializer):
-    batches = BatchSerializer(many=True, read_only=True)
+    batches = BatchSerializer(many=True)
 
     class Meta:
         model = Course
         fields = ['id', 'name', 'description', 'fee', 'batches']
         read_only_fields = ['id']
+
+    def create(self, validated_data):
+        batches_data = validated_data.pop('batches', [])
+        course = Course.objects.create(**validated_data)
+        print("Batches data:", batches_data)
+        for batch_data in batches_data:
+            Batch.objects.create(course=course, **batch_data)
+
+        return course
 
 
 class AcademySerializer(serializers.ModelSerializer):
