@@ -2,7 +2,7 @@ from django.urls import path
 from academy.views import (
     AcademyListCreateAPIView, AcademyRetrieveUpdateDestroyAPIView,
     CourseListCreateAPIView, CourseRetrieveUpdateDestroyAPIView,
-    BatchListCreateAPIView, BatchRetrieveUpdateDestroyAPIView, UpdateAcademyFromUserAPIView
+    BatchListCreateAPIView, BatchRetrieveUpdateDestroyAPIView, UpdateAcademyFromUserAPIView, CourseNameListAPIView
 )
 
 urlpatterns = [
@@ -11,6 +11,7 @@ urlpatterns = [
     path('academy/update-my-academy/', UpdateAcademyFromUserAPIView.as_view(), name='update-my-academy'),
 
     path('courses/', CourseListCreateAPIView.as_view(), name='course-list-create'),
+    path('course-name-list/', CourseNameListAPIView.as_view(), name='course-name-list'),
     path('courses/<int:pk>/', CourseRetrieveUpdateDestroyAPIView.as_view(), name='course-detail'),
 
     path('batches/', BatchListCreateAPIView.as_view(), name='batch-list-create'),

@@ -14,7 +14,7 @@ class Academy(ClassMateModel):
     website = models.URLField(null=True, blank=True)
     contact_number = models.CharField(max_length=15, validators=[phone_validator])
     email = models.EmailField(null=True, blank=True)
-    owner = models.ForeignKey(User, on_delete=models.PROTECT, limit_choices_to={'roles__name': 'academy'})
+    owner = models.ForeignKey(User, on_delete=models.PROTECT, limit_choices_to={'roles__name': 'academy'}, related_name='academy')
 
     # Standard Bangladeshi Address Fields
     division = models.ForeignKey(Division, on_delete=models.SET_NULL, null=True, blank=True)
@@ -66,6 +66,9 @@ class Course(ClassMateModel):
         verbose_name = 'Course'
         verbose_name_plural = 'Courses'
         ordering = ['name']
+        constraints = [
+            models.UniqueConstraint(fields=['academy', 'name'], name='unique_course_name_per_academy')
+        ]
 
 
 class Batch(ClassMateModel):

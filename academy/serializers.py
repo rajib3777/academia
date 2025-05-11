@@ -5,7 +5,7 @@ from .models import Academy, Course, Batch
 class BatchSerializer(serializers.ModelSerializer):
     class Meta:
         model = Batch
-        fields = '__all__'
+        fields = ['id', 'name', 'course', 'start_date', 'end_date']
         read_only_fields = ['id']
 
 
@@ -14,7 +14,7 @@ class CourseSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Course
-        fields = '__all__'
+        fields = ['id', 'name', 'description', 'fee', 'batches']
         read_only_fields = ['id']
 
 
@@ -49,3 +49,9 @@ class AcademyOwnerSerializer(serializers.ModelSerializer):
         if Academy.objects.exclude(id=academy_id).filter(name__iexact=value).exists():
             raise serializers.ValidationError("Academy with this name already exists.")
         return value
+    
+
+class CourseNameListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Course
+        fields = ['id', 'name']

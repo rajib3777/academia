@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError, NotFound, PermissionDenie
 from django.shortcuts import get_object_or_404
 from django.db.models import ProtectedError
 from academy.models import Academy, Course, Batch
-from academy.serializers import AcademySerializer, CourseSerializer, BatchSerializer, AcademyOwnerSerializer
+from academy.serializers import AcademySerializer, CourseSerializer, BatchSerializer, AcademyOwnerSerializer, CourseNameListSerializer
 from classmate.permissions import AuthenticatedGenericView, IsSuperUserOrAdmin, IsAcademyOwner
 from classmate.utils import StandardResultsSetPagination
 
@@ -98,6 +98,7 @@ class AcademyRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, IsSuperUserO
         """
         instance = self.get_object()
         try:
+            print('xx', instance)
             self.perform_destroy(instance)
         except ProtectedError:
             return Response({
@@ -109,7 +110,7 @@ class AcademyRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, IsSuperUserO
         }, status=status.HTTP_204_NO_CONTENT)
 
 
-class UpdateAcademyFromUserAPIView(IsAcademyOwner, APIView):
+class UpdateAcademyFromUserAPIView(AuthenticatedGenericView, IsAcademyOwner, APIView):
     def put(self, request):
         try:
             academy = Academy.objects.get(owner=request.user)
@@ -124,13 +125,41 @@ class UpdateAcademyFromUserAPIView(IsAcademyOwner, APIView):
     
 
 # ----------- COURSE VIEWS -----------
-class CourseListCreateAPIView(AuthenticatedGenericView, generics.ListCreateAPIView):
-    queryset = Course.objects.all().prefetch_related('batches')
+class CourseListCreateAPIView(AuthenticatedGenericView, IsAcademyOwner, generics.ListCreateAPIView):
     serializer_class = CourseSerializer
     pagination_class = StandardResultsSetPagination
 
+    def get_queryset(self):
+        return Course.objects.filter(
+            academy__owner=self.request.user
+        ).prefetch_related('batches')
+    
 
-class CourseRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, generics.RetrieveUpdateDestroyAPIView):
+    def perform_create(self, serializer):
+        academy = self.request.user.academy.first()
+
+        if not academy:
+            raise ValidationError({"academy": "No academy is associated with this user."})
+        
+        if Course.objects.filter(academy=academy, name=self.request.data['name']).exists():
+            raise ValidationError({
+                'name': 'This course name already exists for this academy.'
+            })
+        serializer.save(academy=academy)
+
+
+class CourseNameListAPIView(AuthenticatedGenericView, generics.ListAPIView):
+    serializer_class = CourseNameListSerializer
+    pagination_class = StandardResultsSetPagination
+
+    def get_queryset(self):
+        academy = self.request.user.academy.first()
+        if academy:
+            return Course.objects.filter(academy=academy).values('id', 'name')
+        return Course.objects.all().values('id', 'name')
+
+
+class CourseRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, IsAcademyOwner, generics.RetrieveUpdateDestroyAPIView):
     queryset = Course.objects.all().prefetch_related('batches')
     serializer_class = CourseSerializer
 
