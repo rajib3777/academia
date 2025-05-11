@@ -3,6 +3,7 @@ from django.utils.timezone import now
 from datetime import timedelta
 
 from utils.choices import SMS_TYPE_CHOICES, STATUS_CHOICES, OTHER, QUEUE
+from utils.constants import BANGLADESH_DISTRICTS, BANGLADESH_DIVISIONS, BANGLADESH_UPAZILAS
 
 
 class OTPVerification(models.Model):
@@ -18,6 +19,8 @@ class OTPVerification(models.Model):
         super().save(*args, **kwargs)
 
     def is_expired(self):
+        if self.expires_at is None:
+            return None
         return self.expires_at < now()
 
 
@@ -40,3 +43,26 @@ class SMSHistory(models.Model):
         verbose_name = "SMS History"
         verbose_name_plural = "SMS Histories"
         ordering = ['-sent_at']
+
+
+class Division(models.Model):
+    name = models.CharField(max_length=100, unique=True, choices=BANGLADESH_DIVISIONS)
+
+    def __str__(self):
+        return self.name
+
+
+class District(models.Model):
+    division = models.ForeignKey(Division, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100, unique=True, choices=BANGLADESH_DISTRICTS)
+
+    def __str__(self):
+        return self.name
+
+
+class Upazila(models.Model):
+    district = models.ForeignKey(District, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100, unique=True, choices=BANGLADESH_UPAZILAS)
+
+    def __str__(self):
+        return self.name

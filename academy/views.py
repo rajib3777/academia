@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError, NotFound, PermissionDenie
 from django.shortcuts import get_object_or_404
 from django.db.models import ProtectedError
 from academy.models import Academy, Course, Batch
-from academy.serializers import AcademySerializer, CourseSerializer, BatchSerializer
+from academy.serializers import AcademySerializer, CourseSerializer, BatchSerializer, AcademyOwnerSerializer
 from classmate.permissions import AuthenticatedGenericView, IsSuperUserOrAdmin, IsAcademyOwner
 from classmate.utils import StandardResultsSetPagination
 
@@ -116,7 +116,7 @@ class UpdateAcademyFromUserAPIView(IsAcademyOwner, APIView):
         except Academy.DoesNotExist:
             return Response({'detail': 'Academy not found for this user.'}, status=status.HTTP_404_NOT_FOUND)
 
-        serializer = AcademySerializer(academy, data=request.data)
+        serializer = AcademyOwnerSerializer(academy, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)

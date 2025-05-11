@@ -24,7 +24,8 @@ class AcademyAdmin(ClassMateAdmin):
 
     fields = [
         ('owner', 'name', 'contact_number', 'email',),
-        ('description', 'address',),
+        ('website', 'logo', 'description',),
+        ('division', 'district', 'upazila', 'area_or_union', 'street_address', 'postal_code'),
     ]
 
 

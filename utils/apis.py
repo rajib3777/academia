@@ -2,9 +2,13 @@ from django.http import JsonResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework import generics
+from rest_framework.filters import SearchFilter
 from django.shortcuts import get_object_or_404
-from utils.models import OTPVerification
-from utils.serializers.serializers import SendOTPSerializer, VerifyOTPSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from utils.models import OTPVerification, Division, District, Upazila
+from utils.serializers import SendOTPSerializer, VerifyOTPSerializer, DivisionSerializer, DistrictSerializer, UpazilaSerializer
 from utils.utils import generate_otp, send_sms
 from utils.choices import OTP
 
@@ -80,3 +84,41 @@ class VerifyOTPView(APIView):
             except OTPVerification.DoesNotExist:
                 return Response({'error': 'Invalid phone number.'}, status=status.HTTP_400_BAD_REQUEST)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class DivisionListAPIView(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    queryset = Division.objects.all()
+    serializer_class = DivisionSerializer
+    filter_backends = [SearchFilter]
+    search_fields = ['name']
+
+
+class DistrictListAPIView(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = DistrictSerializer
+
+    def get_queryset(self):
+        division_id = self.request.query_params.get('division_id')
+        queryset = District.objects.all()
+        if division_id:
+            queryset = queryset.filter(division_id=division_id)
+        return queryset
+
+
+class UpazilaListAPIView(generics.ListAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = UpazilaSerializer
+
+    def get_queryset(self):
+        district_id = self.request.query_params.get('district_id')
+        queryset = Upazila.objects.all()
+        if district_id:
+            queryset = queryset.filter(district_id=district_id)
+        return queryset

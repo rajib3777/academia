@@ -3,6 +3,8 @@ from account.models import User
 from classmate.models import ClassMateModel
 from django.core.exceptions import ValidationError
 from account.utils import phone_validator
+from smart_selects.db_fields import ChainedForeignKey
+from utils.models import Division, District, Upazila
 
 
 class Academy(ClassMateModel):
@@ -10,12 +12,37 @@ class Academy(ClassMateModel):
     description = models.TextField(null=True, blank=True)
     logo = models.ImageField(upload_to='academy_logos/', null=True, blank=True)
     website = models.URLField(null=True, blank=True)
-    address = models.TextField()
-    # city = models.CharField(max_length=100)
     contact_number = models.CharField(max_length=15, validators=[phone_validator])
     email = models.EmailField(null=True, blank=True)
     owner = models.ForeignKey(User, on_delete=models.PROTECT, limit_choices_to={'roles__name': 'academy'})
 
+    # Standard Bangladeshi Address Fields
+    division = models.ForeignKey(Division, on_delete=models.SET_NULL, null=True, blank=True)
+    district = ChainedForeignKey(
+        District,
+        chained_field="division",
+        chained_model_field="division",
+        show_all=False,
+        auto_choose=True,
+        sort=True,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    upazila = ChainedForeignKey(
+        Upazila,
+        chained_field="district",
+        chained_model_field="district",
+        show_all=False,
+        auto_choose=True,
+        sort=True,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+    area_or_union = models.CharField(max_length=100, help_text="Union/Ward/Area")
+    street_address = models.CharField(max_length=255, help_text="House/Road/Village")
+    postal_code = models.CharField(max_length=10)
 
     def __str__(self):
         return self.name

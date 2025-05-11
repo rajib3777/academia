@@ -13,7 +13,7 @@ class RoleAdmin(admin.ModelAdmin):
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     model = User
-    list_display = ('username', 'phone', 'email', 'is_active', 'is_staff', 'get_roles', 'get_groups')
+    list_display = ('username', 'phone', 'email', 'is_superuser', 'is_active', 'is_staff', 'get_roles', 'get_groups')
     list_filter = ('is_active', 'is_staff', 'roles')
     search_fields = ('username', 'phone', 'email')
     ordering = ('username',)

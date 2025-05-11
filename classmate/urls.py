@@ -24,5 +24,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include("account.urls")),
     path('api/', include("academy.urls")),
+    path('api/', include("utils.urls")),
     # path('sentry-debug/', trigger_error),
+    path('chaining/', include('smart_selects.urls')),
 ]
