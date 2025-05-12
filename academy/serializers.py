@@ -3,6 +3,8 @@ from .models import Academy, Course, Batch
 
 
 class BatchSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+
     class Meta:
         model = Batch
         fields = ['id', 'name', 'start_date', 'end_date']
@@ -20,11 +22,43 @@ class CourseSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         batches_data = validated_data.pop('batches', [])
         course = Course.objects.create(**validated_data)
-        print("Batches data:", batches_data)
+
         for batch_data in batches_data:
             Batch.objects.create(course=course, **batch_data)
 
         return course
+    
+    def update(self, instance, validated_data):
+        batches_data = validated_data.pop('batches', [])
+
+        if batches_data is not None:
+            incoming_batch_ids = [b.get('id') for b in batches_data if b.get('id') is not None]
+            
+            # Delete batches not in incoming data
+            for batch in instance.batches.all():
+                if batch.id not in incoming_batch_ids:
+                    batch.delete()
+
+            # Create or update batches
+            for batch_data in batches_data:
+                batch_id = batch_data.get('id')
+                if batch_id:  # Update
+                    try:
+                        batch = instance.batches.get(id=batch_id)
+                        for attr, value in batch_data.items():
+                            setattr(batch, attr, value)
+                        batch.save()
+                    except Batch.DoesNotExist:
+                        continue  # or raise an error if you prefer
+                else:  # Create
+                    Batch.objects.create(course=instance, **batch_data)
+
+        # Update course fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+
+        return instance
 
 
 class AcademySerializer(serializers.ModelSerializer):
