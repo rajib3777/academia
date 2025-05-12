@@ -2,6 +2,7 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication, TokenAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.exceptions import PermissionDenied
 
 
 class IsTeacher(BasePermission):
@@ -72,9 +73,13 @@ class IsSuperUserOrAdmin(BasePermission):
     def has_permission(self, request, view):
         user = request.user
 
-        return (
-            user.is_authenticated and (user.is_superuser or user.is_admin())
-        )
+        if not user.is_authenticated:
+            raise PermissionDenied(detail="Authentication credentials were not provided.")
+
+        if not (user.is_superuser or user.is_admin()):
+            raise PermissionDenied(detail="You don't have permission")
+
+        return True
     
 
 class AuthenticatedGenericView:

@@ -67,8 +67,8 @@ class AcademySerializer(serializers.ModelSerializer):
     courses = CourseSerializer(many=True, read_only=True)
     class Meta:
         model = Academy
-        fields = ['id', 'name', 'description', 'logo', 'website', 'address', 'contact_number', 'email', 'owner', 'courses']
-        read_only_fields = ['id', 'owner']
+        fields = ['id', 'name', 'description', 'logo', 'website', 'contact_number', 'email', 'owner', 'courses']
+        read_only_fields = ['id',]
 
 
     def validate_name(self, value):

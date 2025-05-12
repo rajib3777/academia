@@ -5,15 +5,25 @@ from academy.views import (
     BatchListCreateAPIView, BatchRetrieveUpdateDestroyAPIView, UpdateAcademyFromUserAPIView, CourseNameListAPIView
 )
 
-urlpatterns = [
+# Admin-only routes
+admin_urlpatterns = [
     path('academies/', AcademyListCreateAPIView.as_view(), name='academy-list-create'),
     path('academy/<int:pk>/', AcademyRetrieveUpdateDestroyAPIView.as_view(), name='academy-detail'),
-    path('academy/update-my-academy/', UpdateAcademyFromUserAPIView.as_view(), name='update-my-academy'),
-
-    path('courses/', CourseListCreateAPIView.as_view(), name='course-list-create'),
-    path('course-name-list/', CourseNameListAPIView.as_view(), name='course-name-list'),
-    path('courses/<int:pk>/', CourseRetrieveUpdateDestroyAPIView.as_view(), name='course-detail'),
-
-    path('batches/', BatchListCreateAPIView.as_view(), name='batch-list-create'),
-    path('batches/<int:pk>/', BatchRetrieveUpdateDestroyAPIView.as_view(), name='batch-detail'),
 ]
+
+# Academy-owner routes
+academy_urlpatterns = [
+    path('academy/my-academy/', UpdateAcademyFromUserAPIView.as_view(), name='academy-update-my-academy'),
+    path('academy/courses/', CourseListCreateAPIView.as_view(), name='academy-course-list-create'),
+    path('academy/courses/<int:pk>/', CourseRetrieveUpdateDestroyAPIView.as_view(), name='academy-course-detail'),
+    path('academy/batches/', BatchListCreateAPIView.as_view(), name='academy-batch-list-create'),
+    path('academy/batches/<int:pk>/', BatchRetrieveUpdateDestroyAPIView.as_view(), name='academy-batch-detail'),
+]
+
+# Public (with auth) routes
+public_urlpatterns = [
+    path('course-name-list/', CourseNameListAPIView.as_view(), name='public-course-name-list'),
+]
+
+# Combine them into final urlpatterns
+urlpatterns = admin_urlpatterns + academy_urlpatterns + public_urlpatterns

@@ -19,7 +19,7 @@ class AcademyListCreateAPIView(AuthenticatedGenericView, IsSuperUserOrAdmin, gen
     pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['name', 'owner__id', 'contact_number', 'email']
-    search_fields = ['name', 'description', 'address', 'owner__username', 'email']
+    search_fields = ['name', 'description', 'owner__username', 'email']
     ordering_fields = ['name', 'created_at']
     ordering = ['name']
 
@@ -53,10 +53,12 @@ class AcademyListCreateAPIView(AuthenticatedGenericView, IsSuperUserOrAdmin, gen
 
         return Response({
             'message': 'Academy created successfully!'
-        }, status=status.HTTP_201_CREATED, headers=headers)
+        }, status=status.HTTP_201_CREATED)
 
 
-class AcademyRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, IsSuperUserOrAdmin, generics.RetrieveUpdateDestroyAPIView):
+class AcademyRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, generics.RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsSuperUserOrAdmin]
+
     serializer_class = AcademySerializer
 
     def get_queryset(self):
@@ -70,9 +72,6 @@ class AcademyRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, IsSuperUserO
         Custom get_object to handle not found or permission issues.
         """
         obj = get_object_or_404(self.get_queryset(), pk=self.kwargs.get('pk'))
-        # Optionally restrict further, e.g., only owner can access
-        if not self.request.user.is_admin() or not self.request.user.is_superuser:
-            raise PermissionDenied("You don't have permission to access this academy.")
         return obj
 
     def update(self, request, *args, **kwargs):
@@ -88,6 +87,7 @@ class AcademyRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, IsSuperUserO
         serializer.is_valid(raise_exception=True)
 
         self.perform_update(serializer)
+        
         return Response({
             'message': 'Academy updated successfully!'
         }, status=status.HTTP_200_OK)
