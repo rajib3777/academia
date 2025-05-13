@@ -7,11 +7,11 @@ from classmate.models import ClassMateModel
 class School(models.Model):
     name = models.CharField(max_length=255, unique=True)
     address = models.TextField()
-    email = models.EmailField()
-    phone_number = models.CharField(max_length=20, null=True, blank=True)
+    email = models.EmailField(null=True, blank=True)
+    contact_number = models.CharField(max_length=15, null=True, blank=True)
     website = models.URLField(null=True, blank=True)
     logo = models.ImageField(upload_to='school_logos/', null=True, blank=True)
-    
+
     def __str__(self):
         return self.name
 
@@ -24,7 +24,7 @@ class Student(ClassMateModel):
     guardian_contact = models.CharField(max_length=20, null=True, blank=True)
     guardian_email = models.EmailField(null=True, blank=True)
     guardian_relationship = models.CharField(max_length=50, null=True, blank=True)
-    address = models.TextField()
+    address = models.TextField(null=True, blank=True)
     batches = models.ManyToManyField(Batch, related_name='students')
 
     def __str__(self):

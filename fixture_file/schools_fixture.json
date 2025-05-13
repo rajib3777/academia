@@ -1,0 +1,222 @@
+[
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Green Valley High School",
+      "address": "123 Green Valley Road, Dhaka",
+      "email": "contact@greenvalley.edu.bd",
+      "contact_number": "01711123456",
+      "website": "http://greenvalley.edu.bd",
+      "logo": "school_logos/green_valley.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Blue Ocean International School",
+      "address": "45 Ocean Drive, Chittagong",
+      "email": "info@blueocean.edu.bd",
+      "contact_number": "01888876543",
+      "website": "http://blueocean.edu.bd",
+      "logo": "school_logos/blue_ocean.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Golden Future School",
+      "address": "56 Golden Street, Sylhet",
+      "email": "admin@goldenfuture.edu.bd",
+      "contact_number": "01999987654",
+      "website": "http://goldenfuture.edu.bd",
+      "logo": "school_logos/golden_future.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Sunrise Model School",
+      "address": "789 Sunrise Avenue, Khulna",
+      "email": "office@sunrisemodel.edu.bd",
+      "contact_number": "01666665432",
+      "website": "http://sunrisemodel.edu.bd",
+      "logo": "school_logos/sunrise_model.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "City Scholars Academy",
+      "address": "101 City Center, Rajshahi",
+      "email": "hello@cityscholars.edu.bd",
+      "contact_number": "01555554321",
+      "website": "http://cityscholars.edu.bd",
+      "logo": "school_logos/city_scholars.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Maple Leaf Grammar School",
+      "address": "200 Maple Street, Dhaka",
+      "email": "admissions@mapleleaf.edu.bd",
+      "contact_number": "01722223333",
+      "website": "http://mapleleaf.edu.bd",
+      "logo": "school_logos/maple_leaf.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Oxford International School",
+      "address": "Oxford Road, Banani, Dhaka",
+      "email": "oxford@school.edu.bd",
+      "contact_number": "01677778888",
+      "website": "http://oxfordschool.edu.bd",
+      "logo": "school_logos/oxford.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Everest Academy",
+      "address": "99 Mountain Drive, Sylhet",
+      "email": "info@everestacademy.edu.bd",
+      "contact_number": "01812345678",
+      "website": "http://everestacademy.edu.bd",
+      "logo": "school_logos/everest.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Riverdale Public School",
+      "address": "321 River Lane, Barisal",
+      "email": "contact@riverdale.edu.bd",
+      "contact_number": "01787654321",
+      "website": "http://riverdale.edu.bd",
+      "logo": "school_logos/riverdale.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Bangladesh National School",
+      "address": "5 National Avenue, Dhaka",
+      "email": "info@bns.edu.bd",
+      "contact_number": "01555553333",
+      "website": "http://bns.edu.bd",
+      "logo": "school_logos/bns.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "New Horizon School",
+      "address": "404 Future Street, Comilla",
+      "email": "admin@newhorizon.edu.bd",
+      "contact_number": "01933334444",
+      "website": "http://newhorizon.edu.bd",
+      "logo": "school_logos/new_horizon.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Smart Learners Academy",
+      "address": "78 Innovation Lane, Rangpur",
+      "email": "hello@smartlearners.edu.bd",
+      "contact_number": "01730001234",
+      "website": "http://smartlearners.edu.bd",
+      "logo": "school_logos/smart_learners.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Lighthouse High School",
+      "address": "Light House Road, Cox's Bazar",
+      "email": "contact@lighthouse.edu.bd",
+      "contact_number": "01699994444",
+      "website": "http://lighthouse.edu.bd",
+      "logo": "school_logos/lighthouse.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Infinity Scholars School",
+      "address": "789 Knowledge Path, Dhaka",
+      "email": "info@infinityscholars.edu.bd",
+      "contact_number": "01788887777",
+      "website": "http://infinityscholars.edu.bd",
+      "logo": "school_logos/infinity_scholars.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Star Kids International",
+      "address": "22 Galaxy Road, Mymensingh",
+      "email": "hello@starkids.edu.bd",
+      "contact_number": "01888881111",
+      "website": "http://starkids.edu.bd",
+      "logo": "school_logos/starkids.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Bright Future Institute",
+      "address": "999 Dream Street, Khulna",
+      "email": "bright@future.edu.bd",
+      "contact_number": "01700009999",
+      "website": "http://brightfuture.edu.bd",
+      "logo": "school_logos/bright_future.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Excel Education School",
+      "address": "100 Success Avenue, Bogura",
+      "email": "excel@edu.bd",
+      "contact_number": "01500001111",
+      "website": "http://exceleduschool.edu.bd",
+      "logo": "school_logos/excel.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Royal Crown School",
+      "address": "King’s Way, Dhaka",
+      "email": "admin@royalcrown.edu.bd",
+      "contact_number": "01922223333",
+      "website": "http://royalcrown.edu.bd",
+      "logo": "school_logos/royal_crown.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Creative Minds School",
+      "address": "Innovation Park, Rajshahi",
+      "email": "info@creativeminds.edu.bd",
+      "contact_number": "01644445555",
+      "website": "http://creativeminds.edu.bd",
+      "logo": "school_logos/creative_minds.png"
+    }
+  },
+  {
+    "model": "student.school",
+    "fields": {
+      "name": "Unity English School",
+      "address": "123 Unity Street, Barisal",
+      "email": "unity@englishschool.edu.bd",
+      "contact_number": "01800008888",
+      "website": "http://unityschool.edu.bd",
+      "logo": "school_logos/unity.png"
+    }
+  }
+]
