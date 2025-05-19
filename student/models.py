@@ -16,8 +16,8 @@ class School(models.Model):
         return self.name
 
 class Student(ClassMateModel):
-    user = models.OneToOneField(User, on_delete=models.PROTECT, limit_choices_to={'role': 'student'})
-    school = models.OneToOneField(School, on_delete=models.PROTECT)
+    user = models.OneToOneField(User, on_delete=models.PROTECT, limit_choices_to={'roles__name': 'student'})
+    school = models.ForeignKey(School, on_delete=models.PROTECT)
     enrollment_date = models.DateField(auto_now_add=True)
     date_of_birth = models.DateField(null=True, blank=True)
     guardian_name = models.CharField(max_length=255, null=True, blank=True)  
@@ -28,4 +28,8 @@ class Student(ClassMateModel):
     batches = models.ManyToManyField(Batch, related_name='students')
 
     def __str__(self):
-        return self.user.full_name
+        return self.user.get_full_name() or self.user.username
+    class Meta:
+        verbose_name = "Student"
+        verbose_name_plural = "Students"
+        ordering = ['id']

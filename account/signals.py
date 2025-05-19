@@ -1,5 +1,6 @@
 from django.db.models.signals import post_save, post_delete, post_migrate
 from django.dispatch import receiver
+import random
 from django.db.utils import OperationalError, ProgrammingError
 from .models import Role
 from .utils import force_update_role_cache
@@ -102,20 +103,28 @@ def populate_roles_and_superuser(sender, **kwargs):
             print(f'Test teacher created: {teacher_username}')
 
         # Create student if not exists
-        student_username = "test_student"
         student_password = "adminmilon"
-        student_phone = "01787829895"
 
-        if not User.objects.filter(username=student_username).exists():
-            superuser = User.objects.create_superuser(
-                username=student_username,
-                password=student_password,
-                phone=student_phone,
-                is_superuser=False,
-                is_staff=False
-            )
-            superuser.roles.add(Role.objects.get(name="student"))  # Assign student role
-            print(f'Test student created: {student_username}')
+        def generate_random_phone():
+            return "017" + "".join([str(random.randint(0, 9)) for _ in range(8)])
+
+        starting_id = 5001
+
+        for i in range(1, 100):
+            student_username = f"test_student_{i}"
+            student_phone = generate_random_phone()
+
+            if not User.objects.filter(username=student_username).exists():
+                student_user = User.objects.create_user(
+                    id=starting_id + i - 1,  # starting from 5001
+                    username=student_username,
+                    password=student_password,
+                    phone=student_phone,
+                    is_superuser=False,
+                    is_staff=False
+                )
+                student_user.roles.add(Role.objects.get(name="student"))
+                print(f"Student created: {student_username}, ID: {student_user.id}, Phone: {student_phone}")
 
     except (OperationalError, ProgrammingError):
         pass  # Avoid errors during first migrations
