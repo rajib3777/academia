@@ -76,6 +76,12 @@ class Batch(ClassMateModel):
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='batches')
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
+    description = models.TextField(null=True, blank=True)
+    students = models.ManyToManyField(
+        'student.Student',
+        through='BatchEnrollment',
+        related_name='batches'
+    )
 
     def __str__(self):
         return f"{self.name} - {self.course.name}"
@@ -88,3 +94,41 @@ class Batch(ClassMateModel):
     def clean(self):
         if self.end_date and self.end_date < self.start_date:
             raise ValidationError('End date cannot be before start date.')
+        
+
+class Grade(models.Model):
+    GRADE_CHOICES = [
+        ('A+', 'A+'),
+        ('A', 'A'),
+        ('A-', 'A-'),
+        ('B', 'B'),
+        ('C', 'C'),
+        ('D', 'D'),
+        ('F', 'F'),
+    ]
+
+    grade = models.CharField(max_length=2, choices=GRADE_CHOICES, unique=True)
+
+    def __str__(self):
+        return self.grade
+        
+
+class BatchEnrollment(ClassMateModel):
+    student = models.ForeignKey('student.Student', on_delete=models.CASCADE)
+    batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
+
+    enrollment_date = models.DateField(auto_now_add=True)
+    completion_date = models.DateField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+
+    attendance_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    final_grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True, blank=True)
+    remarks = models.TextField(null=True, blank=True)
+
+    class Meta:
+        unique_together = ('student', 'batch')
+        verbose_name = "Batch Enrollment"
+        verbose_name_plural = "Batch Enrollments"
+
+    def __str__(self):
+        return f"{self.student} in {self.batch}"

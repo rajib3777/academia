@@ -1,8 +1,10 @@
 from django.contrib import admin
-from academy.models import Academy, Course, Batch
+from academy.models import Academy, Course, Batch, BatchEnrollment, Grade
 from classmate.admin import ClassMateAdmin
 from academy.forms import AcademyAdminForm, CourseAdminForm
 
+
+admin.site.register(Grade)
 
 # Inline for Course inside Academy
 class CourseInline(admin.StackedInline):
@@ -54,12 +56,51 @@ class CourseAdmin(ClassMateAdmin):
     fields = [('academy', 'name', 'fee', 'description')]
     
 
+class BatchEnrollmentInline(admin.TabularInline):
+    model = BatchEnrollment
+    extra = 0
+    autocomplete_fields = ['student']
+    fields = (
+        'student',
+        'enrollment_date',
+        'completion_date',
+        'is_active',
+        'attendance_percentage',
+        'final_grade',
+        'remarks'
+    )
+    readonly_fields = ('enrollment_date',)
+
+
 @admin.register(Batch)
 class BatchAdmin(ClassMateAdmin):
     list_display = ('name', 'course', 'start_date', 'end_date')
-    list_filter = ('course',)
+    list_filter = ('course', 'start_date', 'end_date')
     search_fields = ('name', 'course__name')
-    ordering = ('start_date',)
+    inlines = [BatchEnrollmentInline]
+    ordering = ['-start_date']
     date_hierarchy = 'start_date'
+    autocomplete_fields = ['course']
 
-    fields = [('course', 'name', 'start_date', 'end_date')]
+
+@admin.register(BatchEnrollment)
+class BatchEnrollmentAdmin(ClassMateAdmin):
+    list_display = (
+        'student',
+        'batch',
+        'enrollment_date',
+        'completion_date',
+        'is_active',
+        'attendance_percentage',
+        'final_grade'
+    )
+    list_filter = ('is_active', 'batch', 'enrollment_date', 'completion_date')
+    search_fields = (
+        'student__user__first_name',
+        'student__user__last_name',
+        'batch__name',
+        'batch__course__name',
+    )
+    autocomplete_fields = ['student', 'batch']
+    readonly_fields = ('enrollment_date',)
+    ordering = ['-enrollment_date']

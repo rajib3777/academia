@@ -1,0 +1,171 @@
+[
+  {
+    "model": "academy.batch",
+    "pk": 100001,
+    "fields": {
+      "name": "FSWD Batch 1",
+      "course": 9101,
+      "start_date": "2025-02-01",
+      "end_date": "2025-05-01",
+      "description": "Morning batch for Full Stack Web Development"
+    }
+  },
+  {
+    "model": "academy.batch",
+    "pk": 100002,
+    "fields": {
+      "name": "FSWD Batch 2",
+      "course": 9101,
+      "start_date": "2025-03-01",
+      "end_date": "2025-06-01",
+      "description": "Evening batch for Full Stack Web Development"
+    }
+  },
+  {
+    "model": "academy.batch",
+    "pk": 100003,
+    "fields": {
+      "name": "FSWD Batch 3",
+      "course": 9101,
+      "start_date": "2025-04-01",
+      "end_date": "2025-07-01",
+      "description": "Weekend batch for Full Stack Web Development"
+    }
+  },
+
+  {
+    "model": "academy.batch",
+    "pk": 100004,
+    "fields": {
+      "name": "DSP Batch 1",
+      "course": 9102,
+      "start_date": "2025-02-10",
+      "end_date": "2025-05-10",
+      "description": "Morning batch for Data Science"
+    }
+  },
+  {
+    "model": "academy.batch",
+    "pk": 100005,
+    "fields": {
+      "name": "DSP Batch 2",
+      "course": 9102,
+      "start_date": "2025-03-10",
+      "end_date": "2025-06-10",
+      "description": "Evening batch for Data Science"
+    }
+  },
+  {
+    "model": "academy.batch",
+    "pk": 100006,
+    "fields": {
+      "name": "DSP Batch 3",
+      "course": 9102,
+      "start_date": "2025-04-10",
+      "end_date": "2025-07-10",
+      "description": "Weekend batch for Data Science"
+    }
+  },
+
+  {
+    "model": "academy.batch",
+    "pk": 100007,
+    "fields": {
+      "name": "MAD Batch 1",
+      "course": 9103,
+      "start_date": "2025-02-15",
+      "end_date": "2025-05-15",
+      "description": "Morning batch for Mobile App Development"
+    }
+  },
+  {
+    "model": "academy.batch",
+    "pk": 100008,
+    "fields": {
+      "name": "MAD Batch 2",
+      "course": 9103,
+      "start_date": "2025-03-15",
+      "end_date": "2025-06-15",
+      "description": "Evening batch for Mobile App Development"
+    }
+  },
+  {
+    "model": "academy.batch",
+    "pk": 100009,
+    "fields": {
+      "name": "MAD Batch 3",
+      "course": 9103,
+      "start_date": "2025-04-15",
+      "end_date": "2025-07-15",
+      "description": "Weekend batch for Mobile App Development"
+    }
+  },
+
+  {
+    "model": "academy.batch",
+    "pk": 100010,
+    "fields": {
+      "name": "UIUX Batch 1",
+      "course": 9104,
+      "start_date": "2025-02-20",
+      "end_date": "2025-05-20",
+      "description": "Morning batch for UI/UX"
+    }
+  },
+  {
+    "model": "academy.batch",
+    "pk": 100011,
+    "fields": {
+      "name": "UIUX Batch 2",
+      "course": 9104,
+      "start_date": "2025-03-20",
+      "end_date": "2025-06-20",
+      "description": "Evening batch for UI/UX"
+    }
+  },
+  {
+    "model": "academy.batch",
+    "pk": 100012,
+    "fields": {
+      "name": "UIUX Batch 3",
+      "course": 9104,
+      "start_date": "2025-04-20",
+      "end_date": "2025-07-20",
+      "description": "Weekend batch for UI/UX"
+    }
+  },
+
+  {
+    "model": "academy.batch",
+    "pk": 100013,
+    "fields": {
+      "name": "DevOps Batch 1",
+      "course": 9105,
+      "start_date": "2025-02-25",
+      "end_date": "2025-05-25",
+      "description": "Morning batch for DevOps"
+    }
+  },
+  {
+    "model": "academy.batch",
+    "pk": 100014,
+    "fields": {
+      "name": "DevOps Batch 2",
+      "course": 9105,
+      "start_date": "2025-03-25",
+      "end_date": "2025-06-25",
+      "description": "Evening batch for DevOps"
+    }
+  },
+  {
+    "model": "academy.batch",
+    "pk": 100015,
+    "fields": {
+      "name": "DevOps Batch 3",
+      "course": 9105,
+      "start_date": "2025-04-25",
+      "end_date": "2025-07-25",
+      "description": "Weekend batch for DevOps"
+    }
+  }
+]

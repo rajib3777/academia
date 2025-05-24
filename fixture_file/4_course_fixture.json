@@ -1,0 +1,52 @@
+[
+  {
+    "model": "academy.course",
+    "pk": 9101,
+    "fields": {
+      "name": "Full Stack Web Development",
+      "description": "Learn to build complete web applications using Python, Django, and React.",
+      "fee": "25000.00",
+      "academy": 9001
+    }
+  },
+  {
+    "model": "academy.course",
+    "pk": 9102,
+    "fields": {
+      "name": "Data Science with Python",
+      "description": "Comprehensive course on data analysis, machine learning, and visualization using Python.",
+      "fee": "30000.00",
+      "academy": 9001
+    }
+  },
+  {
+    "model": "academy.course",
+    "pk": 9103,
+    "fields": {
+      "name": "Mobile App Development",
+      "description": "Learn to develop Android and iOS apps using Flutter.",
+      "fee": "27000.00",
+      "academy": 9001
+    }
+  },
+  {
+    "model": "academy.course",
+    "pk": 9104,
+    "fields": {
+      "name": "UI/UX Design Fundamentals",
+      "description": "Master the principles of design, wireframing, and prototyping using Figma.",
+      "fee": "18000.00",
+      "academy": 9001
+    }
+  },
+  {
+    "model": "academy.course",
+    "pk": 9105,
+    "fields": {
+      "name": "DevOps and Cloud Deployment",
+      "description": "Hands-on course on CI/CD, Docker, Kubernetes, and AWS deployment.",
+      "fee": "32000.00",
+      "academy": 9001
+    }
+  }
+]

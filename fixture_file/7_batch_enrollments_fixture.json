@@ -1,0 +1,1388 @@
+[
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11001,
+    "fields": {
+      "student": 7001,
+      "batch": 100001,
+      "enrollment_date": "2025-01-15",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "85.00",
+      "final_grade": 33003,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11002,
+    "fields": {
+      "student": 7002,
+      "batch": 100002,
+      "enrollment_date": "2025-02-01",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "85.80",
+      "final_grade": 33006,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11003,
+    "fields": {
+      "student": 7003,
+      "batch": 100003,
+      "enrollment_date": "2025-02-12",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "86.60",
+      "final_grade": 33004,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11004,
+    "fields": {
+      "student": 7004,
+      "batch": 100004,
+      "enrollment_date": "2025-02-05",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "87.40",
+      "final_grade": 33006,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11005,
+    "fields": {
+      "student": 7005,
+      "batch": 100005,
+      "enrollment_date": "2025-01-29",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "88.20",
+      "final_grade": 33002,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11006,
+    "fields": {
+      "student": 7006,
+      "batch": 100006,
+      "enrollment_date": "2025-02-07",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "89.00",
+      "final_grade": 33002,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11007,
+    "fields": {
+      "student": 7007,
+      "batch": 100007,
+      "enrollment_date": "2025-02-23",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "89.80",
+      "final_grade": 33003,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11008,
+    "fields": {
+      "student": 7008,
+      "batch": 100008,
+      "enrollment_date": "2025-01-06",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "90.60",
+      "final_grade": 33004,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11009,
+    "fields": {
+      "student": 7009,
+      "batch": 100009,
+      "enrollment_date": "2025-01-12",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "91.40",
+      "final_grade": 33001,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11010,
+    "fields": {
+      "student": 7010,
+      "batch": 100010,
+      "enrollment_date": "2025-01-28",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "92.20",
+      "final_grade": 33003,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11011,
+    "fields": {
+      "student": 7011,
+      "batch": 100011,
+      "enrollment_date": "2025-01-03",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "93.00",
+      "final_grade": 33004,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11012,
+    "fields": {
+      "student": 7012,
+      "batch": 100012,
+      "enrollment_date": "2025-02-12",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "93.80",
+      "final_grade": 33001,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11013,
+    "fields": {
+      "student": 7013,
+      "batch": 100013,
+      "enrollment_date": "2025-01-25",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "94.60",
+      "final_grade": 33003,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11014,
+    "fields": {
+      "student": 7014,
+      "batch": 100014,
+      "enrollment_date": "2025-02-28",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "95.40",
+      "final_grade": 33005,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11015,
+    "fields": {
+      "student": 7015,
+      "batch": 100015,
+      "enrollment_date": "2025-02-15",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "96.20",
+      "final_grade": 33004,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11016,
+    "fields": {
+      "student": 7016,
+      "batch": 100001,
+      "enrollment_date": "2025-01-17",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "85.00",
+      "final_grade": 33001,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11017,
+    "fields": {
+      "student": 7017,
+      "batch": 100002,
+      "enrollment_date": "2025-01-16",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "85.80",
+      "final_grade": 33004,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11018,
+    "fields": {
+      "student": 7018,
+      "batch": 100003,
+      "enrollment_date": "2025-02-10",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "86.60",
+      "final_grade": 33006,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11019,
+    "fields": {
+      "student": 7019,
+      "batch": 100004,
+      "enrollment_date": "2025-01-16",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "87.40",
+      "final_grade": 33004,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11020,
+    "fields": {
+      "student": 7020,
+      "batch": 100005,
+      "enrollment_date": "2025-02-11",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "88.20",
+      "final_grade": 33007,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11021,
+    "fields": {
+      "student": 7021,
+      "batch": 100006,
+      "enrollment_date": "2025-02-04",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "89.00",
+      "final_grade": 33007,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11022,
+    "fields": {
+      "student": 7022,
+      "batch": 100007,
+      "enrollment_date": "2025-01-11",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "89.80",
+      "final_grade": 33007,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11023,
+    "fields": {
+      "student": 7023,
+      "batch": 100008,
+      "enrollment_date": "2025-02-05",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "90.60",
+      "final_grade": 33006,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11024,
+    "fields": {
+      "student": 7024,
+      "batch": 100009,
+      "enrollment_date": "2025-01-30",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "91.40",
+      "final_grade": 33007,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11025,
+    "fields": {
+      "student": 7025,
+      "batch": 100010,
+      "enrollment_date": "2025-01-22",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "92.20",
+      "final_grade": 33007,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11026,
+    "fields": {
+      "student": 7026,
+      "batch": 100011,
+      "enrollment_date": "2025-01-10",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "93.00",
+      "final_grade": 33004,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11027,
+    "fields": {
+      "student": 7027,
+      "batch": 100012,
+      "enrollment_date": "2025-02-21",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "93.80",
+      "final_grade": 33005,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11028,
+    "fields": {
+      "student": 7028,
+      "batch": 100013,
+      "enrollment_date": "2025-03-02",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "94.60",
+      "final_grade": 33002,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11029,
+    "fields": {
+      "student": 7029,
+      "batch": 100014,
+      "enrollment_date": "2025-01-16",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "95.40",
+      "final_grade": 33007,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11030,
+    "fields": {
+      "student": 7030,
+      "batch": 100015,
+      "enrollment_date": "2025-01-31",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "96.20",
+      "final_grade": 33005,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11031,
+    "fields": {
+      "student": 7031,
+      "batch": 100001,
+      "enrollment_date": "2025-01-25",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "85.00",
+      "final_grade": 33007,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11032,
+    "fields": {
+      "student": 7032,
+      "batch": 100002,
+      "enrollment_date": "2025-02-10",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "85.80",
+      "final_grade": 33006,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11033,
+    "fields": {
+      "student": 7033,
+      "batch": 100003,
+      "enrollment_date": "2025-01-20",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "86.60",
+      "final_grade": 33001,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11034,
+    "fields": {
+      "student": 7034,
+      "batch": 100004,
+      "enrollment_date": "2025-02-03",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "87.40",
+      "final_grade": 33004,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11035,
+    "fields": {
+      "student": 7035,
+      "batch": 100005,
+      "enrollment_date": "2025-01-23",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "88.20",
+      "final_grade": 33001,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11036,
+    "fields": {
+      "student": 7036,
+      "batch": 100006,
+      "enrollment_date": "2025-02-08",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "89.00",
+      "final_grade": 33003,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11037,
+    "fields": {
+      "student": 7037,
+      "batch": 100007,
+      "enrollment_date": "2025-01-08",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "89.80",
+      "final_grade": 33006,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11038,
+    "fields": {
+      "student": 7038,
+      "batch": 100008,
+      "enrollment_date": "2025-01-30",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "90.60",
+      "final_grade": 33005,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11039,
+    "fields": {
+      "student": 7039,
+      "batch": 100009,
+      "enrollment_date": "2025-01-16",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "91.40",
+      "final_grade": 33007,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11040,
+    "fields": {
+      "student": 7040,
+      "batch": 100010,
+      "enrollment_date": "2025-02-23",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "92.20",
+      "final_grade": 33001,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11041,
+    "fields": {
+      "student": 7041,
+      "batch": 100011,
+      "enrollment_date": "2025-02-23",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "93.00",
+      "final_grade": 33001,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11042,
+    "fields": {
+      "student": 7042,
+      "batch": 100012,
+      "enrollment_date": "2025-01-21",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "93.80",
+      "final_grade": 33001,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11043,
+    "fields": {
+      "student": 7043,
+      "batch": 100013,
+      "enrollment_date": "2025-01-26",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "94.60",
+      "final_grade": 33007,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11044,
+    "fields": {
+      "student": 7044,
+      "batch": 100014,
+      "enrollment_date": "2025-01-30",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "95.40",
+      "final_grade": 33007,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11045,
+    "fields": {
+      "student": 7045,
+      "batch": 100015,
+      "enrollment_date": "2025-01-06",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "96.20",
+      "final_grade": 33007,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11046,
+    "fields": {
+      "student": 7046,
+      "batch": 100001,
+      "enrollment_date": "2025-02-08",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "85.00",
+      "final_grade": 33003,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11047,
+    "fields": {
+      "student": 7047,
+      "batch": 100002,
+      "enrollment_date": "2025-01-11",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "85.80",
+      "final_grade": 33002,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11048,
+    "fields": {
+      "student": 7048,
+      "batch": 100003,
+      "enrollment_date": "2025-01-23",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "86.60",
+      "final_grade": 33004,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11049,
+    "fields": {
+      "student": 7049,
+      "batch": 100004,
+      "enrollment_date": "2025-01-14",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "87.40",
+      "final_grade": 33004,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11050,
+    "fields": {
+      "student": 7050,
+      "batch": 100005,
+      "enrollment_date": "2025-02-10",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "88.20",
+      "final_grade": 33002,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11051,
+    "fields": {
+      "student": 7051,
+      "batch": 100006,
+      "enrollment_date": "2025-02-24",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "89.00",
+      "final_grade": 33001,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11052,
+    "fields": {
+      "student": 7052,
+      "batch": 100007,
+      "enrollment_date": "2025-01-14",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "89.80",
+      "final_grade": 33002,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11053,
+    "fields": {
+      "student": 7053,
+      "batch": 100008,
+      "enrollment_date": "2025-02-19",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "90.60",
+      "final_grade": 33003,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11054,
+    "fields": {
+      "student": 7054,
+      "batch": 100009,
+      "enrollment_date": "2025-01-17",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "91.40",
+      "final_grade": 33005,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11055,
+    "fields": {
+      "student": 7055,
+      "batch": 100010,
+      "enrollment_date": "2025-02-11",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "92.20",
+      "final_grade": 33004,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11056,
+    "fields": {
+      "student": 7056,
+      "batch": 100011,
+      "enrollment_date": "2025-01-06",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "93.00",
+      "final_grade": 33007,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11057,
+    "fields": {
+      "student": 7057,
+      "batch": 100012,
+      "enrollment_date": "2025-01-28",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "93.80",
+      "final_grade": 33002,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11058,
+    "fields": {
+      "student": 7058,
+      "batch": 100013,
+      "enrollment_date": "2025-01-02",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "94.60",
+      "final_grade": 33002,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11059,
+    "fields": {
+      "student": 7059,
+      "batch": 100014,
+      "enrollment_date": "2025-02-21",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "95.40",
+      "final_grade": 33004,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11060,
+    "fields": {
+      "student": 7060,
+      "batch": 100015,
+      "enrollment_date": "2025-02-11",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "96.20",
+      "final_grade": 33006,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11061,
+    "fields": {
+      "student": 7061,
+      "batch": 100001,
+      "enrollment_date": "2025-02-14",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "85.00",
+      "final_grade": 33002,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11062,
+    "fields": {
+      "student": 7062,
+      "batch": 100002,
+      "enrollment_date": "2025-01-08",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "85.80",
+      "final_grade": 33006,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11063,
+    "fields": {
+      "student": 7063,
+      "batch": 100003,
+      "enrollment_date": "2025-01-07",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "86.60",
+      "final_grade": 33002,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11064,
+    "fields": {
+      "student": 7064,
+      "batch": 100004,
+      "enrollment_date": "2025-03-02",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "87.40",
+      "final_grade": 33002,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11065,
+    "fields": {
+      "student": 7065,
+      "batch": 100005,
+      "enrollment_date": "2025-01-09",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "88.20",
+      "final_grade": 33006,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11066,
+    "fields": {
+      "student": 7066,
+      "batch": 100006,
+      "enrollment_date": "2025-02-27",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "89.00",
+      "final_grade": 33006,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11067,
+    "fields": {
+      "student": 7067,
+      "batch": 100007,
+      "enrollment_date": "2025-02-24",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "89.80",
+      "final_grade": 33005,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11068,
+    "fields": {
+      "student": 7068,
+      "batch": 100008,
+      "enrollment_date": "2025-01-20",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "90.60",
+      "final_grade": 33003,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11069,
+    "fields": {
+      "student": 7069,
+      "batch": 100009,
+      "enrollment_date": "2025-02-26",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "91.40",
+      "final_grade": 33001,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11070,
+    "fields": {
+      "student": 7070,
+      "batch": 100010,
+      "enrollment_date": "2025-02-28",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "92.20",
+      "final_grade": 33007,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11071,
+    "fields": {
+      "student": 7071,
+      "batch": 100011,
+      "enrollment_date": "2025-01-21",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "93.00",
+      "final_grade": 33007,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11072,
+    "fields": {
+      "student": 7072,
+      "batch": 100012,
+      "enrollment_date": "2025-02-17",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "93.80",
+      "final_grade": 33004,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11073,
+    "fields": {
+      "student": 7073,
+      "batch": 100013,
+      "enrollment_date": "2025-01-10",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "94.60",
+      "final_grade": 33006,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11074,
+    "fields": {
+      "student": 7074,
+      "batch": 100014,
+      "enrollment_date": "2025-01-11",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "95.40",
+      "final_grade": 33002,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11075,
+    "fields": {
+      "student": 7075,
+      "batch": 100015,
+      "enrollment_date": "2025-02-10",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "96.20",
+      "final_grade": 33002,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11076,
+    "fields": {
+      "student": 7076,
+      "batch": 100001,
+      "enrollment_date": "2025-02-07",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "85.00",
+      "final_grade": 33004,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11077,
+    "fields": {
+      "student": 7077,
+      "batch": 100002,
+      "enrollment_date": "2025-01-12",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "85.80",
+      "final_grade": 33007,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11078,
+    "fields": {
+      "student": 7078,
+      "batch": 100003,
+      "enrollment_date": "2025-02-17",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "86.60",
+      "final_grade": 33001,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11079,
+    "fields": {
+      "student": 7079,
+      "batch": 100004,
+      "enrollment_date": "2025-02-05",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "87.40",
+      "final_grade": 33007,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11080,
+    "fields": {
+      "student": 7080,
+      "batch": 100005,
+      "enrollment_date": "2025-01-28",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "88.20",
+      "final_grade": 33006,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11081,
+    "fields": {
+      "student": 7081,
+      "batch": 100006,
+      "enrollment_date": "2025-02-17",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "89.00",
+      "final_grade": 33006,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11082,
+    "fields": {
+      "student": 7082,
+      "batch": 100007,
+      "enrollment_date": "2025-01-14",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "89.80",
+      "final_grade": 33004,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11083,
+    "fields": {
+      "student": 7083,
+      "batch": 100008,
+      "enrollment_date": "2025-02-05",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "90.60",
+      "final_grade": 33004,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11084,
+    "fields": {
+      "student": 7084,
+      "batch": 100009,
+      "enrollment_date": "2025-01-08",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "91.40",
+      "final_grade": 33002,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11085,
+    "fields": {
+      "student": 7085,
+      "batch": 100010,
+      "enrollment_date": "2025-02-23",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "92.20",
+      "final_grade": 33007,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11086,
+    "fields": {
+      "student": 7086,
+      "batch": 100011,
+      "enrollment_date": "2025-02-21",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "93.00",
+      "final_grade": 33004,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11087,
+    "fields": {
+      "student": 7087,
+      "batch": 100012,
+      "enrollment_date": "2025-02-10",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "93.80",
+      "final_grade": 33002,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11088,
+    "fields": {
+      "student": 7088,
+      "batch": 100013,
+      "enrollment_date": "2025-02-05",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "94.60",
+      "final_grade": 33002,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11089,
+    "fields": {
+      "student": 7089,
+      "batch": 100014,
+      "enrollment_date": "2025-01-11",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "95.40",
+      "final_grade": 33005,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11090,
+    "fields": {
+      "student": 7090,
+      "batch": 100015,
+      "enrollment_date": "2025-01-14",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "96.20",
+      "final_grade": 33001,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11091,
+    "fields": {
+      "student": 7091,
+      "batch": 100001,
+      "enrollment_date": "2025-02-02",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "85.00",
+      "final_grade": 33005,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11092,
+    "fields": {
+      "student": 7092,
+      "batch": 100002,
+      "enrollment_date": "2025-01-18",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "85.80",
+      "final_grade": 33001,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11093,
+    "fields": {
+      "student": 7093,
+      "batch": 100003,
+      "enrollment_date": "2025-01-12",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "86.60",
+      "final_grade": 33002,
+      "remarks": "Consistent student"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11094,
+    "fields": {
+      "student": 7094,
+      "batch": 100004,
+      "enrollment_date": "2025-01-18",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "87.40",
+      "final_grade": 33006,
+      "remarks": "Needs more practice"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11095,
+    "fields": {
+      "student": 7095,
+      "batch": 100005,
+      "enrollment_date": "2025-01-11",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "88.20",
+      "final_grade": 33002,
+      "remarks": "Strong understanding of concepts"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11096,
+    "fields": {
+      "student": 7096,
+      "batch": 100006,
+      "enrollment_date": "2025-01-07",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "89.00",
+      "final_grade": 33003,
+      "remarks": "Highly motivated learner"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11097,
+    "fields": {
+      "student": 7097,
+      "batch": 100007,
+      "enrollment_date": "2025-01-29",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "89.80",
+      "final_grade": 33007,
+      "remarks": "Excellent performance"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11098,
+    "fields": {
+      "student": 7098,
+      "batch": 100008,
+      "enrollment_date": "2025-02-04",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "90.60",
+      "final_grade": 33003,
+      "remarks": "Good improvement"
+    }
+  },
+  {
+    "model": "academy.BatchEnrollment",
+    "pk": 11099,
+    "fields": {
+      "student": 7099,
+      "batch": 100009,
+      "enrollment_date": "2025-02-13",
+      "completion_date": "2025-07-01",
+      "is_active": true,
+      "attendance_percentage": "91.40",
+      "final_grade": 33004,
+      "remarks": "Consistent student"
+    }
+  }
+]

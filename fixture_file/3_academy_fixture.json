@@ -1,0 +1,15 @@
+[
+  {
+    "model": "academy.academy",
+    "pk": 9001,
+    "fields": {
+      "name": "Bright Future Academy",
+      "description": "An academy focused on modern learning techniques and professional growth.",
+      "logo": null,
+      "website": "https://brightfutureacademy.example.com",
+      "contact_number": "+8801712345678",
+      "email": "info@brightfutureacademy.com",
+      "owner": 3
+    }
+  }
+]
