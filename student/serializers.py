@@ -16,3 +16,9 @@ class SchoolSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Another school with this name already exists.")
         
         return value
+    
+
+class SchoolNameListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = School
+        fields = ['id', 'name']
