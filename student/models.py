@@ -1,6 +1,7 @@
 from django.db import models
 from account.models import User
-from academy.models import Batch
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from classmate.models import ClassMateModel
 
 
@@ -16,9 +17,10 @@ class School(models.Model):
         return self.name
 
 class Student(ClassMateModel):
-    user = models.OneToOneField(User, on_delete=models.PROTECT, limit_choices_to={'roles__name': 'student'})
+    user = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'roles__name': 'student'})
     school = models.ForeignKey(School, on_delete=models.PROTECT)
-    student_id = models.CharField(max_length=20, unique=True, help_text="Unique ID for the student")
+    student_id = models.CharField(max_length=20, unique=True, help_text="Unique ID for the student", editable=False, null=True, blank=True)
+    birth_registration_number = models.CharField(max_length=50, unique=True, null=True, blank=True, help_text="Unique birth registration number for the student")
     date_of_birth = models.DateField(null=True, blank=True)
     guardian_name = models.CharField(max_length=255, null=True, blank=True)  
     guardian_phone = models.CharField(max_length=20, null=True, blank=True)
@@ -32,3 +34,14 @@ class Student(ClassMateModel):
         verbose_name = "Student"
         verbose_name_plural = "Students"
         ordering = ['id']
+
+
+@receiver(pre_save, sender=Student)
+def set_student_id_on_create(sender, instance, **kwargs):
+    """
+    Signal to auto-generate student_id only when creating a new Student.
+    """
+    from student.utils import generate_student_id
+
+    if (not instance.pk and not instance.student_id) or (instance.pk and not instance.student_id):
+        instance.student_id = generate_student_id()

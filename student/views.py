@@ -1,11 +1,11 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from student.models import School
+from student.models import School, Student
 from rest_framework import generics
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from student.serializers import SchoolSerializer, SchoolNameListSerializer
+from student.serializers import SchoolSerializer, SchoolNameListSerializer, StudentSerializer
 from classmate.permissions import AuthenticatedGenericView
 from classmate.utils import StandardResultsSetPagination
 
@@ -22,3 +22,13 @@ class SchoolNameListAPIView(AuthenticatedGenericView, generics.ListAPIView):
     filter_backends = [SearchFilter]
     search_fields = ['name', 'address', 'email', 'contact_number']
     queryset = School.objects.all()
+
+
+class StudentListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+
+class StudentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Student.objects.all()
+    serializer_class = StudentSerializer
+    lookup_field = 'pk'

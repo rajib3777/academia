@@ -12,15 +12,16 @@ class SchoolAdmin(admin.ModelAdmin):
 
 @admin.register(Student)
 class StudentAdmin(ClassMateAdmin):
-    list_display = ('user', 'school', 'student_id', 'date_of_birth', 'guardian_name')
+    list_display = ('student_id', 'school', 'user', 'date_of_birth', 'guardian_name')
     ordering = ('user__first_name', 'school__name')
     fields = [
-        ('user', 'school', 'student_id', 'date_of_birth'),
+        ('user', 'birth_registration_number', 'date_of_birth','school'),
         ('guardian_name', 'guardian_phone', 'guardian_email', 'guardian_relationship'),
         ('address', )
     ]
     list_filter = ('school',)
     search_fields = ('user__full_name', 'school__name')
+    
     # raw_id_fields = ('user', 'school')
 
 

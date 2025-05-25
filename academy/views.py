@@ -148,6 +148,11 @@ class CourseListCreateAPIView(AuthenticatedGenericView, IsAcademyOwner, generics
         serializer.save(academy=academy)
 
 
+class CourseRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, IsAcademyOwner, generics.RetrieveUpdateDestroyAPIView):
+    queryset = Course.objects.all().prefetch_related('batches')
+    serializer_class = CourseSerializer
+
+
 class CourseNameListAPIView(AuthenticatedGenericView, generics.ListAPIView):
     serializer_class = CourseNameListSerializer
     pagination_class = StandardResultsSetPagination
@@ -160,13 +165,8 @@ class CourseNameListAPIView(AuthenticatedGenericView, generics.ListAPIView):
         if academy:
             return Course.objects.filter(academy=academy).values('id', 'name')
         return Course.objects.all().values('id', 'name')
-
-
-class CourseRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, IsAcademyOwner, generics.RetrieveUpdateDestroyAPIView):
-    queryset = Course.objects.all().prefetch_related('batches')
-    serializer_class = CourseSerializer
-
-
+    
+    
 # ----------- BATCH VIEWS -----------
 class BatchListCreateAPIView(AuthenticatedGenericView, generics.ListCreateAPIView):
     serializer_class = BatchSerializer
