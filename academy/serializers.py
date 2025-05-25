@@ -7,8 +7,31 @@ class BatchSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Batch
-        fields = ['id', 'name', 'start_date', 'end_date']
+        fields = ['id', 'name', 'course', 'start_date', 'end_date', 'description']
         read_only_fields = ['id']
+
+    def validate(self, attrs):
+        name = attrs.get('name')
+        course = attrs.get('course')
+        
+        request = self.context.get('request')
+
+        academy = request.user.academy.first()
+
+        if not academy:
+            raise serializers.ValidationError({"academy": "No academy is associated with this user."})
+
+        if self.instance:
+            # For update – skip if the name and course aren't changed
+            if (self.instance.name == name and self.instance.course == course):
+                return attrs
+
+        if Batch.objects.filter(name=name, course_id=course, course__academy=academy).exists():
+            raise serializers.ValidationError({
+                'name': 'A batch with this name already exists for the selected course.'
+            })
+
+        return attrs
 
 
 class CourseSerializer(serializers.ModelSerializer):
@@ -97,4 +120,10 @@ class AcademyOwnerSerializer(serializers.ModelSerializer):
 class CourseNameListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
+        fields = ['id', 'name']
+
+
+class BatchNameListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Batch
         fields = ['id', 'name']

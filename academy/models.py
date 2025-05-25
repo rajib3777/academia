@@ -80,7 +80,7 @@ class Batch(ClassMateModel):
     students = models.ManyToManyField(
         'student.Student',
         through='BatchEnrollment',
-        related_name='batches'
+        related_name='enrolled_batches'
     )
 
     def __str__(self):
@@ -90,6 +90,7 @@ class Batch(ClassMateModel):
         verbose_name = 'Batch'
         verbose_name_plural = 'Batchs'
         ordering = ['start_date']
+        unique_together = ('name', 'course')  # Ensures batch name is unique within a course
 
     def clean(self):
         if self.end_date and self.end_date < self.start_date:

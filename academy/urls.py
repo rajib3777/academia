@@ -2,7 +2,8 @@ from django.urls import path
 from academy.views import (
     AcademyListCreateAPIView, AcademyRetrieveUpdateDestroyAPIView,
     CourseListCreateAPIView, CourseRetrieveUpdateDestroyAPIView,
-    BatchListCreateAPIView, BatchRetrieveUpdateDestroyAPIView, UpdateAcademyFromUserAPIView, CourseNameListAPIView
+    BatchListCreateAPIView, BatchRetrieveUpdateDestroyAPIView, UpdateAcademyFromUserAPIView, CourseNameListAPIView,
+    BatchNameListAPIView
 )
 
 # Admin-only routes
@@ -23,6 +24,7 @@ academy_urlpatterns = [
 # Public (with auth) routes
 public_urlpatterns = [
     path('course-name-list/', CourseNameListAPIView.as_view(), name='public-course-name-list'),
+    path('batch-name-list/', BatchNameListAPIView.as_view(), name='public-batch-name-list'),
 ]
 
 # Combine them into final urlpatterns

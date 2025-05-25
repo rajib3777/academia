@@ -35,7 +35,7 @@ class AcademyAdmin(ClassMateAdmin):
 class BatchInline(admin.TabularInline):
     model = Batch
     extra = 1  # Number of blank inlines to display
-    fields = [('name', 'start_date', 'end_date')]
+    fields = [('name', 'start_date', 'end_date', 'description')]
     show_change_link = True
 
 

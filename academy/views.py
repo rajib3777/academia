@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError, NotFound, PermissionDenie
 from django.shortcuts import get_object_or_404
 from django.db.models import ProtectedError
 from academy.models import Academy, Course, Batch
-from academy.serializers import AcademySerializer, CourseSerializer, BatchSerializer, AcademyOwnerSerializer, CourseNameListSerializer
+from academy.serializers import AcademySerializer, CourseSerializer, BatchSerializer, AcademyOwnerSerializer, CourseNameListSerializer, BatchNameListSerializer
 from classmate.permissions import AuthenticatedGenericView, IsSuperUserOrAdmin, IsAcademyOwner
 from classmate.utils import StandardResultsSetPagination
 
@@ -151,6 +151,9 @@ class CourseListCreateAPIView(AuthenticatedGenericView, IsAcademyOwner, generics
 class CourseNameListAPIView(AuthenticatedGenericView, generics.ListAPIView):
     serializer_class = CourseNameListSerializer
     pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['name', 'academy__id']
+    search_fields = ['name', 'description']
 
     def get_queryset(self):
         academy = self.request.user.academy.first()
@@ -166,11 +169,42 @@ class CourseRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, IsAcademyOwne
 
 # ----------- BATCH VIEWS -----------
 class BatchListCreateAPIView(AuthenticatedGenericView, generics.ListCreateAPIView):
-    queryset = Batch.objects.all()
     serializer_class = BatchSerializer
     pagination_class = StandardResultsSetPagination
 
+    def get_queryset(self):
+        user = self.request.user
+
+        return Batch.objects.select_related(
+            'course',
+            'course__academy',
+            'course__academy__owner'
+        ).prefetch_related(
+            'students'
+        ).filter(
+            course__academy__owner=user
+        )
+    
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request  # optional, DRF includes it by default
+        return context
+
 
 class BatchRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, generics.RetrieveUpdateDestroyAPIView):
-    queryset = Batch.objects.all()
+    queryset = Batch.objects.all().prefetch_related('students')
     serializer_class = BatchSerializer
+
+
+class BatchNameListAPIView(AuthenticatedGenericView, generics.ListAPIView):
+    serializer_class = BatchNameListSerializer
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
+    filterset_fields = ['name', 'course__id']
+    search_fields = ['name', 'description']
+
+    def get_queryset(self):
+        academy = self.request.user.academy.first()
+        if academy:
+            return Batch.objects.filter(course__academy=academy).values('id', 'name')
+        return Batch.objects.all().values('id', 'name')
