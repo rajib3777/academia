@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager, Permission
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from account.utils import phone_validator
+from account.choices import ROLE_CHOICES
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone, password=None, **extra_fields):
@@ -20,13 +21,6 @@ class CustomUserManager(BaseUserManager):
 
 class Role(models.Model):
     """Role model to define different roles in the system."""
-    ROLE_CHOICES = [
-        ('admin', 'Admin'),
-        ('teacher', 'Teacher'),
-        ('student', 'Student'),
-        ('staff', 'Staff'),
-        ('academy', 'Academy'),
-    ]
     name = models.CharField(max_length=10, unique=True, choices=ROLE_CHOICES)
 
     class Meta:
@@ -39,7 +33,7 @@ class Role(models.Model):
 class User(AbstractUser):
     """Custom user model that uses phone number as the unique identifier."""
     email = models.EmailField(_("email address"), unique=True, null=True, blank=True)
-    roles = models.ManyToManyField(Role, related_name="users")
+    role = models.ForeignKey(Role, on_delete=models.PROTECT)
     phone = models.CharField(_("Mobile number"), max_length=15, unique=True, validators=[phone_validator])
     otp = models.CharField(max_length=6, null=True, blank=True)
     is_active = models.BooleanField(default=True)
@@ -56,19 +50,13 @@ class User(AbstractUser):
         ordering = ["id"]
 
     def is_admin(self):
-        return self.roles.filter(name="admin").exists()
-
-    def is_teacher(self):
-        return self.roles.filter(name="teacher").exists()
-
-    def is_teacher_staff(self):
-        return self.roles.filter(name="staff").exists()
+        return self.role and self.role.name == "admin"
 
     def is_student(self):
-        return self.roles.filter(name="student").exists()
+        return self.role and self.role.name == "student"
 
     def is_academy_owner(self):
-        return self.roles.filter(name="academy").exists()
+        return self.role and self.role.name == "academy"
 
     def __str__(self):
         return self.username

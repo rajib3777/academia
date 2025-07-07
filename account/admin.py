@@ -13,15 +13,15 @@ class RoleAdmin(admin.ModelAdmin):
 @admin.register(User)
 class UserAdmin(BaseUserAdmin):
     model = User
-    list_display = ('username', 'phone', 'email', 'is_superuser', 'is_active', 'is_staff', 'get_roles', 'get_groups')
-    list_filter = ('is_active', 'is_staff', 'roles')
+    list_display = ('username', 'phone', 'email', 'is_superuser', 'is_active', 'is_staff', 'role', 'get_groups')
+    list_filter = ('is_active', 'is_staff', 'role')
     search_fields = ('username', 'phone', 'email')
     ordering = ('username',)
     readonly_fields = ('otp',)
 
     fieldsets = (
         (_("Basic Info"), {'fields': [('username', 'email', 'phone', 'otp')]}),
-        (_("Permissions"), {'fields': [('is_active', 'is_staff', 'is_superuser'), ('roles'), ('groups')]}),
+        (_("Permissions"), {'fields': [('is_active', 'is_staff', 'is_superuser'), ('role'), ('groups')]}),
         (_("Password"), {'fields': ('password',)}),
         (_("Important Dates"), {'fields': ('last_login',)}),
     )
@@ -33,17 +33,13 @@ class UserAdmin(BaseUserAdmin):
                 ('username', 'phone', 'email',),
                 ('password1', 'password2', ),
                 ('is_active', 'is_staff', 'is_superuser',),
-                ('roles', ),
+                ('role', ),
                 ('groups', ),
             ],
         }),
     )
 
-    filter_horizontal = ('roles', 'groups',)
-
-    def get_roles(self, obj):
-        return ", ".join(role.name for role in obj.roles.all())
-    get_roles.short_description = "Roles"
+    filter_horizontal = ('groups',)
 
     def get_groups(self, obj):
         return ", ".join(group.name for group in obj.groups.all())

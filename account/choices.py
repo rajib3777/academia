@@ -10,3 +10,13 @@ CONFLICT_ROLE_PAIRS = [
     ({"teacher", "student"}, "A user cannot be both a teacher and a student."),
     ({"staff", "student"}, "A user cannot be both a staff and a student."),
 ]
+
+ADMIN = 'admin'
+STUDENT = 'student'
+ACADEMY = 'academy'
+
+ROLE_CHOICES = [
+    (ADMIN, 'Admin'),
+    (STUDENT, 'Student'),
+    (ACADEMY, 'Academy'),
+]
