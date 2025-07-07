@@ -20,7 +20,7 @@ class UserAdmin(BaseUserAdmin):
     readonly_fields = ('otp',)
 
     fieldsets = (
-        (_("Basic Info"), {'fields': [('username', 'email', 'phone', 'otp')]}),
+        (_("Basic Info"), {'fields': [('username', 'first_name', 'last_name', 'email', 'phone', 'otp')]}),
         (_("Permissions"), {'fields': [('is_active', 'is_staff', 'is_superuser'), ('role'), ('groups')]}),
         (_("Password"), {'fields': ('password',)}),
         (_("Important Dates"), {'fields': ('last_login',)}),
@@ -30,6 +30,7 @@ class UserAdmin(BaseUserAdmin):
         (_("Create User"), {
             'classes': ('wide',),
             'fields': [
+                ('first_name', 'last_name',),
                 ('username', 'phone', 'email',),
                 ('password1', 'password2', ),
                 ('is_active', 'is_staff', 'is_superuser',),

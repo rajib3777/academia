@@ -63,26 +63,32 @@ class RegistrationSerializer(serializers.ModelSerializer):
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
+    access = serializers.CharField(read_only=True)
+    refresh = serializers.CharField(read_only=True)
+    user_id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    phone = serializers.CharField(read_only=True)
+    role = serializers.CharField(read_only=True)
 
     def validate(self, attrs):
         username = attrs.get('username')
-
         password = attrs.get('password')
 
-        user = User.objects.get(username=username)
-        if not user:
+        try:
+            user = User.objects.get(username=username)
+        except User.DoesNotExist:
             raise serializers.ValidationError({"error": "User does not exist."})
 
-            # Check if the provided password matches the one stored for the user
         if not user.check_password(password):
             raise serializers.ValidationError({"error": "Incorrect password."})
 
-        # Issue token on successful login
         refresh = RefreshToken.for_user(user)
-        attrs['tokens'] = {
-            'access': str(refresh.access_token),
-            'refresh': str(refresh)
-        }
+        attrs['access'] = str(refresh.access_token)
+        attrs['refresh'] = str(refresh)
+        attrs['user_id'] = user.id
+        attrs['name'] = user.get_full_name()
+        attrs['phone'] = user.phone
+        attrs['role'] = user.role.name
         return attrs
 
 
