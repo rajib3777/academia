@@ -90,7 +90,7 @@ class AcademySerializer(serializers.ModelSerializer):
     courses = CourseSerializer(many=True, read_only=True)
     class Meta:
         model = Academy
-        fields = ['id', 'name', 'description', 'logo', 'website', 'contact_number', 'email', 'owner', 'courses']
+        fields = ['id', 'name', 'description', 'logo', 'website', 'contact_number', 'email', 'user', 'courses']
         read_only_fields = ['id',]
 
 

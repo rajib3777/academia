@@ -18,13 +18,13 @@ class AcademyListCreateAPIView(AuthenticatedGenericView, IsSuperUserOrAdmin, gen
     serializer_class = AcademySerializer
     pagination_class = StandardResultsSetPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['name', 'owner__id', 'contact_number', 'email']
-    search_fields = ['name', 'description', 'owner__username', 'email']
+    filterset_fields = ['name', 'user__id', 'contact_number', 'email']
+    search_fields = ['name', 'description', 'user__username', 'email']
     ordering_fields = ['name', 'created_at']
     ordering = ['name']
 
     def get_queryset(self):
-        queryset = Academy.objects.select_related('owner').all()
+        queryset = Academy.objects.select_related('user').all()
 
         # Optional: filter by query params like ?search=keyword
         search = self.request.query_params.get('search')
@@ -33,7 +33,7 @@ class AcademyListCreateAPIView(AuthenticatedGenericView, IsSuperUserOrAdmin, gen
                 Q(name__icontains=search) |
                 Q(description__icontains=search) |
                 Q(address__icontains=search) |
-                Q(owner__username__icontains=search) |
+                Q(user__username__icontains=search) |
                 Q(email__icontains=search)
             )
 
