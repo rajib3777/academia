@@ -1,3 +1,6 @@
+import random
+import string
+import secrets
 from django.core.cache import cache
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
@@ -71,3 +74,31 @@ phone_validator = RegexValidator(
     message='Enter a valid contact number.'
 )
 
+
+
+def generate_secure_password(length=10):
+    """
+    Alternative implementation using secrets module for cryptographically secure passwords.
+    """    
+    uppercase = string.ascii_uppercase
+    lowercase = string.ascii_lowercase
+    digits = string.digits
+    special_chars = "!@#$%^&*()_+-=[]{}|;:,.<>?"
+    
+    # Ensure at least one character from each category
+    password = [
+        secrets.choice(uppercase),
+        secrets.choice(lowercase),
+        secrets.choice(digits),
+        secrets.choice(special_chars)
+    ]
+    
+    # Fill remaining positions
+    all_chars = uppercase + lowercase + digits + special_chars
+    for _ in range(length - 4):
+        password.append(secrets.choice(all_chars))
+    
+    # Shuffle the password
+    random.shuffle(password)
+    
+    return ''.join(password)

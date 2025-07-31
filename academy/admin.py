@@ -26,7 +26,7 @@ class AcademyAdmin(ClassMateAdmin):
 
     fields = [
         ('user', 'name', 'contact_number', 'email',),
-        ('website', 'logo', 'description',),
+        ('established_year', 'website', 'logo', 'description',),
         ('division', 'district', 'upazila', 'area_or_union', 'street_address', 'postal_code'),
     ]
 
@@ -35,7 +35,7 @@ class AcademyAdmin(ClassMateAdmin):
 class BatchInline(admin.TabularInline):
     model = Batch
     extra = 1  # Number of blank inlines to display
-    fields = [('name', 'start_date', 'end_date', 'description')]
+    fields = [('name', 'start_date', 'end_date', 'is_active', 'description')]
     show_change_link = True
 
 

@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from account.utils import phone_validator
 from smart_selects.db_fields import ChainedForeignKey
 from utils.models import Division, District, Upazila
-
+from academy.choices_fields import YEAR_CHOICES
 
 class Academy(ClassMateModel):
     name = models.CharField(max_length=255, unique=True)
@@ -15,7 +15,7 @@ class Academy(ClassMateModel):
     contact_number = models.CharField(max_length=15, validators=[phone_validator])
     email = models.EmailField(null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT, limit_choices_to={'role__name': 'academy'}, related_name='academy')
-
+    established_year = models.CharField(max_length=20, null=True, blank=True, default='2025', choices=YEAR_CHOICES)
     # Standard Bangladeshi Address Fields
     division = models.ForeignKey(Division, on_delete=models.SET_NULL, null=True, blank=True)
     district = ChainedForeignKey(
@@ -77,6 +77,7 @@ class Batch(ClassMateModel):
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
     students = models.ManyToManyField(
         'student.Student',
         through='BatchEnrollment',

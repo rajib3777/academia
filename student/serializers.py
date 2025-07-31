@@ -34,7 +34,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'email', 'phone', 'password']
+        fields = ['id', 'username', 'first_name', 'last_name', 'email', 'phone', 'password']
 
     def validate_username(self, value):
         if User.objects.filter(username=value).exists():
@@ -59,45 +59,218 @@ class StudentSerializer(serializers.ModelSerializer):
             'guardian_name', 'guardian_phone', 'guardian_email',
             'guardian_relationship', 'address'
         ]
-        read_only_fields = ['student_id']  # prevent manual input
+        read_only_fields = ['student_id']
 
-    def generate_student_id(self, school):
-        # Example: SC1234-UUID segment
-        return f"{school.id}-{uuid.uuid4().hex[:6].upper()}"
+
+class StudentCreateSerializer(serializers.ModelSerializer):
+    # Nested user fields for creation
+    username = serializers.CharField(write_only=True)
+    first_name = serializers.CharField(write_only=True)
+    last_name = serializers.CharField(write_only=True)
+    email = serializers.EmailField(write_only=True)
+    phone = serializers.CharField(write_only=True)
+    password = serializers.CharField(write_only=True, min_length=8, default='adminmilon')
+    
+    class Meta:
+        model = Student
+        fields = [
+            'username', 'email', 'first_name', 'last_name', 'phone', 'password',
+            'school', 'birth_registration_number', 'date_of_birth',
+            'guardian_name', 'guardian_phone', 'guardian_email',
+            'guardian_relationship', 'address'
+        ]
+        extra_kwargs = {
+            'password': {'write_only': True},
+            'birth_registration_number': {'required': False},
+        }
+
+    def validate_username(self, value):
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("A user with this username already exists.")
+        return value
+
+    def validate_email(self, value):
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        return value
+
+    def validate_birth_registration_number(self, value):
+        if value and Student.objects.filter(birth_registration_number=value).exists():
+            raise serializers.ValidationError("A student with this birth registration number already exists.")
+        return value
 
     def create(self, validated_data):
-        user_data = validated_data.pop('user')
-        user_data['username'] = user_data.get('phone', user_data['phone'])
-        password = user_data.pop('password')
 
-        # Check username & phone uniqueness
-        if User.objects.filter(username=user_data['username']).exists():
-            raise serializers.ValidationError({'username': 'Username already exists.'})
-        if User.objects.filter(phone=user_data['phone']).exists():
-            raise serializers.ValidationError({'phone': 'Phone number already exists.'})
-
-        user = User(**user_data)
-        user.set_password(password)
-        user.save()
-
-        # Assign 'student' role
-        student_role, _ = Role.objects.get_or_create(name='student')
-        user.roles.add(student_role)
-
-        student = Student.objects.create(user=user, **validated_data)
+        # Add student role (assuming you have a Role model)
+        try:
+            from account.models import Role
+            student_role, created = Role.objects.get_or_create(name='student')
+        except ImportError:
+            # If Role model doesn't exist, you might handle this differently
+            pass
+        # Extract user data
+        user_data = {
+            'username': validated_data.pop('username'),
+            'first_name': validated_data.pop('first_name'),
+            'last_name': validated_data.pop('last_name'),
+            'email': validated_data.pop('email'),
+            'phone': validated_data.pop('phone'),
+            'role': student_role,
+            'password': validated_data.pop('password'),
+        }
+        
+        # Create user
+        user = User.objects.create_user(**user_data)
+        
+        # Create student
+        student = Student.objects.create(
+            user=user,
+            **validated_data
+        )
+        
         return student
 
-    def update(self, instance, validated_data):
-        user_data = validated_data.pop('user', None)
-        if user_data:
-            for attr, value in user_data.items():
-                if attr == 'password':
-                    instance.user.set_password(value)
-                else:
-                    setattr(instance.user, attr, value)
-            instance.user.save()
 
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
+class StudentUpdateSerializer(serializers.ModelSerializer):
+    # User fields for updating
+    username = serializers.CharField(required=False)
+    first_name = serializers.CharField(required=False)
+    last_name = serializers.CharField(required=False)
+    email = serializers.EmailField(required=False)
+    phone = serializers.CharField(required=True)
+    password = serializers.CharField(required=False, min_length=8)
+    
+    class Meta:
+        model = Student
+        fields = [
+            'username', 'email', 'first_name', 'last_name', 'phone', 'password',
+            'school', 'birth_registration_number', 'date_of_birth',
+            'guardian_name', 'guardian_phone', 'guardian_email',
+            'guardian_relationship', 'address'
+        ]
+        extra_kwargs = {
+            'school': {'required': False},
+            'birth_registration_number': {'required': False},
+            'date_of_birth': {'required': False},
+            'guardian_name': {'required': False},
+            'guardian_phone': {'required': False},
+            'guardian_email': {'required': False},
+            'guardian_relationship': {'required': False},
+            'address': {'required': False},
+        }
+
+    def validate_username(self, value):
+        # Get current instance
+        instance = self.instance
+        
+        # Check if username is being changed
+        if instance and instance.user.username == value:
+            return value  # Same username, no validation needed
+        
+        # Check if another user has this username
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("A user with this username already exists.")
+        
+        return value
+
+    def validate_email(self, value):
+        # Get current instance
+        instance = self.instance
+        
+        # Check if email is being changed
+        if instance and instance.user.email == value:
+            return value  # Same email, no validation needed
+        
+        # Check if another user has this email
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        
+        return value
+
+    def validate_birth_registration_number(self, value):
+        # Get current instance
+        instance = self.instance
+        
+        # Skip validation if no value provided
+        if not value:
+            return value
+        
+        # Check if birth registration number is being changed
+        if instance and instance.birth_registration_number == value:
+            return value  # Same number, no validation needed
+        
+        # Check if another student has this birth registration number
+        if Student.objects.filter(birth_registration_number=value).exists():
+            raise serializers.ValidationError("A student with this birth registration number already exists.")
+        
+        return value
+
+    def update(self, instance, validated_data):
+        # Extract user-related fields
+        user_fields = ['username', 'email', 'first_name', 'phone', 'last_name', 'password']
+        user_data = {}
+        
+        for field in user_fields:
+            if field in validated_data:
+                user_data[field] = validated_data.pop(field)
+        
+        # Update user if there's user data to update
+        if user_data:
+            user = instance.user
+            
+            # Update user fields
+            for field, value in user_data.items():
+                if field == 'password':
+                    user.set_password(value)
+                else:
+                    setattr(user, field, value)
+            
+            user.save()
+        
+        # Update student fields
+        for field, value in validated_data.items():
+            setattr(instance, field, value)
+        
         instance.save()
         return instance
+    
+
+class StudentListSerializer(serializers.ModelSerializer):
+    """Serializer for listing students with related data"""
+    user = serializers.SerializerMethodField()
+    school = serializers.SerializerMethodField()
+    age = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = Student
+        fields = [
+            'id', 'user', 'school', 'student_id', 'birth_registration_number',
+            'date_of_birth', 'age', 'guardian_name', 'guardian_phone',
+            'guardian_email', 'guardian_relationship', 'address',
+            'created_at', 'modified_at'
+        ]
+    
+    def get_user(self, obj):
+        return {
+            'id': obj.user.id,
+            'username': obj.user.username,
+            'email': obj.user.email,
+            'phone': obj.user.phone,
+            'first_name': obj.user.first_name,
+            'last_name': obj.user.last_name,
+            'full_name': f"{obj.user.first_name} {obj.user.last_name}".strip(),
+            'is_active': obj.user.is_active,
+        }
+    
+    def get_school(self, obj):
+        return {
+            'id': obj.school.id,
+            'name': obj.school.name if hasattr(obj.school, 'name') else str(obj.school),
+        }
+    
+    def get_age(self, obj):
+        if obj.date_of_birth:
+            from datetime import date
+            today = date.today()
+            return today.year - obj.date_of_birth.year - ((today.month, today.day) < (obj.date_of_birth.month, obj.date_of_birth.day))
+        return None

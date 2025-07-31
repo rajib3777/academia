@@ -20,7 +20,7 @@ class StudentAdmin(ClassMateAdmin):
         ('address', )
     ]
     list_filter = ('school',)
-    search_fields = ('user__full_name', 'school__name')
+    search_fields = ('user__first_name__icontains', 'user__last_name__icontains', 'student_id', 'school__name__icontains')
     
     # raw_id_fields = ('user', 'school')
 

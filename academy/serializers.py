@@ -1,13 +1,14 @@
 from rest_framework import serializers
+from django.db import transaction
 from .models import Academy, Course, Batch
-
+from account.serializers import UserSerializer
 
 class BatchSerializer(serializers.ModelSerializer):
     id = serializers.IntegerField(required=False)
 
     class Meta:
         model = Batch
-        fields = ['id', 'name', 'course', 'start_date', 'end_date', 'description']
+        fields = ['id', 'name', 'course', 'start_date', 'end_date', 'is_active', 'description']
         read_only_fields = ['id']
 
     def validate(self, attrs):
@@ -88,9 +89,10 @@ class AcademySerializer(serializers.ModelSerializer):
     # courses = serializers.PrimaryKeyRelatedField(many=True, queryset=Course.objects.all())
     # courses = serializers.PrimaryKeyRelatedField(many=True, queryset=Course.objects.all(), write_only=True)
     courses = CourseSerializer(many=True, read_only=True)
+    user = UserSerializer()
     class Meta:
         model = Academy
-        fields = ['id', 'name', 'description', 'logo', 'website', 'contact_number', 'email', 'user', 'courses']
+        fields = ['id', 'name', 'description', 'established_year', 'logo', 'website', 'contact_number', 'email', 'user', 'courses']
         read_only_fields = ['id',]
 
 
@@ -100,6 +102,32 @@ class AcademySerializer(serializers.ModelSerializer):
         if Academy.objects.exclude(id=academy_id).filter(name__iexact=value).exists():
             raise serializers.ValidationError("Academy with this name already exists.")
         return value
+    
+    def create(self, validated_data):
+        user_data = validated_data.pop('user')
+        print('in: ', user_data)
+        with transaction.atomic():
+            user_serializer = UserSerializer()
+            user = user_serializer.create(user_data)
+            academy = Academy.objects.create(user=user, **validated_data)
+            return academy
+        
+    def update(self, instance, validated_data):
+        user_data = validated_data.pop('user', None)
+        print('user: ', user_data)
+        with transaction.atomic():
+            # Update user if user data is provided
+            if user_data:
+                user_serializer = UserSerializer(instance.user, data=user_data, partial=True)
+                if user_serializer.is_valid(raise_exception=True):
+                    user_serializer.save()
+            
+            # Update academy fields
+            for attr, value in validated_data.items():
+                setattr(instance, attr, value)
+            
+            instance.save()
+            return instance
     
 
 class AcademyOwnerSerializer(serializers.ModelSerializer):

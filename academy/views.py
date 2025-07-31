@@ -46,6 +46,7 @@ class AcademyListCreateAPIView(AuthenticatedGenericView, IsSuperUserOrAdmin, gen
         """
         Override to customize response after creation.
         """
+        print('data: ', request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -63,9 +64,9 @@ class AcademyRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, generics.Ret
 
     def get_queryset(self):
         """
-        Optimized queryset with related owner.
+        Optimized queryset with related user.
         """
-        return Academy.objects.select_related('owner').all()
+        return Academy.objects.select_related('user').all()
 
     def get_object(self):
         """
@@ -82,10 +83,10 @@ class AcademyRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, generics.Ret
         # Handles both PUT (full) and PATCH (partial) cases
         # partial=True	Allows updates with only some fields
         instance = self.get_object()
-        
+        print('sfsfs: ', instance)
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
-
+        print('serializer', serializer)
         self.perform_update(serializer)
         
         return Response({

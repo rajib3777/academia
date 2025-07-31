@@ -1,10 +1,9 @@
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password
-
 from account.choices import CONFLICT_ROLE_PAIRS
 from account.models import User, Role
-from account.utils import get_or_update_role_cache
+from account.utils import get_or_update_role_cache, generate_secure_password
 from utils.models import OTPVerification
 
 
@@ -112,3 +111,95 @@ class UserListSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'name', 'phone', 'email', 'roles']
+
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['username', 'first_name', 'last_name', 'email', 'phone', 'role',]
+
+    def create(self, validated_data):
+        password = generate_secure_password()
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        return user
+    
+    def update(self, instance, validated_data):
+        """
+        Update user instance without changing password.
+        Password remains unchanged during updates.
+        """
+        # Update only the provided fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        
+        instance.save()
+        return instance
+    
+    def validate_email(self, value):
+        """
+        Validate email uniqueness excluding current instance.
+        """
+        queryset = User.objects.filter(email=value)
+        
+        # Exclude current instance during update
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        
+        if queryset.exists():
+            raise serializers.ValidationError("A user with this email already exists.")
+        print('in', value)
+        return value
+
+    def validate_phone(self, value):
+        """
+        Validate phone uniqueness excluding current instance.
+        """
+        queryset = User.objects.filter(phone=value)
+        
+        # Exclude current instance during update
+        if self.instance:
+            queryset = queryset.exclude(pk=self.instance.pk)
+        
+        if queryset.exists():
+            raise serializers.ValidationError("A user with this phone number already exists.")
+        
+        return value
+
+
+# If you want a separate serializer for password updates
+class UserPasswordUpdateSerializer(serializers.ModelSerializer):
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(write_only=True)
+    
+    class Meta:
+        model = User
+        fields = ['old_password', 'new_password', 'confirm_password']
+    
+    def validate(self, attrs):
+        user = self.instance
+        old_password = attrs.get('old_password')
+        new_password = attrs.get('new_password')
+        confirm_password = attrs.get('confirm_password')
+        
+        # Check if old password is correct
+        if not user.check_password(old_password):
+            raise serializers.ValidationError({
+                'old_password': 'Old password is incorrect.'
+            })
+        
+        # Check if new passwords match
+        if new_password != confirm_password:
+            raise serializers.ValidationError({
+                'confirm_password': 'New passwords do not match.'
+            })
+        
+        return attrs
+    
+    def update(self, instance, validated_data):
+        new_password = validated_data['new_password']
+        instance.set_password(new_password)
+        instance.save()
+        return instance
