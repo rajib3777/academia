@@ -126,15 +126,15 @@ class UpdateAcademyFromUserAPIView(AuthenticatedGenericView, IsAcademyOwner, API
     
 
 # ----------- COURSE VIEWS -----------
-class CourseListCreateAPIView(AuthenticatedGenericView, IsAcademyOwner, generics.ListCreateAPIView):
+class CourseListCreateAPIView(AuthenticatedGenericView, generics.ListCreateAPIView):
     serializer_class = CourseSerializer
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
-        return Course.objects.filter(
-            academy__owner=self.request.user
-        ).prefetch_related('batches')
-    
+        # return Course.objects.filter(
+        #     academy__owner=self.request.user
+        # ).prefetch_related('batches')
+        return Course.objects.all().prefetch_related('batches')
 
     def perform_create(self, serializer):
         academy = self.request.user.academy.first()
