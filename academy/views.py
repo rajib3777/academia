@@ -179,11 +179,11 @@ class BatchListCreateAPIView(AuthenticatedGenericView, generics.ListCreateAPIVie
         return Batch.objects.select_related(
             'course',
             'course__academy',
-            'course__academy__owner'
+            'course__academy__user'
         ).prefetch_related(
             'students'
         ).filter(
-            course__academy__owner=user
+            course__academy__user=user
         )
     
     def get_serializer_context(self):
