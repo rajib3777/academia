@@ -14,7 +14,8 @@ class Academy(ClassMateModel):
     website = models.URLField(null=True, blank=True)
     contact_number = models.CharField(max_length=15, validators=[phone_validator])
     email = models.EmailField(null=True, blank=True)
-    user = models.ForeignKey(User, on_delete=models.PROTECT, limit_choices_to={'role__name': 'academy'}, related_name='academy')
+    # user = models.ForeignKey(User, on_delete=models.PROTECT, limit_choices_to={'role__name': 'academy'}, related_name='academy')
+    user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='academy')
     established_year = models.CharField(max_length=20, null=True, blank=True, default='2025', choices=YEAR_CHOICES)
     # Standard Bangladeshi Address Fields
     division = models.ForeignKey(Division, on_delete=models.SET_NULL, null=True, blank=True)

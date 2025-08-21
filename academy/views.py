@@ -9,7 +9,7 @@ from rest_framework.exceptions import ValidationError, NotFound, PermissionDenie
 from django.shortcuts import get_object_or_404
 from django.db.models import ProtectedError
 from academy.models import Academy, Course, Batch
-from academy.serializers import AcademySerializer, CourseSerializer, BatchSerializer, AcademyOwnerSerializer, CourseNameListSerializer, BatchNameListSerializer
+from academy.serializers import AcademySerializer, CourseSerializer, BatchSerializer, AcademyOwnerSerializer, CourseNameListSerializer, BatchNameListSerializer, CourseCreateSerializer
 from classmate.permissions import AuthenticatedGenericView, IsSuperUserOrAdmin, IsAcademyOwner
 from classmate.utils import StandardResultsSetPagination
 
@@ -127,7 +127,7 @@ class UpdateAcademyFromUserAPIView(AuthenticatedGenericView, IsAcademyOwner, API
 
 # ----------- COURSE VIEWS -----------
 class CourseListCreateAPIView(AuthenticatedGenericView, generics.ListCreateAPIView):
-    serializer_class = CourseSerializer
+    serializer_class = CourseCreateSerializer
     pagination_class = StandardResultsSetPagination
 
     def get_queryset(self):
@@ -151,7 +151,7 @@ class CourseListCreateAPIView(AuthenticatedGenericView, generics.ListCreateAPIVi
 
 class CourseRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, IsAcademyOwner, generics.RetrieveUpdateDestroyAPIView):
     queryset = Course.objects.all().prefetch_related('batches')
-    serializer_class = CourseSerializer
+    serializer_class = CourseCreateSerializer
 
 
 class CourseNameListAPIView(AuthenticatedGenericView, generics.ListAPIView):

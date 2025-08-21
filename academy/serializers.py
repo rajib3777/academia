@@ -11,6 +11,15 @@ class BatchSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'course', 'start_date', 'end_date', 'is_active', 'description']
         read_only_fields = ['id']
 
+
+class BatchCreateSerializer(serializers.ModelSerializer):
+    id = serializers.IntegerField(required=False)
+
+    class Meta:
+        model = Batch
+        fields = ['id', 'name', 'start_date', 'end_date', 'is_active', 'description']
+        read_only_fields = ['id']
+
     def validate(self, attrs):
         name = attrs.get('name')
         course = attrs.get('course')
@@ -43,10 +52,18 @@ class CourseSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'fee', 'batches']
         read_only_fields = ['id']
 
+class CourseCreateSerializer(serializers.ModelSerializer):
+    batches = BatchCreateSerializer(many=True)
+
+    class Meta:
+        model = Course
+        fields = ['id', 'name', 'description', 'fee', 'batches']
+        read_only_fields = ['id']
+
     def create(self, validated_data):
         batches_data = validated_data.pop('batches', [])
         course = Course.objects.create(**validated_data)
-
+        print('course: ', course)
         for batch_data in batches_data:
             Batch.objects.create(course=course, **batch_data)
 
@@ -83,7 +100,6 @@ class CourseSerializer(serializers.ModelSerializer):
         instance.save()
 
         return instance
-
 
 class AcademySerializer(serializers.ModelSerializer):
     # courses = serializers.PrimaryKeyRelatedField(many=True, queryset=Course.objects.all())
