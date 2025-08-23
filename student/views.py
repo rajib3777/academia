@@ -25,7 +25,7 @@ from django.core.paginator import Paginator
 from student.utils import StudentFilter
 
 class SchoolViewSet(viewsets.ModelViewSet):
-    queryset = School.objects.all()
+    queryset = School.objects.all().order_by('id')
     serializer_class = SchoolSerializer
     authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
@@ -40,11 +40,11 @@ class SchoolNameListAPIView(AuthenticatedGenericView, generics.ListAPIView):
 
 
 class StudentListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Student.objects.all()
+    queryset = Student.objects.all().order_by('id')
     serializer_class = StudentSerializer
 
 class StudentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Student.objects.all()
+    queryset = Student.objects.all().order_by('id')
     serializer_class = StudentSerializer
     lookup_field = 'pk'
 
@@ -316,7 +316,7 @@ class StudentListView(APIView):
     
     def get_queryset(self):
         """Get optimized queryset with select_related for performance"""
-        return Student.objects.select_related('user', 'school').all()
+        return Student.objects.select_related('user', 'school').all().order_by('id')
     
     def apply_filters(self, queryset, request):
         """Apply filters using django-filter"""

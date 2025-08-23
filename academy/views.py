@@ -21,7 +21,7 @@ class AcademyListCreateAPIView(AuthenticatedGenericView, IsSuperUserOrAdmin, gen
     filterset_fields = ['name', 'user__id', 'contact_number', 'email']
     search_fields = ['name', 'description', 'user__username', 'email']
     ordering_fields = ['name', 'created_at']
-    ordering = ['name']
+    ordering = ['id']
 
     def get_queryset(self):
         queryset = Academy.objects.select_related('user').all()
@@ -134,7 +134,7 @@ class CourseListCreateAPIView(AuthenticatedGenericView, generics.ListCreateAPIVi
         # return Course.objects.filter(
         #     academy__owner=self.request.user
         # ).prefetch_related('batches')
-        return Course.objects.all().prefetch_related('batches')
+        return Course.objects.all().order_by('id').prefetch_related('batches')
 
     def perform_create(self, serializer):
         academy = self.request.user.academy.first()
@@ -165,7 +165,7 @@ class CourseNameListAPIView(AuthenticatedGenericView, generics.ListAPIView):
         academy = self.request.user.academy.first()
         if academy:
             return Course.objects.filter(academy=academy).values('id', 'name')
-        return Course.objects.all().values('id', 'name')
+        return Course.objects.all().order_by('id').values('id', 'name')
     
     
 # ----------- BATCH VIEWS -----------
@@ -184,7 +184,7 @@ class BatchListCreateAPIView(AuthenticatedGenericView, generics.ListCreateAPIVie
             'students'
         ).filter(
             course__academy__user=user
-        )
+        ).order_by('id')
     
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -207,5 +207,5 @@ class BatchNameListAPIView(AuthenticatedGenericView, generics.ListAPIView):
     def get_queryset(self):
         academy = self.request.user.academy.first()
         if academy:
-            return Batch.objects.filter(course__academy=academy).values('id', 'name')
-        return Batch.objects.all().values('id', 'name')
+            return Batch.objects.filter(course__academy=academy).order_by('id').values('id', 'name')
+        return Batch.objects.all().order_by('id').values('id', 'name')
