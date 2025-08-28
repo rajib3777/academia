@@ -374,7 +374,7 @@ class StudentListView(APIView):
     
     def paginate_queryset(self, queryset, request):
         """Apply pagination"""
-        page_size = int(request.GET.get('page_size', 20))
+        page_size = int(request.GET.get('page_size', 10))
         page_number = int(request.GET.get('page', 1))
         
         # Limit page size to prevent abuse
