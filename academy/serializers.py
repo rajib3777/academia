@@ -108,7 +108,8 @@ class AcademySerializer(serializers.ModelSerializer):
     user = UserSerializer()
     class Meta:
         model = Academy
-        fields = ['id', 'name', 'description', 'established_year', 'logo', 'website', 'contact_number', 'email', 'user', 'courses']
+        fields = ['id', 'name', 'description', 'established_year', 'logo', 'website', 'contact_number', 'email', 'user', 
+                  'division', 'district', 'upazila', 'area_or_union', 'street_address', 'postal_code', 'courses']
         read_only_fields = ['id',]
 
 
