@@ -60,6 +60,29 @@ class CourseCreateSerializer(serializers.ModelSerializer):
         fields = ['id', 'name', 'description', 'fee', 'batches']
         read_only_fields = ['id']
 
+    def validate(self, attrs):
+        name = attrs.get('name')
+        
+        request = self.context.get('request')
+
+        academy = request.user.academy.first()
+
+        if not academy:
+            raise serializers.ValidationError({"academy": "No academy is associated with this user."})
+
+        if self.instance:
+            # For update – skip if the name and course aren't changed
+            if (self.instance.name == name and self.instance.academy == academy):
+                return attrs
+        
+        if Course.objects.filter(academy=academy, name=name).exists():
+            raise serializers.ValidationError({
+                'name': 'This course name already exists for this academy.'
+            })
+
+        return attrs
+
+
     def create(self, validated_data):
         batches_data = validated_data.pop('batches', [])
         course = Course.objects.create(**validated_data)

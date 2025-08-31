@@ -5,6 +5,7 @@ from rest_framework.response import Response
 from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
+from rest_framework import serializers
 from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
 from django.shortcuts import get_object_or_404
 from django.db.models import ProtectedError
@@ -140,13 +141,13 @@ class CourseListCreateAPIView(AuthenticatedGenericView, generics.ListCreateAPIVi
         academy = self.request.user.academy.first()
 
         if not academy:
-            raise ValidationError({"academy": "No academy is associated with this user."})
-        
-        if Course.objects.filter(academy=academy, name=self.request.data['name']).exists():
-            raise ValidationError({
-                'name': 'This course name already exists for this academy.'
-            })
+            raise serializers.ValidationError({"academy": "No academy is associated with this user."})
         serializer.save(academy=academy)
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request  # optional, DRF includes it by default
+        return context
 
 
 class CourseRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, IsAcademyOwner, generics.RetrieveUpdateDestroyAPIView):
