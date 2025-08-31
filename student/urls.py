@@ -15,7 +15,7 @@ student_urlpatterns = [
     path('v1/students/create/', StudentCreateView.as_view(), name='student_create'),
     path('v1/students/<str:student_id>/update/', StudentUpdateView.as_view(), name='student_update'),
     path('v1/students/', StudentListView.as_view(), name='student_list'),
-    path('students/<int:pk>/', StudentRetrieveUpdateDestroyAPIView.as_view(), name='student-detail'),
+    path('student/<int:pk>/', StudentRetrieveUpdateDestroyAPIView.as_view(), name='student-detail'),
 ]
 
 # Public (with auth) routes
