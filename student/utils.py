@@ -61,6 +61,7 @@ class StudentFilter(filters.FilterSet):
     # User filters
     username = filters.CharFilter(field_name='user__username', lookup_expr='icontains')
     email = filters.CharFilter(field_name='user__email', lookup_expr='icontains')
+    phone = filters.CharFilter(field_name='user__phone', lookup_expr='icontains')
     first_name = filters.CharFilter(field_name='user__first_name', lookup_expr='icontains')
     last_name = filters.CharFilter(field_name='user__last_name', lookup_expr='icontains')
     is_active = filters.BooleanFilter(field_name='user__is_active')
