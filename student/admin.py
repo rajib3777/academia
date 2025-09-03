@@ -21,7 +21,7 @@ class StudentAdmin(ClassMateAdmin):
         ('created_at', 'modified_at')
     ]
     list_filter = ('school',)
-    readonly_fields = ('student_id', 'created_at', 'modified_at')
+    readonly_fields = ('student_id', )
     search_fields = ('user__first_name__icontains', 'user__last_name__icontains', 'student_id', 'school__name__icontains')
     
     # raw_id_fields = ('user', 'school')
