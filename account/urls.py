@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
-from account.apis import LoginAPIView, UserUpdateAPIView, UserListAPIView, RegistrationAPIView, RoleListAPIView
+from account.apis import LoginAPIView, UserUpdateAPIView, UserListAPIView, RegistrationAPIView, RoleListAPIView, RoleMenuPermissionNestedListView
 
 app_name = "users"
 urlpatterns = [
@@ -10,5 +10,6 @@ urlpatterns = [
     path('user/<int:pk>/', UserUpdateAPIView.as_view(), name='user-update'),
     path('registration/', RegistrationAPIView.as_view(), name='registration'),
     path('roles/', RoleListAPIView.as_view(), name='role-list'),
+    path('role-menu-permissions-nested/', RoleMenuPermissionNestedListView.as_view(), name='role-menu-permissions-nested'),
 
 ]

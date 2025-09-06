@@ -2,7 +2,7 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password
 from account.choices import CONFLICT_ROLE_PAIRS
-from account.models import User, Role
+from account.models import User, Role, Menu, Permission, RoleMenuPermission
 from account.utils import get_or_update_role_cache, generate_secure_password
 from utils.models import OTPVerification
 
@@ -203,3 +203,48 @@ class UserPasswordUpdateSerializer(serializers.ModelSerializer):
         instance.set_password(new_password)
         instance.save()
         return instance
+    
+
+class PermissionSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Permission
+        fields = ['id', 'code', 'name']
+
+class SubMenuSerializer(serializers.ModelSerializer):
+    permissions = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Menu
+        fields = ['id', 'name', 'permissions']
+
+    def get_permissions(self, obj):
+        role = self.context.get('role')
+        if not role:
+            return []
+        perms = RoleMenuPermission.objects.filter(role=role, menu=obj).first()
+        if perms:
+            return PermissionSerializer(perms.permissions.all(), many=True).data
+        return []
+
+class MenuWithSubmenusSerializer(serializers.ModelSerializer):
+    submenus = serializers.SerializerMethodField()
+    permissions = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Menu
+        fields = ['id', 'name', 'permissions', 'submenus']
+
+    def get_submenus(self, obj):
+        role = self.context.get('role')
+        # submenus = obj.submenus.all()
+        # Only submenus assigned to this role
+        submenu_ids = RoleMenuPermission.objects.filter(role=role, menu__parent=obj).values_list('menu_id', flat=True)
+        submenus = Menu.objects.filter(id__in=submenu_ids)
+        return SubMenuSerializer(submenus, many=True, context={'role': role}).data
+
+    def get_permissions(self, obj):
+        role = self.context.get('role')
+        perms = RoleMenuPermission.objects.filter(role=role, menu=obj).first()
+        if perms:
+            return PermissionSerializer(perms.permissions.all(), many=True).data
+        return []

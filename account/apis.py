@@ -9,8 +9,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.generics import ListAPIView, UpdateAPIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from account.utils import UserListPaginationClass
-from account.serializers import LoginSerializer, UserUpdateSerializer, UserListSerializer, RegistrationSerializer, RoleSerializer
-from account.models import User, Role
+from account.serializers import LoginSerializer, UserUpdateSerializer, UserListSerializer, RegistrationSerializer, RoleSerializer, MenuWithSubmenusSerializer
+from account.models import User, Role, Menu, Role, RoleMenuPermission
 
 
 class RegistrationAPIView(APIView):
@@ -75,3 +75,21 @@ class RoleListAPIView(ListAPIView):
     serializer_class = RoleSerializer
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
+
+
+class RoleMenuPermissionNestedListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            role = request.user.role
+        except Role.DoesNotExist:
+            return Response({"detail": "Role not found."}, status=404)
+        # Top-level menus only
+        # menus = Menu.objects.filter(parent__isnull=True)
+        # Only top-level menus assigned to this role
+        menu_ids = RoleMenuPermission.objects.filter(role=role, menu__parent__isnull=True).values_list('menu_id', flat=True)
+        menus = Menu.objects.filter(id__in=menu_ids)
+        serializer = MenuWithSubmenusSerializer(menus, many=True, context={'role': role})
+        return Response(serializer.data)
+    

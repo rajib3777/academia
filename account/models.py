@@ -60,3 +60,33 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.username
+
+
+class Permission(models.Model):
+    """Defines a single permission action."""
+    code = models.CharField(max_length=50, unique=True)
+    name = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
+
+class Menu(models.Model):
+    """Represents a menu or submenu in the frontend."""
+    name = models.CharField(max_length=100)
+    parent = models.ForeignKey('self', null=True, blank=True, related_name='submenus', on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+
+class RoleMenuPermission(models.Model):
+    """Maps a role to menu and its allowed permissions."""
+    role = models.ForeignKey(Role, on_delete=models.CASCADE)
+    menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
+    permissions = models.ManyToManyField(Permission, blank=True)
+
+    class Meta:
+        unique_together = ('role', 'menu')
+
+    def __str__(self):
+        return f"{self.role.name} - {self.menu.name}"
+

@@ -145,7 +145,6 @@ class AcademySerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         user_data = validated_data.pop('user')
-        print('in: ', user_data)
         with transaction.atomic():
             user_serializer = UserSerializer()
             user = user_serializer.create(user_data)
@@ -154,7 +153,6 @@ class AcademySerializer(serializers.ModelSerializer):
         
     def update(self, instance, validated_data):
         user_data = validated_data.pop('user', None)
-        print('user: ', user_data)
         with transaction.atomic():
             # Update user if user data is provided
             if user_data:

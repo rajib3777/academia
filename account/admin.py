@@ -1,5 +1,5 @@
 from django.contrib import admin
-from account.models import User, Role
+from account.models import User, Role, Permission, Menu, RoleMenuPermission
 from classmate.admin import ClassMateAdmin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.utils.translation import gettext_lazy as _
@@ -47,3 +47,20 @@ class UserAdmin(BaseUserAdmin):
     get_groups.short_description = "Groups"
 
 
+@admin.register(Permission)
+class PermissionAdmin(admin.ModelAdmin):
+    list_display = ('code', 'name')
+    search_fields = ('code', 'name')
+
+@admin.register(Menu)
+class MenuAdmin(admin.ModelAdmin):
+    list_display = ('name', 'parent')
+    search_fields = ('name',)
+    list_filter = ('parent',)
+
+@admin.register(RoleMenuPermission)
+class RoleMenuPermissionAdmin(admin.ModelAdmin):
+    list_display = ('role', 'menu')
+    filter_horizontal = ('permissions',)
+    search_fields = ('role__name', 'menu__name')
+    list_filter = ('role', )
