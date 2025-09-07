@@ -54,7 +54,7 @@ class PermissionAdmin(admin.ModelAdmin):
 
 @admin.register(Menu)
 class MenuAdmin(admin.ModelAdmin):
-    list_display = ('name', 'parent')
+    list_display = ('name', 'parent', 'order')
     search_fields = ('name',)
     list_filter = ('parent',)
 

@@ -77,7 +77,7 @@ class RoleListAPIView(ListAPIView):
     authentication_classes = [JWTAuthentication]
 
 
-class RoleMenuPermissionNestedListView(APIView):
+class RoleMenuPermissionListView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -85,8 +85,7 @@ class RoleMenuPermissionNestedListView(APIView):
             role = request.user.role
         except Role.DoesNotExist:
             return Response({"detail": "Role not found."}, status=404)
-        # Top-level menus only
-        # menus = Menu.objects.filter(parent__isnull=True)
+        
         # Only top-level menus assigned to this role
         menu_ids = RoleMenuPermission.objects.filter(role=role, menu__parent__isnull=True).values_list('menu_id', flat=True)
         menus = Menu.objects.filter(id__in=menu_ids)

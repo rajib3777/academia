@@ -74,7 +74,11 @@ class Menu(models.Model):
     """Represents a menu or submenu in the frontend."""
     name = models.CharField(max_length=100)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='submenus', on_delete=models.CASCADE)
-
+    order = models.PositiveIntegerField(default=0, help_text="Order for menu/submenu display")
+    
+    class Meta:
+        ordering = ['order', 'id']
+        
     def __str__(self):
         return self.name
 

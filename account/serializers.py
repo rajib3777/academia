@@ -215,7 +215,7 @@ class SubMenuSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Menu
-        fields = ['id', 'name', 'permissions']
+        fields = ['id', 'name', 'order', 'permissions']
 
     def get_permissions(self, obj):
         role = self.context.get('role')
@@ -232,14 +232,13 @@ class MenuWithSubmenusSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Menu
-        fields = ['id', 'name', 'permissions', 'submenus']
+        fields = ['id', 'name', 'order', 'permissions', 'submenus']
 
     def get_submenus(self, obj):
         role = self.context.get('role')
-        # submenus = obj.submenus.all()
         # Only submenus assigned to this role
         submenu_ids = RoleMenuPermission.objects.filter(role=role, menu__parent=obj).values_list('menu_id', flat=True)
-        submenus = Menu.objects.filter(id__in=submenu_ids)
+        submenus = Menu.objects.filter(id__in=submenu_ids).order_by('order', 'id')
         return SubMenuSerializer(submenus, many=True, context={'role': role}).data
 
     def get_permissions(self, obj):
