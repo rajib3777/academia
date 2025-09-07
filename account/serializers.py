@@ -247,3 +247,27 @@ class MenuWithSubmenusSerializer(serializers.ModelSerializer):
         if perms:
             return PermissionSerializer(perms.permissions.all(), many=True).data
         return []
+
+
+class MenuRecursiveSerializer(serializers.ModelSerializer):
+    submenus = serializers.SerializerMethodField()
+    permissions = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Menu
+        fields = ['id', 'name', 'order', 'permissions', 'submenus']
+
+    def get_submenus(self, obj):
+        role = self.context.get('role')
+        # Only submenus assigned to this role, ordered by 'order'
+        submenu_ids = RoleMenuPermission.objects.filter(role=role, menu__parent=obj).values_list('menu_id', flat=True)
+        submenus = Menu.objects.filter(id__in=submenu_ids).order_by('order', 'id')
+        # Recursive call
+        return MenuRecursiveSerializer(submenus, many=True, context=self.context).data
+
+    def get_permissions(self, obj):
+        role = self.context.get('role')
+        perms = RoleMenuPermission.objects.filter(role=role, menu=obj).first()
+        if perms:
+            return PermissionSerializer(perms.permissions.all(), many=True).data
+        return []

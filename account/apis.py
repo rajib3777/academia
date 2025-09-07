@@ -9,7 +9,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.generics import ListAPIView, UpdateAPIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from account.utils import UserListPaginationClass
-from account.serializers import LoginSerializer, UserUpdateSerializer, UserListSerializer, RegistrationSerializer, RoleSerializer, MenuWithSubmenusSerializer
+from account.serializers import (LoginSerializer, UserUpdateSerializer, UserListSerializer, 
+                                 RegistrationSerializer, RoleSerializer, MenuWithSubmenusSerializer, MenuRecursiveSerializer)
 from account.models import User, Role, Menu, Role, RoleMenuPermission
 
 
@@ -78,6 +79,7 @@ class RoleListAPIView(ListAPIView):
 
 
 class RoleMenuPermissionListView(APIView):
+    authentication_classes = [JWTAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -88,7 +90,24 @@ class RoleMenuPermissionListView(APIView):
         
         # Only top-level menus assigned to this role
         menu_ids = RoleMenuPermission.objects.filter(role=role, menu__parent__isnull=True).values_list('menu_id', flat=True)
-        menus = Menu.objects.filter(id__in=menu_ids)
+        menus = Menu.objects.filter(id__in=menu_ids).order_by('order', 'id').prefetch_related('submenus')
         serializer = MenuWithSubmenusSerializer(menus, many=True, context={'role': role})
+        return Response(serializer.data)
+    
+
+class RoleMenuPermissionNestedListView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        try:
+            role = request.user.role
+        except Role.DoesNotExist:
+            return Response({"detail": "Role not found."}, status=404)
+        
+        # Only top-level menus assigned to this role
+        menu_ids = RoleMenuPermission.objects.filter(role=role, menu__parent__isnull=True).values_list('menu_id', flat=True)
+        menus = Menu.objects.filter(id__in=menu_ids).order_by('order', 'id').prefetch_related('submenus')
+        serializer = MenuRecursiveSerializer(menus, many=True, context={'role': role})
         return Response(serializer.data)
     
