@@ -208,14 +208,14 @@ class UserPasswordUpdateSerializer(serializers.ModelSerializer):
 class PermissionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Permission
-        fields = ['id', 'code', 'name']
+        fields = ['code', ]
 
 class SubMenuSerializer(serializers.ModelSerializer):
     permissions = serializers.SerializerMethodField()
 
     class Meta:
         model = Menu
-        fields = ['id', 'name', 'order', 'permissions']
+        fields = ['name', 'permissions']
 
     def get_permissions(self, obj):
         role = self.context.get('role')
@@ -228,11 +228,12 @@ class SubMenuSerializer(serializers.ModelSerializer):
 
 class MenuWithSubmenusSerializer(serializers.ModelSerializer):
     submenus = serializers.SerializerMethodField()
-    permissions = serializers.SerializerMethodField()
+    # permissions = serializers.SerializerMethodField()
 
     class Meta:
         model = Menu
-        fields = ['id', 'name', 'order', 'permissions', 'submenus']
+        # fields = ['name', 'permissions', 'submenus']
+        fields = ['name', 'submenus']
 
     def get_submenus(self, obj):
         role = self.context.get('role')
