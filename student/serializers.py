@@ -62,6 +62,101 @@ class StudentSerializer(serializers.ModelSerializer):
         read_only_fields = ['student_id']
 
 
+class StudentDetailSerializer(serializers.Serializer):
+    # Student fields
+    id = serializers.IntegerField(read_only=True)
+    student_id = serializers.CharField(read_only=True)
+    birth_registration_number = serializers.CharField(allow_null=True)
+    date_of_birth = serializers.DateField(allow_null=True)
+    guardian_name = serializers.CharField(allow_null=True)
+    guardian_phone = serializers.CharField(allow_null=True)
+    guardian_email = serializers.EmailField(allow_null=True)
+    guardian_relationship = serializers.CharField(allow_null=True)
+    address = serializers.CharField(allow_null=True)
+    created_at = serializers.DateTimeField(read_only=True)
+    modified_at = serializers.DateTimeField(read_only=True)
+    
+    # School fields
+    school_id = serializers.IntegerField()
+    school_name = serializers.CharField()
+    
+    # User fields
+    user_id = serializers.IntegerField()
+    username = serializers.CharField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    email = serializers.EmailField()
+    phone = serializers.CharField()
+    is_active = serializers.BooleanField()
+    
+    # Computed fields
+    age = serializers.IntegerField()
+    full_name = serializers.CharField()
+    
+    def to_representation(self, instance):
+        """
+        Custom representation to optimize field access and avoid 
+        repeated attribute lookups.
+        """
+        # Using already prefetched data
+        user = instance.user
+        school = instance.school
+        
+        # Calculate age
+        age = None
+        if instance.date_of_birth:
+            from datetime import date, datetime
+            today = date.today()
+            
+            # Handle case where date_of_birth might be a string
+            birth_date = instance.date_of_birth
+            if isinstance(birth_date, str):
+                try:
+                    # Parse the string to a date object
+                    birth_date = datetime.strptime(birth_date, '%Y-%m-%d').date()
+                except ValueError:
+                    # If parsing fails, leave age as None
+                    birth_date = None
+                    
+            if birth_date:
+                age = today.year - birth_date.year - (
+                    (today.month, today.day) < 
+                    (birth_date.month, birth_date.day)
+                )
+            
+        return {
+            # Student fields
+            'id': instance.id,
+            'student_id': instance.student_id,
+            'birth_registration_number': instance.birth_registration_number,
+            'date_of_birth': instance.date_of_birth,
+            'guardian_name': instance.guardian_name,
+            'guardian_phone': instance.guardian_phone,
+            'guardian_email': instance.guardian_email,
+            'guardian_relationship': instance.guardian_relationship,
+            'address': instance.address,
+            'created_at': instance.created_at,
+            'modified_at': instance.modified_at,
+            
+            # School fields
+            'school_id': school.id,
+            'school_name': school.name,
+            
+            # User fields
+            'user_id': user.id,
+            'username': user.username,
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+            'email': user.email,
+            'phone': user.phone,
+            'is_active': user.is_active,
+            
+            # Computed fields
+            'age': age,
+            'full_name': f"{user.first_name} {user.last_name}".strip(),
+        }
+
+
 class StudentCreateSerializer(serializers.ModelSerializer):
     # Nested user fields for creation
     username = serializers.CharField(write_only=True)

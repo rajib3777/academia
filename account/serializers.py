@@ -2,6 +2,8 @@ from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth.hashers import make_password
 from account.choices import CONFLICT_ROLE_PAIRS
+from account.services.user_service import UserService
+from account.selectors.user_selector import UserSelector
 from account.models import User, Role, Menu, Permission, RoleMenuPermission
 from account.utils import get_or_update_role_cache, generate_secure_password
 from utils.models import OTPVerification
@@ -118,53 +120,37 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = ['username', 'first_name', 'last_name', 'email', 'phone', 'role',]
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.user_service = UserService()
+        self.user_selector = UserSelector()
+
     def create(self, validated_data):
-        password = generate_secure_password()
-        user = User(**validated_data)
-        user.set_password(password)
-        user.save()
-        return user
+        """
+        Create a new user using UserService.
+        """
+        return self.user_service.create_user(validated_data)
     
     def update(self, instance, validated_data):
         """
-        Update user instance without changing password.
-        Password remains unchanged during updates.
+        Update user instance using UserService.
         """
-        # Update only the provided fields
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        
-        instance.save()
-        return instance
+        return self.user_service.update_user(instance.id, validated_data)
     
     def validate_email(self, value):
         """
         Validate email uniqueness excluding current instance.
         """
-        queryset = User.objects.filter(email=value)
-        
-        # Exclude current instance during update
-        if self.instance:
-            queryset = queryset.exclude(pk=self.instance.pk)
-        
-        if queryset.exists():
+        if self.user_selector.check_email_exists(value, self.instance.pk if self.instance else None):
             raise serializers.ValidationError("A user with this email already exists.")
-        print('in', value)
         return value
 
     def validate_phone(self, value):
         """
         Validate phone uniqueness excluding current instance.
         """
-        queryset = User.objects.filter(phone=value)
-        
-        # Exclude current instance during update
-        if self.instance:
-            queryset = queryset.exclude(pk=self.instance.pk)
-        
-        if queryset.exists():
+        if self.user_selector.check_phone_exists(value, self.instance.pk if self.instance else None):
             raise serializers.ValidationError("A user with this phone number already exists.")
-        
         return value
 
 

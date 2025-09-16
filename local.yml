@@ -1,30 +1,31 @@
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: ./compose/local/Dockerfile
     container_name: classmate_web
     volumes:
       - .:/app
     ports:
-      - "8001:8001"
+      - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
         restart: true
     env_file:
-      - ./.env
+      - ./.envs/.local/.env.local
       
 
   db:
     image: postgres:17
+    restart: always
     container_name: classmate_db
     volumes:
       - classmate_db:/var/lib/postgresql/data/
-    environment:
-      POSTGRES_USER: ${DATABASE_USER}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
-      POSTGRES_DB: ${DATABASE_NAME}
+    env_file:
+      - ./.envs/.local/.env.local
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      test: ["CMD-SHELL", "PGPASSWORD=${DATABASE_PASSWORD} pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
       interval: 10s
       retries: 5
       start_period: 30s

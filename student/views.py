@@ -11,7 +11,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from django.core.exceptions import ValidationError
-from student.serializers import SchoolSerializer, SchoolNameListSerializer, StudentSerializer, StudentCreateSerializer, StudentUpdateSerializer, StudentListSerializer
+from student.serializers import (SchoolSerializer, SchoolNameListSerializer, StudentSerializer, 
+                                 StudentCreateSerializer, StudentUpdateSerializer, StudentListSerializer, 
+                                 StudentDetailSerializer)
 from classmate.permissions import AuthenticatedGenericView
 from classmate.utils import StandardResultsSetPagination
 from rest_framework.views import APIView
@@ -23,6 +25,9 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django.db.models import Q
 from django.core.paginator import Paginator
 from student.utils import StudentFilter
+from functools import cached_property
+from student.selectors import student_selector
+from student.services import student_service
 
 class SchoolViewSet(viewsets.ModelViewSet):
     queryset = School.objects.all().order_by('id')
@@ -43,11 +48,115 @@ class StudentListCreateAPIView(generics.ListCreateAPIView):
     queryset = Student.objects.all().order_by('id')
     serializer_class = StudentSerializer
 
-class StudentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-    queryset = Student.objects.all().order_by('id')
-    serializer_class = StudentSerializer
-    lookup_field = 'pk'
+# class StudentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
+#     queryset = Student.objects.all().order_by('id')
+#     serializer_class = StudentSerializer
+#     lookup_field = 'pk'
 
+class StudentRetrieveUpdateDestroyAPIView(APIView):
+    """API endpoint for detailed student information and operations."""
+    
+    @cached_property
+    def student_selector(self) -> student_selector.StudentSelector:
+        """Lazy initialization of StudentSelector."""
+        return student_selector.StudentSelector()
+
+    @cached_property
+    def student_service(self) -> student_service.StudentService:
+        """Lazy initialization of StudentService."""
+        return student_service.StudentService()
+    
+    def get(self, request, student_id):
+        """
+        Get detailed information for a specific student.
+        """
+        # Use selector to get optimized student data
+        student = self.student_selector.get_student_by_id(student_id)
+        
+        if not student:
+            return Response(
+                {"detail": "Student not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Serialize and return the data
+        serializer = StudentDetailSerializer(student)
+        return Response(serializer.data)
+    
+    def patch(self, request, student_id):
+        """
+        Partially update a student's information.
+        """
+        try:
+            # Extract user and student data from request
+            user_data = {}
+            student_data = {}
+            
+            # User fields
+            for field in ['username', 'first_name', 'last_name', 'email', 'phone', 'password']:
+                if field in request.data:
+                    user_data[field] = request.data[field]
+            
+            # Student fields
+            for field in ['school_id', 'birth_registration_number', 'date_of_birth', 
+                         'guardian_name', 'guardian_phone', 'guardian_email', 
+                         'guardian_relationship', 'address']:
+                if field in request.data:
+                    student_data[field] = request.data[field]
+            
+            # Update student using service
+            student = self.student_service.update_student(
+                student_id=student_id,
+                user_data=user_data if user_data else None,
+                student_data=student_data if student_data else None
+            )
+            
+            # Return updated student data
+            serializer = StudentDetailSerializer(student)
+            return Response(serializer.data)
+            
+        except ValidationError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
+    def delete(self, request, student_id):
+        """
+        Deactivate a student (soft delete).
+        """
+        try:
+            self.student_service.deactivate_student(student_id)
+            return Response(status=status.HTTP_204_NO_CONTENT)
+        except ValidationError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class StudentActivateView(APIView):
+    """API endpoint to activate a deactivated student."""
+    
+    @cached_property
+    def student_service(self) -> student_service.StudentService:
+        """Lazy initialization of StudentService."""
+        return student_service.StudentService()
+
+    def post(self, request, student_id):
+        """
+        Activate a deactivated student.
+        """
+        try:
+            student = self.student_service.activate_student(student_id)
+            serializer = StudentDetailSerializer(student)
+            return Response(serializer.data)
+        except ValidationError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
 
 class StudentCreateView(APIView):
     """
@@ -316,8 +425,8 @@ class StudentListView(APIView):
     
     def get_queryset(self):
         """Get optimized queryset with select_related for performance"""
-        return Student.objects.select_related('user', 'school').all().order_by('id')
-    
+        return Student.objects.select_related('user', 'school').filter(user__is_active=True).order_by('id')
+
     def apply_filters(self, queryset, request):
         """Apply filters using django-filter"""
         filterset = self.filterset_class(request.GET, queryset=queryset)
@@ -374,7 +483,7 @@ class StudentListView(APIView):
     
     def paginate_queryset(self, queryset, request):
         """Apply pagination"""
-        page_size = int(request.GET.get('page_size', 10))
+        page_size = int(request.GET.get('page_size', 100))
         page_number = int(request.GET.get('page', 1))
         
         # Limit page size to prevent abuse

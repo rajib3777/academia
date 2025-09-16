@@ -1,0 +1,37 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./compose/local/Dockerfile
+    container_name: classmate_web
+    volumes:
+      - .:/app
+    ports:
+      - "80:80"
+    depends_on:
+      db:
+        condition: service_healthy
+        restart: true
+    env_file:
+      - ./.envs/.local/.env.local
+      
+
+  db:
+    image: postgres:17
+    restart: always
+    container_name: classmate_db
+    volumes:
+      - classmate_db:/var/lib/postgresql/data/
+    ports:
+      - "5432:5432"
+    env_file:
+      - ./.envs/.local/.env.local
+    healthcheck:
+      test: ["CMD-SHELL", "PGPASSWORD=${DATABASE_PASSWORD} pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
+
+volumes:
+  classmate_db:
