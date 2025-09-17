@@ -24,6 +24,17 @@ Show db:
 Access shell in container:
 - docker exec -it classmate_web python manage.py shell
 
+Data generate in db container:
+- 
+- 
+- docker exec -it classmate_web sh -c 'python manage.py loaddata fixture_file/3_academy_fixture.json'
+- docker exec -it classmate_web sh -c 'python manage.py loaddata fixture_file/4_course_fixture.json'
+- docker exec -it classmate_web sh -c 'python manage.py loaddata fixture_file/5_batch_fixture.json'
+- docker exec -it classmate_web sh -c 'python manage.py loaddata fixture_file/6_grade_fixture.json'
+- docker exec -it classmate_web sh -c 'python manage.py loaddata fixture_file/7_batch_enrollments_fixture.json'
+-
+
+
 
 # database restore in docker:
 - docker cp /Users/alim/Downloads/aws_classmate.sql classmate_db:/.

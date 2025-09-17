@@ -34,6 +34,10 @@ class Student(ClassMateModel):
         verbose_name = "Student"
         verbose_name_plural = "Students"
         ordering = ['id']
+        indexes = [
+            models.Index(fields=['student_id']),
+            models.Index(fields=['school_id']),
+        ]
 
 
 @receiver(pre_save, sender=Student)

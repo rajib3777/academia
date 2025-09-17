@@ -369,3 +369,30 @@ class StudentListSerializer(serializers.ModelSerializer):
             today = date.today()
             return today.year - obj.date_of_birth.year - ((today.month, today.day) < (obj.date_of_birth.month, obj.date_of_birth.day))
         return None
+
+
+class StudentDropdownSerializer(serializers.Serializer):
+    """
+    Serializer for student dropdown data.
+    Only includes the fields needed for the dropdown.
+    """
+    student_id = serializers.CharField(read_only=True)
+    full_name = serializers.CharField(read_only=True)
+    
+    def to_representation(self, instance):
+        """
+        Customize representation for dropdown options.
+        """
+        # If we're using the annotated queryset from the selector
+        if hasattr(instance, 'full_name'):
+            return {
+                'student_id': instance.student_id,
+                'full_name': instance.full_name
+            }
+        
+        # Fallback if the queryset doesn't have the annotation
+        user = instance.user
+        return {
+            'student_id': instance.student_id,
+            'full_name': f"{user.first_name} {user.last_name}".strip() or user.username
+        }

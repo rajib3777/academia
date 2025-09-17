@@ -20,6 +20,7 @@ class AcademyAdmin(ClassMateAdmin):
     list_display = ('name', 'contact_number', 'email', 'user')
     list_filter = ('user', 'name',)
     search_fields = ('name', 'user__username', 'contact_number', 'email')
+    autocomplete_fields = ('user',)
     ordering = ('name',)
     inlines = [CourseInline]
     form = AcademyAdminForm

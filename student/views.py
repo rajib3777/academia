@@ -13,7 +13,7 @@ from django.db import transaction
 from django.core.exceptions import ValidationError
 from student.serializers import (SchoolSerializer, SchoolNameListSerializer, StudentSerializer, 
                                  StudentCreateSerializer, StudentUpdateSerializer, StudentListSerializer, 
-                                 StudentDetailSerializer)
+                                 StudentDetailSerializer, StudentDropdownSerializer)
 from classmate.permissions import AuthenticatedGenericView
 from classmate.utils import StandardResultsSetPagination
 from rest_framework.views import APIView
@@ -483,11 +483,11 @@ class StudentListView(APIView):
     
     def paginate_queryset(self, queryset, request):
         """Apply pagination"""
-        page_size = int(request.GET.get('page_size', 100))
+        page_size = int(request.GET.get('page_size', 20))
         page_number = int(request.GET.get('page', 1))
         
         # Limit page size to prevent abuse
-        page_size = min(page_size, 100)
+        page_size = min(page_size, 20)
         
         paginator = Paginator(queryset, page_size)
         page = paginator.get_page(page_number)
@@ -561,5 +561,59 @@ class StudentListView(APIView):
                     'error': 'Failed to retrieve students',
                     'details': str(e)
                 },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class StudentDropdownView(APIView):
+    """
+    API endpoint for student dropdown data with role-based filtering.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
+    def get(self, request):
+        """
+        Get filtered students for dropdown selection.
+        
+        Query parameters:
+        - academy_id: Optional filter by specific academy ID
+        - search: Optional search term for student name or ID
+        """
+        try:
+            # Extract query parameters
+            academy_id = request.query_params.get('academy_id')
+            search = request.query_params.get('search')
+            
+            # Validate numeric parameters
+            if academy_id and not academy_id.isdigit():
+                return Response(
+                    {"detail": "Academy ID must be a valid integer."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Convert parameters to appropriate types
+            academy_id = int(academy_id) if academy_id else None
+
+            # Get students using selector with role-based filtering
+            selector = student_selector.StudentSelector()
+            students = selector.get_students_for_dropdown(
+                user=request.user,
+                academy_id=academy_id,
+                search=search
+            )
+
+            # Serialize and return the data
+            serializer = StudentDropdownSerializer(students, many=True)
+            return Response(serializer.data)
+            
+        except Exception as e:
+            # Log the exception
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.exception("Error in StudentDropdownView")
+            
+            return Response(
+                {"detail": "An unexpected error occurred."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
