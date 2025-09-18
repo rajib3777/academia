@@ -597,9 +597,12 @@ class StudentListV1View(APIView):
             # Extract search and ordering parameters
             search_query = request.GET.get('search', '').strip()
             ordering = request.GET.get('ordering')
-            
+            academy_id = request.GET.get('academy_id')
+
             # Use selector to get data with all parameters
             pagination_info = self.student_selector.list_students(
+                request_user=request.user,
+                academy_id=academy_id,
                 filters=request.GET,
                 search_query=search_query,
                 ordering=ordering,
@@ -667,8 +670,7 @@ class StudentDropdownView(APIView):
             academy_id = int(academy_id) if academy_id else None
 
             # Get students using selector with role-based filtering
-            selector = student_selector.StudentSelector()
-            students = selector.get_students_for_dropdown(
+            students = student_selector.StudentSelector().get_students_for_dropdown(
                 user=request.user,
                 academy_id=academy_id,
                 search=search
@@ -676,7 +678,21 @@ class StudentDropdownView(APIView):
 
             # Serialize and return the data
             serializer = StudentDropdownSerializer(students, many=True)
-            return Response(serializer.data)
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'count': len(serializer.data)
+            })
+        
+        except ValidationError as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'Invalid parameters',
+                    'details': str(e)
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
             
         except Exception as e:
             # Log the exception
@@ -685,6 +701,10 @@ class StudentDropdownView(APIView):
             logger.exception("Error in StudentDropdownView")
             
             return Response(
-                {"detail": "An unexpected error occurred."},
+                {
+                    'success': False,
+                    'error': 'An unexpected error occurred',
+                    'details': str(e)
+                },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

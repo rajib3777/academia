@@ -3,13 +3,15 @@ from academy.views import (
     AcademyListCreateAPIView, AcademyRetrieveUpdateDestroyAPIView,
     CourseListCreateAPIView, CourseRetrieveUpdateDestroyAPIView,
     BatchListCreateAPIView, BatchRetrieveUpdateDestroyAPIView, UpdateAcademyFromUserAPIView, CourseNameListAPIView,
-    BatchNameListAPIView
+    BatchNameListAPIView, AcademyDropdownView
 )
 
 # Admin-only routes
 admin_urlpatterns = [
     path('academies/', AcademyListCreateAPIView.as_view(), name='academy-list-create'),
     path('academy/<int:pk>/', AcademyRetrieveUpdateDestroyAPIView.as_view(), name='academy-detail'),
+    path('academies/dropdown/', AcademyDropdownView.as_view(), name='academy-dropdown'),
+
 ]
 
 # Academy-owner routes

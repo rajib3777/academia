@@ -31,13 +31,29 @@ class StudentSelector:
             return None
         
     @staticmethod
-    def get_all_active_students() -> QuerySet:
+    def get_all_active_students(request_user: Any, academy_id: Optional[int] = None) -> QuerySet:
         """
         Get all active students with optimized prefetches.
         
         Returns:
             QuerySet of active Student instances
         """
+         # Check if user is from an academy
+        if request_user.role.name == account_choices.ACADEMY:
+            if hasattr(request_user, 'academy') and request_user.academy.exists():
+                # Filter students based on academy enrollment
+                academy_id = request_user.academy.first().id
+                return Student.objects.select_related('user', 'school').filter(
+                    user__is_active=True,
+                    batchenrollment__batch__course__academy_id=academy_id
+                ).distinct()
+
+        if academy_id:
+            return Student.objects.select_related('user', 'school').filter(
+                user__is_active=True,
+                batchenrollment__batch__course__academy_id=academy_id
+            ).distinct()
+        
         return Student.objects.select_related('user', 'school').filter(user__is_active=True)
 
     @staticmethod
@@ -274,6 +290,8 @@ class StudentSelector:
     
     @staticmethod
     def list_students(
+        request_user: Any,
+        academy_id: Optional[int] = None,
         filters: Dict[str, Any] = None,
         search_query: Optional[str] = None,
         ordering: Optional[str] = None,
@@ -294,7 +312,7 @@ class StudentSelector:
             Tuple[QuerySet, Dict]: Queryset of student objects and pagination info
         """
         # Get base queryset with optimized joins
-        queryset = StudentSelector.get_all_active_students()
+        queryset = StudentSelector.get_all_active_students(request_user, academy_id=academy_id)
         
         # Apply filters
         queryset = StudentSelector.apply_list_filters(queryset, filters)

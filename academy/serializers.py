@@ -193,3 +193,15 @@ class BatchNameListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Batch
         fields = ['id', 'name']
+
+
+class AcademyDropdownSerializer(serializers.Serializer):
+    id = serializers.IntegerField(read_only=True)
+    name = serializers.CharField(read_only=True)
+    
+    def to_representation(self, instance):
+        return {
+            'id': instance.id,
+            'name': instance.name,
+        }
+    

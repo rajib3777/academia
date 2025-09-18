@@ -6,13 +6,19 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import status
 from rest_framework import serializers
+from rest_framework.permissions import IsAuthenticated
+from django.core.exceptions import ValidationError
+from functools import cached_property
 from rest_framework.exceptions import ValidationError, NotFound, PermissionDenied
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.shortcuts import get_object_or_404
 from django.db.models import ProtectedError
 from academy.models import Academy, Course, Batch
-from academy.serializers import AcademySerializer, CourseSerializer, BatchSerializer, AcademyOwnerSerializer, CourseNameListSerializer, BatchNameListSerializer, CourseCreateSerializer
+from academy.serializers import (AcademySerializer, CourseSerializer, BatchSerializer, AcademyOwnerSerializer, 
+                                 CourseNameListSerializer, BatchNameListSerializer, CourseCreateSerializer, AcademyDropdownSerializer)
 from classmate.permissions import AuthenticatedGenericView, IsSuperUserOrAdmin, IsAcademyOwner
 from classmate.utils import StandardResultsSetPagination
+from academy.selectors import academy_selector
 
 # ----------- ACADEMY VIEWS -----------
 class AcademyListCreateAPIView(AuthenticatedGenericView, IsSuperUserOrAdmin, generics.ListCreateAPIView):
@@ -210,3 +216,71 @@ class BatchNameListAPIView(AuthenticatedGenericView, generics.ListAPIView):
         if academy:
             return Batch.objects.filter(course__academy=academy).order_by('id').values('id', 'name')
         return Batch.objects.all().order_by('id').values('id', 'name')
+
+
+class AcademyDropdownView(APIView):
+    """
+    API endpoint for academy dropdown data.
+    Returns minimal data needed for dropdown selection.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]  # Use default authentication classes
+    
+    @cached_property
+    def academy_selector(self) -> academy_selector.AcademySelector:
+        """Lazy initialization of AcademySelector."""
+        return academy_selector.AcademySelector()
+
+    def get(self, request):
+        """
+        Get academy data for dropdown selection.
+        
+        Query parameters:
+        - search: Optional search term for academy name
+        - is_active: Filter by active status (default: true)
+        """
+        try:
+            # Extract query parameters
+            search = request.query_params.get('search', '')
+            is_active = request.query_params.get('is_active', 'true').lower() == 'true'
+            
+            # Get academies using selector
+            academies = self.academy_selector.get_academies_for_dropdown(
+                search_query=search,
+                request_user=request.user,
+                is_active=is_active
+            )
+            
+            # Serialize data
+            serializer = AcademyDropdownSerializer(academies, many=True)
+            
+            # Return response
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'count': len(serializer.data)
+            })
+            
+        except ValidationError as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'Invalid parameters',
+                    'details': str(e)
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            # Log the exception
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.exception("Error in AcademyDropdownView")
+            
+            return Response(
+                {
+                    'success': False,
+                    'error': 'An unexpected error occurred',
+                    'details': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
