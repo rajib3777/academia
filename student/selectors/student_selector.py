@@ -38,7 +38,7 @@ class StudentSelector:
         Returns:
             QuerySet of active Student instances
         """
-         # Check if user is from an academy
+        # Check if user is from an academy
         if request_user.role.name == account_choices.ACADEMY:
             if hasattr(request_user, 'academy') and request_user.academy.exists():
                 # Filter students based on academy enrollment
@@ -48,13 +48,18 @@ class StudentSelector:
                     batchenrollment__batch__course__academy_id=academy_id
                 ).distinct()
 
-        if academy_id:
+        # If admin or staff, return all students or filter by provided academy_id
+        if academy_id and (request_user.is_admin or request_user.is_staff):
             return Student.objects.select_related('user', 'school').filter(
                 user__is_active=True,
                 batchenrollment__batch__course__academy_id=academy_id
             ).distinct()
         
-        return Student.objects.select_related('user', 'school').filter(user__is_active=True)
+        # If admin or staff, return all active students
+        if request_user.is_admin or request_user.is_staff:
+            return Student.objects.select_related('user', 'school').filter(user__is_active=True)
+        
+        return Student.objects.none()
 
     @staticmethod
     def apply_list_filters(queryset, filters):
@@ -324,6 +329,7 @@ class StudentSelector:
         queryset = StudentSelector.apply_list_ordering(queryset, ordering)
 
         # Apply pagination
+        # For more advance cursor pagination use "from rest_framework.pagination import CursorPagination"
         paginated_data = StudentSelector.paginate_queryset(queryset, page_size, page)
 
         return paginated_data

@@ -42,8 +42,9 @@ class BatchInline(admin.TabularInline):
 
 @admin.register(Course)
 class CourseAdmin(ClassMateAdmin):
-    list_display = ('name', 'fee', 'academy')
-    list_filter = ('academy',)
+    list_display = ('name', 'fee', 'course_type', 'academy')
+    list_filter = ('academy', 'course_type',)
+    autocomplete_fields = ('academy',)
     search_fields = ('name', 'academy__name')
     ordering = ('name',)
     inlines = [BatchInline]
@@ -54,7 +55,7 @@ class CourseAdmin(ClassMateAdmin):
     # It will show the date hierarchy based on the created_at field.
     # You can change 'created_at' to any DateField or DateTimeField in your model.
 
-    fields = [('academy', 'name', 'fee', 'description')]
+    fields = [('academy', 'name', 'fee', 'course_type', 'description')]
     
 
 class BatchEnrollmentInline(admin.TabularInline):

@@ -5,7 +5,7 @@ from django.core.exceptions import ValidationError
 from account.utils import phone_validator
 from smart_selects.db_fields import ChainedForeignKey
 from utils.models import Division, District, Upazila
-from academy.choices_fields import YEAR_CHOICES
+from academy.choices_fields import YEAR_CHOICES, COURSE_TYPE_CHOICES, COURSE_TYPE_BANGLA
 
 class Academy(ClassMateModel):
     name = models.CharField(max_length=255, unique=True)
@@ -59,6 +59,12 @@ class Course(ClassMateModel):
     description = models.TextField()
     fee = models.DecimalField(max_digits=10, decimal_places=2)
     academy = models.ForeignKey(Academy, on_delete=models.PROTECT, null=True, related_name='courses')
+    course_type = models.CharField(
+        max_length=50,
+        choices=COURSE_TYPE_CHOICES,
+        default=COURSE_TYPE_BANGLA,
+        help_text="The subject or category this course belongs to"
+    )
 
     def __str__(self):
         return self.name

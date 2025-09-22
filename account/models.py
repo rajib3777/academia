@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager, Permission
 from django.utils.translation import gettext_lazy as _
 from django.db import models
 from account.utils import phone_validator
-from account.choices import ROLE_CHOICES
+from account.choices import ROLE_CHOICES, STUDENT, ACADEMY, ADMIN
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone, password=None, **extra_fields):
@@ -50,13 +50,13 @@ class User(AbstractUser):
         ordering = ["id"]
 
     def is_admin(self):
-        return self.role and self.role.name == "admin"
+        return self.role and self.role.name == ADMIN
 
     def is_student(self):
-        return self.role and self.role.name == "student"
+        return self.role and self.role.name == STUDENT
 
-    def is_academy_owner(self):
-        return self.role and self.role.name == "academy"
+    def is_academy(self):
+        return self.role and self.role.name == ACADEMY
 
     def __str__(self):
         return self.username

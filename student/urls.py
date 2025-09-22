@@ -10,8 +10,11 @@ school_urlpatterns = [
     path('', include(school_router.urls)),
 ]
 
-student_urlpatterns = [
+dropdown_urlpatterns = [
     path('students/dropdown/', StudentDropdownView.as_view(), name='student-dropdown'),
+]
+
+student_urlpatterns = [
     path('students/', StudentListCreateAPIView.as_view(), name='student-list-create'),
     path('v1/students/create/', StudentCreateView.as_view(), name='student_create'),
     path('v1/students/<str:student_id>/update/', StudentUpdateView.as_view(), name='student_update'),
@@ -26,4 +29,4 @@ public_urlpatterns = [
     path('school-name-list/', SchoolNameListAPIView.as_view(), name='public-school-name-list'),
 ]
 
-urlpatterns = school_urlpatterns + student_urlpatterns + public_urlpatterns
+urlpatterns = school_urlpatterns + student_urlpatterns + public_urlpatterns + dropdown_urlpatterns

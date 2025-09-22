@@ -19,7 +19,7 @@ class IsAdminOrAcademyOwner(BasePermission):
         user = request.user
         return (
             user.is_authenticated and
-            (user.is_superuser or user.is_admin() or user.is_academy_owner())
+            (user.is_superuser or user.is_admin() or user.is_academy())
         )
     
 
@@ -65,7 +65,7 @@ class IsAcademyOwner(BasePermission):
         user = request.user
 
         return (
-            user.is_authenticated and user.is_academy_owner()
+            user.is_authenticated and user.is_academy()
         )
     
 
