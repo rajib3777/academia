@@ -20,7 +20,7 @@ class BatchCreateView(APIView):
     @cached_property
     def batch_service(self):
         """Lazy initialization of BatchService."""
-        return BatchService(user=self.request.user)
+        return BatchService(request_user=self.request.user)
     
     def post(self, request):
         """
@@ -82,7 +82,7 @@ class BatchUpdateView(APIView):
     @cached_property
     def batch_service(self):
         """Lazy initialization of BatchService."""
-        return BatchService(user=self.request.user)
+        return BatchService(request_user=self.request.user)
     
     @cached_property
     def batch_selector(self):

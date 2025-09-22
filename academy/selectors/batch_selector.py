@@ -54,12 +54,18 @@ class BatchSelector:
 
         # Check if user is from an academy
         if request_user.is_academy():
-            if hasattr(request_user, 'academy'):
+            if hasattr(request_user, 'academy') and request_user.academy.exists():
                 # Filter students based on academy enrollment
                 academy_id = request_user.academy.first().id
                 queryset = queryset.filter(course__academy_id=academy_id)
             else:
                 # No academy associated, return empty queryset
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning(
+                    f"User {request_user.id} has academy role but no academy association. "
+                    "This may indicate incomplete user setup or data inconsistency."
+                )
                 return queryset.none()
         elif request_user.is_student():
             # Students can only see batches they are enrolled in

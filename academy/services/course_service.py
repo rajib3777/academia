@@ -90,16 +90,10 @@ class CourseService:
                 # Create batches if provided
                 if batches_data:
                     for batch_data in batches_data:
-                        try:
-                            self.batch_service.create_batch({
-                                **batch_data,
-                                'course_id': course.id
-                            })
-                        except IntegrityError as e:
-                            if 'academy_batch_name_course_id' in str(e):
-                                batch_name = batch_data.get('name', 'Unknown')
-                                raise ValidationError(f"Batch with name '{batch_name}' already exists for this course.")
-                            raise
+                        self.batch_service.create_batch({
+                            **batch_data,
+                            'course_id': course.id
+                        })
                 
                 return course
         except IntegrityError as e:
