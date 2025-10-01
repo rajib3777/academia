@@ -77,7 +77,7 @@ class BatchEnrollmentInline(admin.TabularInline):
 @admin.register(Batch)
 class BatchAdmin(ClassMateAdmin):
     list_display = ('name', 'course', 'start_date', 'end_date')
-    list_filter = ('course__academy', 'course', 'start_date', 'end_date')
+    list_filter = ('is_active', 'course__academy', 'course', 'start_date', 'end_date')
     search_fields = ('name', 'course__name')
     inlines = [BatchEnrollmentInline]
     ordering = ['-start_date']

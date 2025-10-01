@@ -2,6 +2,7 @@ from typing import Optional, Dict, Any, List, Tuple
 from django.db.models import QuerySet, Prefetch, Q, Count
 from django.core.paginator import Paginator
 from academy.models import Course, Batch
+from student.models import Student
 from account import choices as account_choices
 
 class CourseSelector:
@@ -266,16 +267,18 @@ class CourseSelector:
         )
 
         # Check if user is from an academy
-        if request_user.role.name == account_choices.ACADEMY:
+        if request_user.is_academy():
             if hasattr(request_user, 'academy') and request_user.academy.exists():
                 # Filter students based on academy enrollment
                 academy_id = academy_id or request_user.academy.first().id
                 query = query.filter(
                     academy_id=academy_id
                 ).distinct()
-        elif request_user.role.name == account_choices.STUDENT:
+            else:
+                return query.none()
+            
+        elif request_user.is_student():
             # Find courses where student is enrolled in at least one batch
-            from student.models import Student
             try:
                 student = Student.objects.get(user=request_user)
                 # Filter courses through the batch relationship
@@ -288,7 +291,7 @@ class CourseSelector:
                 return query.distinct()
             except Student.DoesNotExist:
                 return query.none()
-        elif request_user.role.name == account_choices.ADMIN:
+        elif request_user.is_admin() or request_user.is_staff():
             if academy_id:
                 query = query.filter(
                     academy_id=academy_id
@@ -305,6 +308,30 @@ class CourseSelector:
         
         # Order by name for better usability
         return query.order_by('name', )
+    
+    @staticmethod
+    def course_has_students(course_id: int) -> bool:
+        """
+        Check if a course has any students enrolled in any of its batches.
+        
+        Args:
+            course_id: ID of the course to check
+            
+        Returns:
+            Boolean indicating if the course has any students
+        """
+        try:
+            # Check if any batches in the course have students
+            return Course.objects.filter(
+                id=course_id,
+                batches__students__isnull=False
+            ).distinct().exists()
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.exception(f"Error checking if course {course_id} has students: {str(e)}")
+            # Default to True to prevent accidental deletion in case of error
+            return True
     
     
     

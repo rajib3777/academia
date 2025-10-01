@@ -63,3 +63,20 @@ class BatchSerializer(serializers.Serializer):
             'created_at': instance.created_at,
             'modified_at': instance.modified_at,
         }
+
+
+class BatchDropdownSerializer(serializers.Serializer):
+    """
+    Serializer for batch dropdown data with minimal fields.
+    """
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+
+    def to_representation(self, instance):
+        """
+        Customize representation for dropdown options.
+        """
+        return {
+            'id': instance.id,
+            'name': instance.name
+        }

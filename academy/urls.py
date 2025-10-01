@@ -2,11 +2,11 @@ from django.urls import path
 from academy.views.academy_views import (
     AcademyListCreateAPIView, AcademyRetrieveUpdateDestroyAPIView,
     CourseListCreateAPIView, CourseRetrieveUpdateDestroyAPIView,
-    BatchListCreateAPIView, BatchRetrieveUpdateDestroyAPIView, UpdateAcademyFromUserAPIView, CourseNameListAPIView,
-    BatchNameListAPIView, AcademyDropdownView
+    BatchListCreateAPIView, BatchRetrieveUpdateDestroyAPIView, UpdateAcademyFromUserAPIView,
+    AcademyDropdownView
 )
-from academy.views.course_views import CourseCreateView, CourseUpdateView, CourseListView, CourseDropdownView
-from academy.views.batch_views import BatchCreateView, BatchUpdateView, BatchListView
+from academy.views.course_views import CourseCreateView, CourseUpdateView, CourseListView, CourseDropdownView, CourseDeleteView
+from academy.views.batch_views import BatchCreateView, BatchUpdateView, BatchListView, BatchDeleteView, BatchDropdownView
 
 
 # Admin-only routes
@@ -26,17 +26,13 @@ academy_urlpatterns = [
     path('academy/batches/<int:pk>/', BatchRetrieveUpdateDestroyAPIView.as_view(), name='academy-batch-detail'),
 ]
 
-# Public (with auth) routes
-public_urlpatterns = [
-    path('course-name-list/', CourseNameListAPIView.as_view(), name='public-course-name-list'),
-    path('batch-name-list/', BatchNameListAPIView.as_view(), name='public-batch-name-list'),
-]
-
 course_urlpatterns = [
     # Course endpoints
     path('v1/courses/', CourseListView.as_view(), name='course-list'),
     path('v1/courses/create/', CourseCreateView.as_view(), name='course-create'),
     path('v1/courses/<int:course_id>/update/', CourseUpdateView.as_view(), name='course-update'),
+    path('v1/courses/<int:course_id>/', CourseDeleteView.as_view(), name='course-delete'),
+    path('courses/dropdown/', CourseDropdownView.as_view(), name='course-dropdown'),
 
 ]
 
@@ -45,11 +41,10 @@ batch_urlpatterns = [
     path('v1/batches/', BatchListView.as_view(), name='batch-list'),
     path('v1/batches/create/', BatchCreateView.as_view(), name='batch-create'),
     path('v1/batches/<int:batch_id>/update/', BatchUpdateView.as_view(), name='batch-update'),
-]
+    path('v1/batches/<int:batch_id>/', BatchDeleteView.as_view(), name='batch-delete'),
+    path('batches/dropdown/', BatchDropdownView.as_view(), name='batch-dropdown'),
 
-dropdown_urlpatterns = [
-    path('courses/dropdown/', CourseDropdownView.as_view(), name='course-dropdown'),
 ]
 
 # Combine them into final urlpatterns
-urlpatterns = admin_urlpatterns + academy_urlpatterns + public_urlpatterns + course_urlpatterns + batch_urlpatterns + dropdown_urlpatterns
+urlpatterns = admin_urlpatterns + academy_urlpatterns + course_urlpatterns + batch_urlpatterns

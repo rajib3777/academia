@@ -17,7 +17,7 @@ class StudentAdmin(ClassMateAdmin):
     fields = [
         ('user', 'student_id', 'birth_registration_number', 'date_of_birth','school'),
         ('guardian_name', 'guardian_phone', 'guardian_email', 'guardian_relationship'),
-        ('address', ),
+        ('profile_picture', 'address', ),
         ('created_at', 'modified_at')
     ]
     list_filter = ('school',)

@@ -15,7 +15,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import ProtectedError
 from academy.models import Academy, Course, Batch
 from academy.serializers.academy_serializers import (AcademySerializer, CourseSerializer, BatchSerializer, AcademyOwnerSerializer, 
-                                 CourseNameListSerializer, BatchNameListSerializer, CourseCreateSerializer, AcademyDropdownSerializer)
+                                 CourseCreateSerializer, AcademyDropdownSerializer)
 from classmate.permissions import AuthenticatedGenericView, IsSuperUserOrAdmin, IsAcademyOwner
 from classmate.utils import StandardResultsSetPagination
 from academy.selectors import academy_selector
@@ -160,20 +160,6 @@ class CourseRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, IsAcademyOwne
     queryset = Course.objects.all().prefetch_related('batches')
     serializer_class = CourseCreateSerializer
 
-
-class CourseNameListAPIView(AuthenticatedGenericView, generics.ListAPIView):
-    serializer_class = CourseNameListSerializer
-    pagination_class = StandardResultsSetPagination
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['name', 'academy__id']
-    search_fields = ['name', 'description']
-
-    def get_queryset(self):
-        academy = self.request.user.academy.first()
-        if academy:
-            return Course.objects.filter(academy=academy).values('id', 'name')
-        return Course.objects.all().order_by('id').values('id', 'name')
-    
     
 # ----------- BATCH VIEWS -----------
 class BatchListCreateAPIView(AuthenticatedGenericView, generics.ListCreateAPIView):
@@ -202,20 +188,6 @@ class BatchListCreateAPIView(AuthenticatedGenericView, generics.ListCreateAPIVie
 class BatchRetrieveUpdateDestroyAPIView(AuthenticatedGenericView, generics.RetrieveUpdateDestroyAPIView):
     queryset = Batch.objects.all().prefetch_related('students')
     serializer_class = BatchSerializer
-
-
-class BatchNameListAPIView(AuthenticatedGenericView, generics.ListAPIView):
-    serializer_class = BatchNameListSerializer
-    pagination_class = StandardResultsSetPagination
-    filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['name', 'course__id']
-    search_fields = ['name', 'description']
-
-    def get_queryset(self):
-        academy = self.request.user.academy.first()
-        if academy:
-            return Batch.objects.filter(course__academy=academy).order_by('id').values('id', 'name')
-        return Batch.objects.all().order_by('id').values('id', 'name')
 
 
 class AcademyDropdownView(APIView):

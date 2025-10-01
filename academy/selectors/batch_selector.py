@@ -4,6 +4,7 @@ from django.db.models.functions import Extract
 from django.utils import timezone
 from django.core.paginator import Paginator
 from academy.models import Batch, Course
+from student.models import Student
 from account import choices as account_choices
 
 class BatchSelector:
@@ -223,3 +224,120 @@ class BatchSelector:
         paginated_data = BatchSelector.paginate_queryset(queryset, page_size, page)
         
         return paginated_data
+    
+    @staticmethod
+    def batch_has_students(batch_id: int) -> bool:
+        """
+        Check if a batch has any enrolled students.
+        
+        Args:
+            batch_id: ID of the batch to check
+            
+        Returns:
+            Boolean indicating if the batch has any students
+        """
+        try:
+            from django.db.models import Count
+            
+            # Check if the batch has any students
+            return Batch.objects.filter(
+                id=batch_id,
+                students__isnull=False
+            ).exists()
+        except Exception as e:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.exception(f"Error checking if batch {batch_id} has students: {str(e)}")
+            # Default to True to prevent accidental deletion in case of error
+            return True
+        
+    @staticmethod
+    def get_batches_for_dropdown(
+        request=None,
+        academy_id: Optional[int] = None,
+        course_id: Optional[int] = None,
+        search: Optional[str] = None,
+        active_only: bool = True,
+    ) -> QuerySet:
+        """
+        Get batches for dropdown based on user role.
+        
+        Args:
+            request: The current request object containing the user
+            academy_id: Optional filter for a specific academy
+            course_id: Optional filter for a specific course
+            search: Optional search term for batch name
+            active_only: Whether to include only active batches
+            
+        Returns:
+            QuerySet of batches with optimized fields for dropdown
+        """
+        request_user = request.user
+        
+        # Start with an optimized query using select_related for related data
+        query = Batch.objects.select_related('course', 'course__academy').only(
+            'id', 'name', 'is_active', 'course_id', 'course__academy__id'
+        )
+        
+        # Apply active filter if needed
+        if active_only:
+            query = query.filter(is_active=True)
+
+        # Check if user is from an academy
+        if request_user.is_academy():
+            if hasattr(request_user, 'academy') and request_user.academy.exists():
+                # Filter batches based on academy
+                academy_id = academy_id or request_user.academy.first().id
+                query = query.filter(
+                    course__academy_id=academy_id
+                ).distinct()
+            else:
+                # No academy associated with user
+                return query.none()
+                
+        elif request_user.is_student():
+            # Find batches where student is enrolled
+            try:
+                student = Student.objects.get(user=request_user)
+                # Filter batches where student is enrolled
+                query = query.filter(students=student)
+                
+                # Apply academy filter if provided
+                if academy_id:
+                    query = query.filter(course__academy_id=academy_id)
+                    
+                # Apply course filter if provided
+                if course_id:
+                    query = query.filter(course_id=course_id)
+                    
+                return query.distinct()
+            except Student.DoesNotExist:
+                return query.none()
+                
+        elif request_user.is_admin() or request_user.is_staff():
+            # Admin can see all batches
+            if academy_id:
+                query = query.filter(
+                    course__academy_id=academy_id
+                ).distinct()
+            
+            if course_id:
+                query = query.filter(course_id=course_id)
+                
+            query = query.distinct()
+        else:
+            return query.none()
+
+        # Apply course filter if provided
+        if course_id:
+            query = query.filter(course_id=course_id)
+
+        # Apply search filter if provided
+        if search:
+            query = query.filter(
+                Q(name__icontains=search) |
+                Q(course__name__icontains=search)
+            )
+        
+        # Order by name and start date for better usability
+        return query.order_by('-start_date', 'name')

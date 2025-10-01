@@ -5,20 +5,22 @@ from django.db import transaction, IntegrityError
 from django.core.exceptions import ValidationError
 from academy.models import Course, Batch
 from account import choices as account_choices
+from academy.selectors.course_selector import CourseSelector
+
 
 class CourseService:
     """
     Service class for Course model to handle all write operations.
     """
     
-    def __init__(self, user):
+    def __init__(self, request_user):
         """
         Initialize with the current user for permission checks.
         
         Args:
             user: The user performing the operation
         """
-        self.user = user
+        self.request_user = request_user
 
     def _get_authorized_academy_id(self, requested_academy_id: Optional[int] = None) -> int:
         """
@@ -38,14 +40,14 @@ class CourseService:
             ValidationError: If user doesn't have permission
         """
         # Check if user is from an academy
-        if self.user.role.name == account_choices.ACADEMY:
-            if hasattr(self.user, 'academy') and self.user.academy.exists():
-                return self.user.academy.first().id
+        if self.request_user.role.name == account_choices.ACADEMY:
+            if hasattr(self.request_user, 'academy') and self.request_user.academy.exists():
+                return self.request_user.academy.first().id
             else:
                 raise ValidationError("You are not associated with any academy.")
         
         # Check if user is an admin
-        elif self.user.role.name == account_choices.ADMIN:
+        elif self.request_user.role.name == account_choices.ADMIN:
             if requested_academy_id is None:
                 raise ValidationError("Academy ID is required for admin operations.")
             return requested_academy_id
@@ -53,13 +55,71 @@ class CourseService:
         # Other roles don't have permission
         else:
             raise ValidationError("You don't have permission to manage courses.")
+        
+    def _validate_user_permission(request_user, course_id: int) -> None:
+        """
+        Validate if user has permission to manage this course.
+        
+        Args:
+            course_id: ID of the course
+            
+        Raises:
+            ValidationError: If user doesn't have permission
+        """
+        if request_user.is_academy() or request_user.is_admin():
+            try:
+                course = CourseSelector.get_course_by_id(course_id)
+                if not request_user.academy.filter(id=course.academy.id).exists():
+                    raise ValidationError("You don't have permission to manage this courses.")
+            except Course.DoesNotExist:
+                raise ValidationError(f"Course with ID {course_id} does not exist.")
+        else:
+            raise ValidationError("You don't have permission to manage courses.")
+
+    @transaction.atomic
+    def delete_course(self, course_id: int) -> Dict[str, Any]:
+        """
+        Delete a course if it has no students enrolled.
+        
+        Args:
+            course_id: ID of the course to delete
+            
+        Returns:
+            Dict with success status and message
+            
+        Raises:
+            ValidationError: If course has students or user lacks permission
+        """
+        #TODO after final QA add this validation.
+        # CourseService._validate_user_permission(self.request_user, course_id)
+        
+        # Check if course has any enrolled students
+        has_students = CourseSelector.course_has_students(course_id)
+        
+        if has_students:
+            raise ValidationError(
+                'Cannot delete this course because it has students enrolled in one or more batches. '
+                'Please remove all students from batches before deleting.'
+            )
+        
+        # Get course for return message
+        course = CourseSelector.get_course_by_id(course_id)
+        course_name = course.name
+        
+        # Delete the course
+        course.delete()
+        
+        return {
+            'success': True,
+            'message': f'Course "{course_name}" has been successfully deleted'
+        }
     
     @cached_property
     def batch_service(self):
         """Lazy initialization of BatchService."""
         from academy.services.batch_service import BatchService
-        return BatchService(user=self.user)
-    
+        return BatchService(user=self.request_user)
+
     def create_course(self, data: Dict[str, Any], batches_data: Optional[List[Dict[str, Any]]] = None) -> Course:
         """
         Create a course with optional batch data.

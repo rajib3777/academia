@@ -3,6 +3,8 @@ from django.db import transaction
 from academy.models import Batch, Course
 from django.core.exceptions import ValidationError
 from django.db import transaction, IntegrityError
+from academy.selectors.course_selector import CourseSelector
+from academy.selectors.batch_selector import BatchSelector
 
 class BatchService:
     """
@@ -18,7 +20,7 @@ class BatchService:
         """
         self.request_user = request_user
     
-    def _validate_user_permission(self, course_id: int) -> None:
+    def _validate_user_permission(request_user, batch_id: int) -> None:
         """
         Validate if user has permission to manage batches for a course.
         
@@ -28,15 +30,59 @@ class BatchService:
         Raises:
             ValidationError: If user doesn't have permission
         """
-        if self.request_user.is_academy():
+
+        if request_user.is_academy() or request_user.is_admin():
             try:
-                course = Course.objects.select_related('academy').get(id=course_id)
-                if not self.request_user.academy.filter(id=course.academy.id).exists():
-                    raise ValidationError("You don't have permission to manage batches for this course.")
-            except Course.DoesNotExist:
-                raise ValidationError(f"Course with ID {course_id} does not exist.")
+                batch = BatchSelector.get_batch_by_id(batch_id)
+                if not hasattr(request_user, 'academy') or not request_user.academy.exists():
+                    raise ValidationError('User is not associated with any academy')
+                
+                academy = request_user.academy.first()
+                if batch.course.academy_id != academy.id:
+                    raise ValidationError('You do not have permission to delete this batch')
+            except Batch.DoesNotExist:
+                raise ValidationError(f"Batch with ID {batch_id} does not exist.")
         else:
             raise ValidationError("You don't have permission to manage batches.")
+
+    @transaction.atomic
+    def delete_batch(self, batch_id: int) -> Dict[str, Any]:
+        """
+        Delete a batch if it has no students enrolled.
+        
+        Args:
+            batch_id: ID of the batch to delete
+            
+        Returns:
+            Dict with success status and message
+            
+        Raises:
+            ValidationError: If batch has students or user lacks permission
+        """
+        #TODO after final QA add this validation.
+        # BatchService._validate_user_permission(self.request_user, batch_id)
+        
+        # Check if batch has any enrolled students
+        has_students = BatchSelector.batch_has_students(batch_id)
+        
+        if has_students:
+            raise ValidationError(
+                'Cannot delete this batch because it has enrolled students. '
+                'Please unenroll all students before deleting.'
+            )
+        
+        # Get batch for return message
+        batch = BatchSelector.get_batch_by_id(batch_id)
+        batch_name = batch.name
+        course_name = batch.course.name
+        
+        # Delete the batch
+        batch.delete()
+        
+        return {
+            'success': True,
+            'message': f'Batch "{batch_name}" from course "{course_name}" has been successfully deleted'
+        }
     
     @transaction.atomic
     def create_batch(self, data: Dict[str, Any]) -> Batch:
@@ -51,7 +97,8 @@ class BatchService:
         """
         # Validate user permission
         #TODO after final QA add this validation.
-        # self._validate_user_permission(data['course_id'])
+        # course_selector = CourseSelector()
+        # course_selector.validate_user_permission(self.request.user, data['course_id'])
 
         try:
             # Create batch

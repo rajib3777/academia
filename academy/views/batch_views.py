@@ -1,3 +1,4 @@
+import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,7 +9,8 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from classmate.permissions import AuthenticatedGenericView
 from academy.selectors.batch_selector import BatchSelector
 from academy.services.batch_service import BatchService
-from academy.serializers.batch_serializers import BatchSerializer
+from academy.serializers.batch_serializers import BatchSerializer, BatchDropdownSerializer
+logger = logging.getLogger(__name__)
 
 class BatchCreateView(APIView):
     """
@@ -220,6 +222,149 @@ class BatchListView(AuthenticatedGenericView, APIView):
                 {
                     'success': False,
                     'error': 'Failed to retrieve batches',
+                    'details': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+class BatchDeleteView(APIView):
+    """
+    API endpoint for deleting a batch.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
+    def delete(self, request, batch_id):
+        """
+        Delete a batch if it has no enrolled students.
+        
+        Args:
+            batch_id: ID of the batch to delete
+        
+        Returns:
+            Response with success message or error details
+        """
+        try:
+            batch_service = BatchService(request_user=request.user)
+            result = batch_service.delete_batch(batch_id)
+            
+            return Response(
+                result,
+                status=status.HTTP_200_OK
+            )
+            
+        except ValidationError as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': str(e),
+                    'error_code': 'validation_error'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.exception(f"Error deleting batch {batch_id}: {str(e)}")
+            return Response(
+                {
+                    'success': False,
+                    'error': 'An unexpected error occurred while deleting the batch',
+                    'details': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+
+class BatchDropdownView(APIView):
+    """
+    API endpoint for batch dropdown data with role-based filtering.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    @cached_property
+    def batch_selector(self):
+        """Lazy initialization of BatchSelector."""
+        return BatchSelector()
+    
+    def get(self, request):
+        """
+        Get filtered batches for dropdown selection.
+        
+        Query parameters:
+        - academy_id: Optional filter by specific academy ID
+        - course_id: Optional filter by specific course ID
+        - search: Optional search term for batch name
+        - active_only: Whether to include only active batches (default: true)
+        """
+        try:
+            # Extract query parameters
+            academy_id = request.query_params.get('academy_id')
+            course_id = request.query_params.get('course_id')
+            search = request.query_params.get('search')
+            
+            # Only apply active_only filter if explicitly provided
+            active_only = None
+            if 'active_only' in request.query_params:
+                active_only = request.query_params.get('active_only').lower() == 'true'
+            
+            # Validate numeric parameters
+            if academy_id and not academy_id.isdigit():
+                return Response(
+                    {
+                        "success": False, 
+                        "error": "Academy ID must be a valid integer."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+                
+            if course_id and not course_id.isdigit():
+                return Response(
+                    {
+                        "success": False,
+                        "error": "Course ID must be a valid integer."
+                    },
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            
+            # Convert parameters to appropriate types
+            academy_id = int(academy_id) if academy_id else None
+            course_id = int(course_id) if course_id else None
+
+            # Get batches using selector with role-based filtering
+            batches = self.batch_selector.get_batches_for_dropdown(
+                request=request,
+                academy_id=academy_id,
+                course_id=course_id,
+                search=search,
+                active_only=active_only
+            )
+
+            # Serialize and return the data
+            serializer = BatchDropdownSerializer(batches, many=True)
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'count': len(serializer.data)
+            })
+        
+        except ValidationError as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'Invalid parameters',
+                    'details': str(e)
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        except Exception as e:
+            # Log the exception
+            logger.exception(f"Error in BatchDropdownView: {str(e)}")
+            
+            return Response(
+                {
+                    'success': False,
+                    'error': 'An unexpected error occurred',
                     'details': str(e)
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR

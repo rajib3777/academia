@@ -182,18 +182,6 @@ class AcademyOwnerSerializer(serializers.ModelSerializer):
         if Academy.objects.exclude(id=academy_id).filter(name__iexact=value).exists():
             raise serializers.ValidationError("Academy with this name already exists.")
         return value
-    
-
-class CourseNameListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Course
-        fields = ['id', 'name']
-
-
-class BatchNameListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Batch
-        fields = ['id', 'name']
 
 
 class AcademyDropdownSerializer(serializers.Serializer):

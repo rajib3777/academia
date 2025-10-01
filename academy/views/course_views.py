@@ -1,4 +1,4 @@
-
+import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -10,6 +10,7 @@ from academy.selectors.course_selector import CourseSelector
 from academy.services.course_service import CourseService
 from academy.serializers import course_serializers
 from classmate.permissions import AuthenticatedGenericView
+logger = logging.getLogger(__name__)
 
 class CourseCreateView(AuthenticatedGenericView, APIView):
     """
@@ -20,7 +21,7 @@ class CourseCreateView(AuthenticatedGenericView, APIView):
     @cached_property
     def course_service(self):
         """Lazy initialization of CourseService."""
-        return CourseService(user=self.request.user)
+        return CourseService(request_user=self.request.user)
     
     def post(self, request):
         """
@@ -101,8 +102,8 @@ class CourseUpdateView(AuthenticatedGenericView, APIView):
     @cached_property
     def course_service(self):
         """Lazy initialization of CourseService."""
-        return CourseService(user=self.request.user)
-    
+        return CourseService(request_user=self.request.user)
+
     @cached_property
     def course_selector(self):
         """Lazy initialization of CourseSelector."""
@@ -335,3 +336,48 @@ class CourseDropdownView(APIView):
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
+class CourseDeleteView(APIView):
+    """
+    API endpoint for deleting a course.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
+    def delete(self, request, course_id):
+        """
+        Delete a course if it has no students enrolled in any of its batches.
+        
+        Args:
+            course_id: ID of the course to delete
+        
+        Returns:
+            Response with success message or error details
+        """
+        try:
+            course_service = CourseService(request_user=request.user)
+            result = course_service.delete_course(course_id)
+            
+            return Response(
+                result,
+                status=status.HTTP_200_OK
+            )
+            
+        except ValidationError as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': str(e),
+                    'error_code': 'validation_error'
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            logger.exception(f"Error deleting course {course_id}: {str(e)}")
+            return Response(
+                {
+                    'success': False,
+                    'error': 'An unexpected error occurred while deleting the course',
+                    'details': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
