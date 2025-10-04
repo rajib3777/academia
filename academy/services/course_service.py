@@ -118,7 +118,7 @@ class CourseService:
     def batch_service(self):
         """Lazy initialization of BatchService."""
         from academy.services.batch_service import BatchService
-        return BatchService(user=self.request_user)
+        return BatchService(request_user=self.request_user)
 
     def create_course(self, data: Dict[str, Any], batches_data: Optional[List[Dict[str, Any]]] = None) -> Course:
         """
