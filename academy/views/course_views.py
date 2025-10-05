@@ -383,14 +383,14 @@ class CourseDeleteView(APIView):
             )
         
 
-class CourseTypeListView(APIView):
+class CourseTypeDropdownView(APIView):
     """
     View to list all available course types.
     """
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    serializer_class = course_serializers.CourseTypeSerializer
+    serializer_class = course_serializers.CourseTypeDropdownSerializer
 
     @cached_property
     def course_type_selector(self):

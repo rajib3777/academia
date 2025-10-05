@@ -128,7 +128,7 @@ class CourseDropdownSerializer(serializers.Serializer):
         }
 
 
-class CourseTypeSerializer(serializers.Serializer):
+class CourseTypeDropdownSerializer(serializers.Serializer):
     """
     Serializer for course type choices.
     
