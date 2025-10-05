@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ValidationError
 from functools import cached_property
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from academy.selectors.course_selector import CourseSelector
+from academy.selectors.course_selector import CourseSelector, CourseTypeSelector
 from academy.services.course_service import CourseService
 from academy.serializers import course_serializers
 from classmate.permissions import AuthenticatedGenericView
@@ -379,5 +379,43 @@ class CourseDeleteView(APIView):
                     'error': 'An unexpected error occurred while deleting the course',
                     'details': str(e)
                 },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+
+class CourseTypeListView(APIView):
+    """
+    View to list all available course types.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    serializer_class = course_serializers.CourseTypeSerializer
+
+    @cached_property
+    def course_type_selector(self):
+        """Lazy initialization of CourseTypeSelector."""
+        return CourseTypeSelector()
+    
+    def get(self, request, format=None):
+        """
+        Get list of all available course types.
+        
+        Returns:
+            Response with course types data
+        """
+        try:
+            course_types = self.course_type_selector.list_course_types()
+            serializer = self.serializer_class(course_types, many=True)
+            
+            return Response({
+                'count': len(course_types),
+                'results': serializer.data
+            })
+            
+        except Exception as e:
+            logger.error(f"Error in CourseTypeListView: {str(e)}")
+            return Response(
+                {"detail": "An error occurred while retrieving course types."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

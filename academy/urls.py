@@ -6,7 +6,7 @@ from academy.views.academy_views import (
     AcademyDropdownView
 )
 from academy.views.academy_views_v2 import (AcademyListView, AcademyCreateView, AcademyDetailView, AcademyUpdateView, AcademyDeleteView)
-from academy.views.course_views import CourseCreateView, CourseUpdateView, CourseListView, CourseDropdownView, CourseDeleteView
+from academy.views.course_views import CourseCreateView, CourseUpdateView, CourseListView, CourseDropdownView, CourseDeleteView, CourseTypeListView
 from academy.views.batch_views import BatchCreateView, BatchUpdateView, BatchListView, BatchDeleteView, BatchDropdownView
 
 
@@ -42,6 +42,7 @@ course_urlpatterns = [
     path('v1/courses/<int:course_id>/update/', CourseUpdateView.as_view(), name='course-update'),
     path('v1/courses/<int:course_id>/', CourseDeleteView.as_view(), name='course-delete'),
     path('courses/dropdown/', CourseDropdownView.as_view(), name='course-dropdown'),
+    path('course-types/', CourseTypeListView.as_view(), name='course-type-list'),
 
 ]
 

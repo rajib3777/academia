@@ -4,6 +4,7 @@ from django.core.paginator import Paginator
 from academy.models import Course, Batch
 from student.models import Student
 from account import choices as account_choices
+from academy.choices_fields import COURSE_TYPE_CHOICES
 
 class CourseSelector:
     """
@@ -333,5 +334,24 @@ class CourseSelector:
             # Default to True to prevent accidental deletion in case of error
             return True
     
+
+class CourseTypeSelector:
+    """
+    Selector for course type choices.
     
+    This selector provides methods to retrieve course type data
+    from the predefined choices.
+    """
     
+    @staticmethod
+    def list_course_types() -> List[Dict[str, str]]:
+        """
+        Get all available course types.
+        
+        Returns:
+            List of dictionaries with course type values and display names
+        """
+        return [
+            {'value': value, 'display_name': display_name} 
+            for value, display_name in COURSE_TYPE_CHOICES
+        ]
