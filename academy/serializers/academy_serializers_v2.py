@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from typing import Dict, Any, List
-
 from academy.models import Academy, Course, Batch, BatchEnrollment, Grade
-from account.models import User
+from utils.models import Division, District, Upazila
 
 
 class UserSerializer(serializers.Serializer):
@@ -247,3 +246,36 @@ class AcademyListSerializer(serializers.Serializer):
         data['courses'] = courses_data
             
         return data
+
+
+class AcademyAccountUpdateSerializer(serializers.Serializer):
+    """
+    Serializer for updating academy user account and academy profile.
+    """
+    user = serializers.DictField(required=False)
+    academy = serializers.DictField(required=False)
+
+    def validate_user(self, value: dict) -> dict:
+        print('serializer user value:', value)
+        # Whitelist allowed user fields
+        allowed = {'first_name', 'last_name', 'email', 'phone'}
+        return {k: v for k, v in value.items() if k in allowed}
+
+    def validate_academy(self, value: dict) -> dict:
+        # Validate FK IDs early
+        for fk_field, model_cls in [
+            ('division', Division),
+            ('district', District),
+            ('upazila', Upazila),
+        ]:
+            if fk_field in value and isinstance(value[fk_field], int):
+                if not model_cls.objects.filter(pk=value[fk_field]).exists():
+                    raise serializers.ValidationError({fk_field: f'Invalid {fk_field} id: {value[fk_field]}'})
+                
+        # Whitelist allowed academy fields
+        allowed = {
+            'name', 'description', 'logo', 'website', 'contact_number', 'email',
+            'established_year', 'division', 'district', 'upazila',
+            'area_or_union', 'street_address', 'postal_code'
+        }
+        return {k: v for k, v in value.items() if k in allowed}

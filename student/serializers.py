@@ -396,3 +396,25 @@ class StudentDropdownSerializer(serializers.Serializer):
             'student_id': instance.student_id,
             'full_name': f"{user.first_name} {user.last_name}".strip() or user.username
         }
+    
+
+class StudentAccountUpdateSerializer(serializers.Serializer):
+    """
+    Serializer for updating student user account and student profile.
+    """
+    user = serializers.DictField(required=False)
+    student = serializers.DictField(required=False)
+
+    def validate_user(self, value: dict) -> dict:
+        # Whitelist allowed user fields
+        allowed = {'first_name', 'last_name', 'email', 'phone'}
+        return {k: v for k, v in value.items() if k in allowed}
+
+    def validate_student(self, value: dict) -> dict:
+        # Whitelist allowed student fields
+        allowed = {
+            'profile_picture', 'school', 'birth_registration_number', 'date_of_birth', 
+            'guardian_name', 'guardian_phone', 'guardian_email',
+            'guardian_relationship', 'address'
+        }
+        return {k: v for k, v in value.items() if k in allowed}

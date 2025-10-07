@@ -204,7 +204,25 @@ class StudentService:
             student.save()
         
         return student
-    
+
+    def update_student_account(self, student: Student, data: dict) -> None:
+        # Resolve FK fields to instances
+        fk_fields = {
+            'school': School,
+        }
+        for field, model_cls in fk_fields.items():
+            if field in data and isinstance(data[field], int):
+                instance = model_cls.objects.filter(pk=data[field]).first()
+                if not instance:
+                    raise ValueError(f'Invalid {field} id: {data[field]}')
+                data[field] = instance
+
+        # Assign all other fields
+        for field, value in data.items():
+            setattr(student, field, value)
+        student.full_clean()
+        student.save()
+
     def deactivate_student(self, student_id: int) -> Student:
         """
         Deactivate a student by setting the associated user to inactive.

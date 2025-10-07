@@ -224,3 +224,24 @@ class AcademyService:
             # Log the exception
             print(f"Error deleting academy: {e}")
             return False
+
+    def update_academy_account(self, academy: Academy, data: dict) -> None:
+        # Resolve FK fields to instances
+        fk_fields = {
+            'division': Division,
+            'district': District,
+            'upazila': Upazila,
+        }
+        for field, model_cls in fk_fields.items():
+            if field in data and isinstance(data[field], int):
+                instance = model_cls.objects.filter(pk=data[field]).first()
+                if not instance:
+                    raise ValueError(f'Invalid {field} id: {data[field]}')
+                data[field] = instance
+        
+        # Assign all other fields
+        for field, value in data.items():
+            setattr(academy, field, value)
+        academy.full_clean()
+        academy.save()
+

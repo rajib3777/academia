@@ -9,8 +9,12 @@ from academy.serializers.academy_serializers_v2 import (
     AcademyCreateUpdateSerializer,
     AcademyListSerializer
 )
-from academy.services.academy_service_v2 import AcademyService
 from academy.selectors import academy_selector_v2
+from academy.services import academy_service_v2
+from account.selectors import user_selector
+from account.services import user_service
+from academy.serializers import academy_serializers_v2
+from academy.services.academy_service_v2 import AcademyService
 from django.core.exceptions import ValidationError
 
 # Configure logger
@@ -90,13 +94,14 @@ class AcademyListView(APIView):
 
 class AcademyCreateView(APIView):
     """Create a new academy."""
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.service_class = AcademyService
-        self.selector_class = AcademySelector
-    
+        self.service_class = academy_service_v2.AcademyService()
+        self.selector_class = academy_selector_v2.AcademySelector()
+
     def post(self, request, format=None):
         """
         Create a new academy with user data.
@@ -104,8 +109,8 @@ class AcademyCreateView(APIView):
         Returns:
             Response with created academy data or error details
         """
-        serializer = AcademyCreateUpdateSerializer(data=request.data)
-        
+        serializer = academy_serializers_v2.AcademyCreateUpdateSerializer(data=request.data)
+
         if serializer.is_valid():
             try:
                 service = self.service_class()
@@ -114,8 +119,8 @@ class AcademyCreateView(APIView):
                 # Get the created academy with all related data for response
                 selector = self.selector_class()
                 detailed_academy = selector.get_academy_by_id(academy.id)
-                response_serializer = AcademyListSerializer(detailed_academy)
-                
+                response_serializer = academy_serializers_v2.AcademyListSerializer(detailed_academy)
+
                 return Response(response_serializer.data, status=status.HTTP_201_CREATED)
             
             except ValidationError as e:
@@ -132,11 +137,12 @@ class AcademyCreateView(APIView):
 class AcademyDetailView(APIView):
     """Get academy details by ID."""
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.selector_class = AcademySelector
-    
+        self.selector_class = academy_selector_v2.AcademySelector()
+
     def get(self, request, academy_id, format=None):
         """
         Get detailed information about an academy.
@@ -172,12 +178,13 @@ class AcademyDetailView(APIView):
 class AcademyUpdateView(APIView):
     """Update an existing academy."""
     permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.service_class = AcademyService
-        self.selector_class = AcademySelector
-    
+        self.service_class = academy_service_v2.AcademyService()
+        self.selector_class = academy_selector_v2.AcademySelector()
+
     def put(self, request, academy_id, format=None):
         """
         Update an academy and its associated user.
@@ -232,12 +239,13 @@ class AcademyUpdateView(APIView):
 
 class AcademyDeleteView(APIView):
     """Delete an academy and its related data."""
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.service_class = AcademyService
-    
+        self.service_class = academy_service_v2.AcademyService()
+
     def delete(self, request, academy_id, format=None):
         """
         Delete an academy and all related courses, batches, and enrollments.
@@ -263,3 +271,40 @@ class AcademyDeleteView(APIView):
             logger.error(f"Error in AcademyDeleteView: {str(e)}")
             return Response({'detail': 'An error occurred while deleting the academy.'}, 
                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class AcademyAccountUpdateView(APIView):
+    """
+    API for academy users to update their own account and academy profile.
+    Allows password change.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    academy_selector = academy_selector_v2.AcademySelector()
+    academy_service = academy_service_v2.AcademyService()
+    user_service = user_service.UserService()
+
+    def put(self, request):
+        request_user = request.user
+        if not request_user.is_academy():
+            return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+
+        academy = self.academy_selector.get_by_user(request_user)
+        serializer = academy_serializers_v2.AcademyAccountUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            # Update user fields
+            user_update_data = serializer.validated_data.get('user', {})
+            if user_update_data:
+                self.user_service.update_user(request_user.id, user_update_data)
+
+            # Update academy fields
+            academy_update_data = serializer.validated_data.get('academy', {})
+            if academy_update_data:
+                self.academy_service.update_academy_account(academy, academy_update_data)
+
+            return Response({'detail': 'Account updated successfully.'}, status=status.HTTP_200_OK)
+        except ValidationError as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

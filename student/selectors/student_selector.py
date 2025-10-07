@@ -7,6 +7,7 @@ from django.db.models.functions import Concat
 from student.models import Student
 from student.utils import StudentFilter
 from account import choices as account_choices
+from account.models import User
 
 
 class StudentSelector:
@@ -29,7 +30,11 @@ class StudentSelector:
             return Student.objects.select_related('user', 'school').get(id=student_id)
         except Student.DoesNotExist:
             return None
-        
+
+    @staticmethod
+    def get_student_by_user(user: User) -> Student:
+        return Student.objects.select_related('user', 'school').get(user=user)
+
     @staticmethod
     def get_all_active_students(request_user: Any, academy_id: Optional[int] = None) -> QuerySet:
         """

@@ -258,3 +258,21 @@ class MenuRecursiveSerializer(serializers.ModelSerializer):
         if perms:
             return PermissionSerializer(perms.permissions.all(), many=True).data
         return []
+
+
+class ChangePasswordSerializer(serializers.Serializer):
+    """
+    Serializer for password change requests.
+    """
+    old_password = serializers.CharField(write_only=True)
+    new_password = serializers.CharField(write_only=True, min_length=8)
+    confirm_password = serializers.CharField(write_only=True)
+
+    def validate(self, attrs) -> dict:
+        if not attrs.get('old_password') or not attrs.get('new_password') or not attrs.get('confirm_password'):
+            raise serializers.ValidationError('All password fields are required.')
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError('New password and confirm password do not match.')
+        if len(attrs['new_password']) < 8:
+            raise serializers.ValidationError('New password must be at least 8 characters.')
+        return attrs

@@ -3,12 +3,16 @@ from django.db.models import QuerySet, Count, Prefetch, Q, F
 from django.core.paginator import Paginator
 from account import choices as account_choices
 from academy.models import Academy, Batch, BatchEnrollment, Course
+from account.models import User
 
 
 class AcademySelector:
     """
     Selector for Academy model to handle all read operations with optimized queries.
     """
+
+    def get_by_user(self, user: User) -> Academy:
+        return Academy.objects.select_related('user').get(user=user)
     
     @staticmethod
     def get_page_range_with_ellipsis(current_page: int, total_pages: int, delta: int = 2) -> List:

@@ -1,6 +1,7 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
 from account.apis import LoginAPIView, UserUpdateAPIView, UserListAPIView, RegistrationAPIView, RoleListAPIView, RoleMenuPermissionListView, RoleMenuPermissionNestedListView
+from account.views import ChangePasswordView
 
 app_name = "users"
 urlpatterns = [
@@ -12,5 +13,5 @@ urlpatterns = [
     path('roles/', RoleListAPIView.as_view(), name='role-list'),
     path('role-menu-permissions/', RoleMenuPermissionListView.as_view(), name='role-menu-permissions'),
     path('role-menu-permissions-nested/', RoleMenuPermissionNestedListView.as_view(), name='role-menu-permissions-nested'),
-
+    path('change-password/', ChangePasswordView.as_view(), name='change-password'),
 ]

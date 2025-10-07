@@ -13,7 +13,8 @@ from django.core.exceptions import ValidationError
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from student.serializers import (SchoolSerializer, SchoolNameListSerializer, StudentSerializer, 
                                  StudentCreateSerializer, StudentUpdateSerializer, StudentListSerializer, 
-                                 StudentDetailSerializer, StudentDropdownSerializer)
+                                 StudentDetailSerializer, StudentDropdownSerializer,
+                                 StudentAccountUpdateSerializer)
 from classmate.permissions import AuthenticatedGenericView
 from classmate.utils import StandardResultsSetPagination
 from django.db.models import Q
@@ -22,6 +23,9 @@ from student.utils import StudentFilter
 from functools import cached_property
 from student.selectors import student_selector
 from student.services import student_service
+from account.selectors import user_selector
+from account.services import user_service
+
 
 class SchoolViewSet(viewsets.ModelViewSet):
     queryset = School.objects.all().order_by('id')
@@ -708,3 +712,40 @@ class StudentDropdownView(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+        
+
+class StudentAccountUpdateView(APIView):
+    """
+    API for academy users to update their own account and academy profile.
+    Allows password change.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    student_selector = student_selector.StudentSelector()
+    student_service = student_service.StudentService()
+    user_service = user_service.UserService()
+
+    def put(self, request):
+        request_user = request.user
+        if not request_user.is_student():
+            return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+
+        student = self.student_selector.get_student_by_user(request_user)
+        serializer = StudentAccountUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            # Update user fields
+            user_update_data = serializer.validated_data.get('user', {})
+            if user_update_data:
+                self.user_service.update_user(request_user.id, user_update_data)
+
+            # Update student fields
+            student_update_data = serializer.validated_data.get('student', {})
+            if student_update_data:
+                self.student_service.update_student_account(student, student_update_data)
+
+            return Response({'detail': 'Student updated successfully.'}, status=status.HTTP_200_OK)
+        except ValidationError as e:
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)

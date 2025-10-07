@@ -68,3 +68,14 @@ class UserService:
         user.set_password(new_password)
         user.save()
         return user
+
+    def update_own_user(self, user: User, data: dict) -> None:
+        for field, value in data.items():
+            setattr(user, field, value)
+        user.full_clean()
+        user.save()
+
+    def set_password(self, user: User, new_password: str) -> None:
+        user.set_password(new_password)
+        user.full_clean()
+        user.save()
