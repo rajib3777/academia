@@ -276,3 +276,15 @@ class ChangePasswordSerializer(serializers.Serializer):
         if len(attrs['new_password']) < 8:
             raise serializers.ValidationError('New password must be at least 8 characters.')
         return attrs
+    
+
+class UserSerializer(serializers.Serializer):
+    """
+    Serializer for basic user details.
+    """
+    id = serializers.IntegerField()
+    username = serializers.CharField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    email = serializers.EmailField(allow_blank=True)
+    phone = serializers.CharField()

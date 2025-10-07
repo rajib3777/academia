@@ -1,3 +1,4 @@
+import logging
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -14,7 +15,7 @@ from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from student.serializers import (SchoolSerializer, SchoolNameListSerializer, StudentSerializer, 
                                  StudentCreateSerializer, StudentUpdateSerializer, StudentListSerializer, 
                                  StudentDetailSerializer, StudentDropdownSerializer,
-                                 StudentAccountUpdateSerializer)
+                                 StudentAccountUpdateSerializer, StudentAccountDetailSerializer)
 from classmate.permissions import AuthenticatedGenericView
 from classmate.utils import StandardResultsSetPagination
 from django.db.models import Q
@@ -25,6 +26,7 @@ from student.selectors import student_selector
 from student.services import student_service
 from account.selectors import user_selector
 from account.services import user_service
+logger = logging.getLogger(__name__)
 
 
 class SchoolViewSet(viewsets.ModelViewSet):
@@ -749,3 +751,37 @@ class StudentAccountUpdateView(APIView):
             return Response({'detail': 'Student updated successfully.'}, status=status.HTTP_200_OK)
         except ValidationError as e:
             return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class StudentAccountDetailView(APIView):
+    """
+    API view to retrieve authenticated student's account details.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    selector_class = student_selector.StudentSelector()
+
+    def get(self, request, format=None) -> Response:
+        """
+        Get detailed information about the authenticated student.
+
+        Returns:
+            Response with student details or error.
+        """
+        try:
+            request_user = request.user
+            if not hasattr(request_user, 'role') or not request_user.is_student():
+                return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+
+            student = self.selector_class.get_student_by_user(request_user)
+            if not student:
+                return Response({'detail': 'Student not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+            serializer = StudentAccountDetailSerializer(student, context={'request': request})
+            return Response({'success': True, 'data': serializer.data}, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f'Error in StudentAccountDetailView: {str(e)}')
+            return Response(
+                {'success': False, 'error': 'An error occurred while retrieving student details.'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

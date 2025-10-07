@@ -3,7 +3,7 @@ from student.models import School, Student
 from account.models import User, Role
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
-import uuid
+from account.serializers import UserSerializer
 
 
 class SchoolSerializer(serializers.ModelSerializer):
@@ -418,3 +418,31 @@ class StudentAccountUpdateSerializer(serializers.Serializer):
             'guardian_relationship', 'address'
         }
         return {k: v for k, v in value.items() if k in allowed}
+    
+
+class StudentAccountDetailSerializer(serializers.Serializer):
+    """
+    Serializer for detailed student information.
+    """
+    id = serializers.IntegerField()
+    profile_picture = serializers.ImageField(allow_null=True)
+    school_id = serializers.IntegerField(source='school.id', allow_null=True)
+    school_name = serializers.CharField(source='school.name', allow_null=True)
+    user = UserSerializer()
+    student_id = serializers.CharField()
+    birth_registration_number = serializers.CharField(allow_blank=True)
+    date_of_birth = serializers.DateField(allow_null=True)
+    guardian_name = serializers.CharField(allow_blank=True)
+    guardian_phone = serializers.CharField(allow_blank=True)
+    guardian_email = serializers.CharField(allow_blank=True)
+    guardian_relationship = serializers.CharField(allow_blank=True)
+    address = serializers.CharField(allow_blank=True)
+
+    def get_profile_picture(self, obj) -> str:
+        request = self.context.get('request')
+        if obj.profile_picture and hasattr(obj.profile_picture, 'url'):
+            url = obj.profile_picture.url
+            if request is not None:
+                return request.build_absolute_uri(url)
+            return url
+        return None

@@ -2,17 +2,7 @@ from rest_framework import serializers
 from typing import Dict, Any, List
 from academy.models import Academy, Course, Batch, BatchEnrollment, Grade
 from utils.models import Division, District, Upazila
-
-
-class UserSerializer(serializers.Serializer):
-    """Serializer for user data in academy operations."""
-    id = serializers.IntegerField(read_only=True)
-    username = serializers.CharField(max_length=150)
-    email = serializers.EmailField()
-    first_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
-    last_name = serializers.CharField(max_length=150, required=False, allow_blank=True)
-    password = serializers.CharField(write_only=True, required=False)
-    phone = serializers.CharField(max_length=15, required=False)
+from account.serializers import UserSerializer
 
 
 class AcademyCreateUpdateSerializer(serializers.Serializer):
@@ -279,3 +269,36 @@ class AcademyAccountUpdateSerializer(serializers.Serializer):
             'area_or_union', 'street_address', 'postal_code'
         }
         return {k: v for k, v in value.items() if k in allowed}
+
+
+class AcademyAccountDetailSerializer(serializers.Serializer):
+    """
+    Serializer for detailed academy information.
+    """
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    description = serializers.CharField(allow_blank=True)
+    logo = serializers.ImageField(allow_null=True)
+    website = serializers.URLField(allow_blank=True)
+    contact_number = serializers.CharField()
+    email = serializers.EmailField(allow_blank=True)
+    established_year = serializers.CharField()
+    division_id = serializers.IntegerField(source='division.id', allow_null=True)
+    division_name = serializers.CharField(source='division.name', allow_null=True)
+    district_id = serializers.IntegerField(source='district.id', allow_null=True)
+    district_name = serializers.CharField(source='district.name', allow_null=True)
+    upazila_id = serializers.IntegerField(source='upazila.id', allow_null=True)
+    upazila_name = serializers.CharField(source='upazila.name', allow_null=True)
+    area_or_union = serializers.CharField()
+    street_address = serializers.CharField()
+    postal_code = serializers.CharField()
+    user = UserSerializer()
+
+    def get_logo(self, obj) -> str:
+        request = self.context.get('request')
+        if obj.logo and hasattr(obj.logo, 'url'):
+            url = obj.logo.url
+            if request is not None:
+                return request.build_absolute_uri(url)
+            return url
+        return None

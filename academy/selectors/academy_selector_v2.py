@@ -12,7 +12,7 @@ class AcademySelector:
     """
 
     def get_by_user(self, user: User) -> Academy:
-        return Academy.objects.select_related('user').get(user=user)
+        return Academy.objects.select_related('user', 'division', 'district', 'upazila').filter(user=user).first()
     
     @staticmethod
     def get_page_range_with_ellipsis(current_page: int, total_pages: int, delta: int = 2) -> List:
