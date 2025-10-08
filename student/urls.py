@@ -1,14 +1,16 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from student.views import (SchoolViewSet, SchoolNameListAPIView, StudentListCreateAPIView, StudentRetrieveUpdateDestroyAPIView, 
+from student.views.student_views import (SchoolNameListAPIView, StudentListCreateAPIView, StudentRetrieveUpdateDestroyAPIView, 
                            StudentCreateView, StudentUpdateView, StudentListV1View, StudentActivateView, StudentDropdownView, 
                            StudentAccountUpdateView, StudentAccountDetailView, SchoolDropdownView)
-
-school_router = DefaultRouter()
-school_router.register(r'school', SchoolViewSet, basename='school') # need to work on basename
+from student.views.school_views import SchoolListView, SchoolCreateView, SchoolUpdateView, SchoolDeleteView
 
 school_urlpatterns = [
-    path('', include(school_router.urls)),
+    path('v1/schools/', SchoolListView.as_view(), name='school-list'),
+    path('v1/schools/create/', SchoolCreateView.as_view(), name='school-create'),
+    path('v1/schools/<int:school_id>/update/', SchoolUpdateView.as_view(), name='school-update'),
+    path('v1/schools/<int:school_id>/delete/', SchoolDeleteView.as_view(), name='school-delete'),
+
 ]
 
 dropdown_urlpatterns = [

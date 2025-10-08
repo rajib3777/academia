@@ -86,9 +86,9 @@ class StudentSelector:
             if is_numeric_search and len(search_query) >= 8:
                 # Try direct phone number contains search first
                 phone_matches = queryset.filter(
-                    Q(user__phone__contains=search_query) |
-                    Q(guardian_phone__contains=search_query) | 
-                    Q(birth_registration_number__contains=search_query)
+                    Q(user__phone__icontains=search_query) |
+                    Q(guardian_phone__icontains=search_query) | 
+                    Q(birth_registration_number__icontains=search_query)
                 )
                 
                 # If we found phone matches, return them
