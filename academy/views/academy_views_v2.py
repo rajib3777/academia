@@ -14,7 +14,6 @@ from academy.services import academy_service_v2
 from account.selectors import user_selector
 from account.services import user_service
 from academy.serializers import academy_serializers_v2
-from academy.services.academy_service_v2 import AcademyService
 from django.core.exceptions import ValidationError
 
 # Configure logger
