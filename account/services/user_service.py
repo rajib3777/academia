@@ -1,6 +1,7 @@
 from typing import Dict, Any, Optional
 from django.db import transaction
 from account.models import User
+from django.core.cache import cache
 from account.utils import generate_secure_password
 from account.selectors.user_selector import UserSelector
 
@@ -79,3 +80,13 @@ class UserService:
         user.set_password(new_password)
         user.full_clean()
         user.save()
+
+
+class NavbarService:
+    """
+    Service to manage navbar account info cache.
+    """
+    @staticmethod
+    def invalidate_navbar_account_info_cache(user_id: int) -> None:
+        cache_key = f'navbar_account_info_{user_id}'
+        cache.delete(cache_key)

@@ -1,11 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.cache import cache
 from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.exceptions import ValidationError
-from account.serializers import ChangePasswordSerializer
+from account.serializers import ChangePasswordSerializer, NavbarAccountInfoSerializer
 from account.services.user_service import UserService
 from academy.selectors import academy_selector_v2
 from student.selectors import student_selector
@@ -14,7 +15,6 @@ from student.serializers import student_serializers
 from academy.services import academy_service_v2
 from student.services import student_service
 from account.services import user_service
-
 import logging
 
 logger = logging.getLogger(__name__)
@@ -151,6 +151,8 @@ class AccountUpdateView(APIView):
                 if academy_update_data:
                     self.academy_service.update_academy_account(academy, academy_update_data)
 
+                # After successful update:
+                user_service.NavbarService.invalidate_navbar_account_info_cache(request_user.id)
                 return Response({'detail': 'Academy updated successfully.'}, status=status.HTTP_200_OK)
             except ValidationError as e:
                 return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -186,6 +188,8 @@ class AccountUpdateView(APIView):
                 if student_update_data:
                     self.student_service.update_student_account(student, student_update_data)
 
+                # After successful update:
+                user_service.NavbarService.invalidate_navbar_account_info_cache(request_user.id)
                 return Response({'detail': 'Student updated successfully.'}, status=status.HTTP_200_OK)
             except ValidationError as e:
                 return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
@@ -195,4 +199,48 @@ class AccountUpdateView(APIView):
         else:
             return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
 
-        
+
+class NavbarAccountInfoView(APIView):
+    """
+    API to get minimal account info for navbar.
+    Returns student full name, profile picture, student_id
+    or academy name, logo based on logged-in user.
+    Uses cache for performance.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+
+    academy_selector = academy_selector_v2.AcademySelector()
+    student_selector = student_selector.StudentSelector()
+
+    CACHE_TIMEOUT = 60 * 60 * 24  # 1 day
+
+    def get_cache_key(self, user_id: int) -> str:
+        return f'navbar_account_info_{user_id}'
+
+    def get(self, request):
+        user = request.user
+        cache_key = self.get_cache_key(user.id)
+        cached_data = cache.get(cache_key)
+
+        if cached_data:
+            return Response({'success': True, 'data': cached_data}, status=status.HTTP_200_OK)
+
+        if hasattr(user, 'role') and user.is_student():
+            student = self.student_selector.get_student_by_user(user)
+            if not student:
+                return Response({'detail': 'Student not found.'}, status=status.HTTP_404_NOT_FOUND)
+            serializer = NavbarAccountInfoSerializer(student, context={'request': request, 'user_type': 'student'})
+            data = serializer.data
+        elif hasattr(user, 'role') and user.is_academy():
+            academy = self.academy_selector.get_by_user(user)
+            if not academy:
+                return Response({'detail': 'Academy not found.'}, status=status.HTTP_404_NOT_FOUND)
+            serializer = NavbarAccountInfoSerializer(academy, context={'request': request, 'user_type': 'academy'})
+            data = serializer.data
+        else:
+            return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
+
+        cache.set(cache_key, data, self.CACHE_TIMEOUT)
+        return Response({'success': True, 'data': data}, status=status.HTTP_200_OK)
+    

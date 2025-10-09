@@ -288,3 +288,48 @@ class UserSerializer(serializers.Serializer):
     last_name = serializers.CharField()
     email = serializers.EmailField(allow_blank=True)
     phone = serializers.CharField()
+
+
+class NavbarAccountInfoSerializer(serializers.Serializer):
+    """
+    Serializer for minimal navbar account info.
+    Handles both Student and Academy.
+    """
+    # For Student
+    full_name = serializers.CharField(required=False)
+    profile_picture = serializers.SerializerMethodField()
+    student_id = serializers.CharField(required=False)
+    # For Academy
+    name = serializers.CharField(required=False)
+    logo = serializers.SerializerMethodField()
+
+    def get_profile_picture(self, obj):
+        request = self.context.get('request')
+        if hasattr(obj, 'profile_picture') and obj.profile_picture:
+            url = obj.profile_picture.url
+            if request:
+                return request.build_absolute_uri(url)
+            return url
+        return None
+
+    def get_logo(self, obj):
+        request = self.context.get('request')
+        if hasattr(obj, 'logo') and obj.logo:
+            url = obj.logo.url
+            if request:
+                return request.build_absolute_uri(url)
+            return url
+        return None
+
+    def to_representation(self, instance):
+        user_type = self.context.get('user_type')
+        data = {}
+        if user_type == 'student':
+            data['name'] = instance.user.get_full_name()
+            data['picture'] = self.get_profile_picture(instance)
+            data['id'] = instance.student_id
+        elif user_type == 'academy':
+            data['name'] = instance.name
+            data['picture'] = self.get_logo(instance)
+            data['id'] = instance.id
+        return data
