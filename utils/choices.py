@@ -2,6 +2,7 @@ OTP='OTP'
 PROMO='Promo'
 NOTIFICATION='Notification'
 TRANSACTION='Transaction'
+ACCOUNT = 'Account'
 OTHER='Other'
 
 SMS_TYPE_CHOICES = [
@@ -9,6 +10,7 @@ SMS_TYPE_CHOICES = [
     (PROMO, 'Promotional'),
     (NOTIFICATION, 'Notification'),
     (TRANSACTION, 'Transactional'),
+    (ACCOUNT, 'Account Credential'),
     (OTHER, 'Other'),
 ]
 

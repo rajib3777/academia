@@ -7,7 +7,11 @@ from academy.models import Academy, Course, Batch, BatchEnrollment
 from account.models import User
 from academy.selectors.academy_selector_v2 import AcademySelector
 from utils.models import Division, District, Upazila
-
+from account.services.user_service import UserService
+from utils.services.sms_service import SMSService
+from utils.utils import save_sms_history
+from utils.choices import ACCOUNT, QUEUE
+from account.choices import ACADEMY
 
 class AcademyService:
     """
@@ -16,8 +20,9 @@ class AcademyService:
     
     def __init__(self):
         """Initialize the AcademyService."""
-        pass
-    
+        self.user_service = UserService()
+        self.sms_service = SMSService()
+
     @cached_property
     def academy_selector(self) -> AcademySelector:
         """
@@ -75,26 +80,20 @@ class AcademyService:
                 raise ValidationError(f"Upazila with ID {upazila_id} does not exist.")
         
         # Create user
-        user = User.objects.create_user(
-            username=user_data.get('username'),
-            email=user_data.get('email'),
-            first_name=user_data.get('first_name', ''),
-            last_name=user_data.get('last_name', ''),
-            password=user_data.get('password', User.objects.make_random_password())
-        )
-        
-        # Set user role if available
-        if hasattr(User, 'role'):
-            from account.models import Role
-            try:
-                academy_role = Role.objects.get(name='academy')
-                user.role = academy_role
-                user.save()
-            except (Role.DoesNotExist, AttributeError):
-                pass
-        
+        user, password = self.user_service.create_user(user_data, ACADEMY)
+
         # Create academy
         academy = Academy.objects.create(user=user, **data)
+
+        # Send SMS with login credentials
+        self.sms_service.save_sms_history(
+            created_by=None,
+            created_for=user,
+            phone_number=user.phone,
+            message=f"Your academy account has been created. Phone Number: {user.username}, Password: {password}",
+            sms_type=ACCOUNT,
+            status=QUEUE
+        )
         return academy
 
     @transaction.atomic

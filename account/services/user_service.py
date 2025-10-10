@@ -1,7 +1,9 @@
 from typing import Dict, Any, Optional
 from django.db import transaction
-from account.models import User
+from account.models import User, Role
 from django.core.cache import cache
+from django.db import transaction, IntegrityError
+from django.core.exceptions import ValidationError as DjangoValidationError
 from account.utils import generate_secure_password
 from account.selectors.user_selector import UserSelector
 
@@ -16,21 +18,44 @@ class UserService:
         self.user_selector = UserSelector()
 
     @transaction.atomic
-    def create_user(self, user_data: Dict[str, Any]) -> User:
+    def create_user(self, user_data: Dict[str, Any], role: str) -> User:
         """
         Creates a new user with a secure password.
         
         Args:
             user_data: Dictionary containing user information
-            
+            role: Role to assign to the user
+
         Returns:
             User: Created user instance
         """
-        password = generate_secure_password()
-        user = User(**user_data)
-        user.set_password(password)
-        user.save()
-        return user
+        password=user_data.get('password', generate_secure_password())
+        username = user_data.get('username')
+        phone = user_data.get('phone')
+
+        # Check for duplicate username
+        if username and User.objects.filter(username=username).exists():
+            raise DjangoValidationError('A user with this username already exists.')
+
+        # Check for duplicate phone
+        if phone and User.objects.filter(phone=phone).exists():
+            raise DjangoValidationError('A user with this phone number already exists.')
+
+        try:
+            user = User(**user_data)
+            user.set_password(password)
+            user.role, _ = Role.objects.get_or_create(name=role)
+            user.save()
+            return user, password
+        except DjangoValidationError as e:
+            # Re-raise for serializer/view to handle
+            raise
+        except IntegrityError as e:
+            # Handle any other DB integrity errors
+            raise DjangoValidationError({'detail': f'Integrity error: {str(e)}'})
+        except Exception as e:
+            # General fallback
+            raise DjangoValidationError({'detail': f'Error creating user: {str(e)}'})
 
     @transaction.atomic
     def update_user(self, user_id: int, user_data: Dict[str, Any]) -> User:

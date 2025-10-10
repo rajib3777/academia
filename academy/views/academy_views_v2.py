@@ -110,19 +110,19 @@ class AcademyCreateView(APIView):
         """
         serializer = academy_serializers_v2.AcademyCreateUpdateSerializer(data=request.data)
 
-        if serializer.is_valid():
+        if serializer.is_valid(raise_exception=True):
             try:
-                service = self.service_class()
-                academy = service.create_academy(serializer.validated_data)
+                serializer.is_valid(raise_exception=True)
+                academy = self.service_class.create_academy(serializer.validated_data)
                 
                 # Get the created academy with all related data for response
-                selector = self.selector_class()
-                detailed_academy = selector.get_academy_by_id(academy.id)
+                detailed_academy = self.selector_class.get_academy_by_id(academy.id)
                 response_serializer = academy_serializers_v2.AcademyListSerializer(detailed_academy)
 
-                return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+                return Response({'success': True, 'data': response_serializer.data}, status=status.HTTP_201_CREATED)
             
             except ValidationError as e:
+                logger.error(f"Validation error in AcademyCreateView: {str(e)}")
                 return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
             
             except Exception as e:
@@ -142,7 +142,7 @@ class AcademyDetailView(APIView):
         super().__init__(**kwargs)
         self.selector_class = academy_selector_v2.AcademySelector()
 
-    def get(self, request, academy_id, format=None):
+    def get(self, request, academy_id=None, format=None):
         """
         Get detailed information about an academy.
         
@@ -153,17 +153,22 @@ class AcademyDetailView(APIView):
             Response with academy details or error
         """
         try:
-            selector = self.selector_class()
-            academy = selector.get_academy_by_id(academy_id)
+            # Check if user is allowed to view this academy
+            if not request.user.is_superuser and not request.user.is_admin() and not request.user.is_academy():
+                return Response({'detail': 'You do not have permission to view this academy'}, 
+                                status=status.HTTP_403_FORBIDDEN)
+            
+            if request.user.is_academy():
+                academy = self.selector_class.get_academy_details_by_user(request.user)
+            elif request.user.is_superuser or request.user.is_admin():
+                if not academy_id:
+                    return Response({'detail': 'Academy ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+                academy = self.selector_class.get_academy_details_by_id(academy_id)
+            else:
+                return Response({'detail': 'You do not have permission to view this academy'}, status=status.HTTP_403_FORBIDDEN)
             
             if not academy:
                 return Response({'detail': 'Academy not found'}, status=status.HTTP_404_NOT_FOUND)
-            
-            # Check if user is allowed to view this academy
-            if not request.user.is_superuser and hasattr(request.user, 'role'):
-                if request.user.role.name == 'academy' and academy.user != request.user:
-                    return Response({'detail': 'You do not have permission to view this academy'}, 
-                                   status=status.HTTP_403_FORBIDDEN)
                     
             serializer = AcademyListSerializer(academy)
             return Response(serializer.data)
@@ -233,14 +238,13 @@ class AcademyUpdateView(APIView):
         """
         try:
             # Get the academy first to check permissions
-            selector = self.selector_class()
-            academy = selector.get_academy_by_id(academy_id)
+            academy = self.selector_class.get_academy_by_id(academy_id)
             
             if not academy:
                 return Response({'detail': 'Academy not found'}, status=status.HTTP_404_NOT_FOUND)
             
             # Check if user is allowed to update this academy
-            if not request.user.is_superuser and academy.user != request.user:
+            if not request.user.is_superuser and not request.user.is_admin() and not request.user.is_academy():
                 return Response({'detail': 'You do not have permission to update this academy'}, 
                                status=status.HTTP_403_FORBIDDEN)
             
@@ -248,14 +252,12 @@ class AcademyUpdateView(APIView):
             serializer = AcademyCreateUpdateSerializer(data=request.data, partial=True)
             
             if serializer.is_valid():
-                service = self.service_class()
-                
                 try:
-                    updated_academy = service.update_academy(academy_id, serializer.validated_data)
+                    updated_academy = self.service_class.update_academy(academy_id, serializer.validated_data)
                     
                     if updated_academy:
                         # Get the updated academy with all related data for response
-                        detailed_academy = selector.get_academy_by_id(academy_id)
+                        detailed_academy = self.selector_class.get_academy_by_id(academy_id)
                         response_serializer = AcademyListSerializer(detailed_academy)
                         return Response(response_serializer.data)
                     
@@ -270,7 +272,7 @@ class AcademyUpdateView(APIView):
         except Exception as e:
             logger.error(f"Error in AcademyUpdateView: {str(e)}")
             return Response({'detail': 'An error occurred while updating the academy.'}, 
-                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                           status=status.HTTP_400_BAD_REQUEST)
 
 
 class AcademyDeleteView(APIView):
@@ -294,8 +296,7 @@ class AcademyDeleteView(APIView):
             Response indicating success or failure
         """
         try:
-            service = self.service_class()
-            success = service.delete_academy(academy_id)
+            success = self.service_class.delete_academy(academy_id)
             
             if success:
                 return Response(status=status.HTTP_204_NO_CONTENT)

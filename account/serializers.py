@@ -282,8 +282,20 @@ class UserSerializer(serializers.Serializer):
     """
     Serializer for basic user details.
     """
-    id = serializers.IntegerField()
-    username = serializers.CharField()
+    id = serializers.IntegerField(required=False)
+    username = serializers.CharField(read_only=True)
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
+    email = serializers.EmailField(allow_blank=True)
+    phone = serializers.CharField()
+
+
+class AdminAccountDetailSerializer(serializers.Serializer):
+    """
+    Serializer for detailed admin information.
+    """
+    id = serializers.IntegerField(required=False)
+    username = serializers.CharField(read_only=True)
     first_name = serializers.CharField()
     last_name = serializers.CharField()
     email = serializers.EmailField(allow_blank=True)

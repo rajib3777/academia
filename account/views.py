@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.exceptions import ValidationError
-from account.serializers import ChangePasswordSerializer, NavbarAccountInfoSerializer
+from account.serializers import ChangePasswordSerializer, NavbarAccountInfoSerializer, AdminAccountDetailSerializer
 from account.services.user_service import UserService
 from academy.selectors import academy_selector_v2
 from student.selectors import student_selector
@@ -75,6 +75,7 @@ class AccountDetailView(APIView):
         super().__init__(**kwargs)
         self.academy_selector_class = academy_selector_v2.AcademySelector()
         self.student_selector_class = student_selector.StudentSelector()
+        self.user_selector_class = user_service.UserSelector()
 
     def get(self, request, format=None):
         try:
@@ -94,11 +95,18 @@ class AccountDetailView(APIView):
                     return Response({'detail': 'Student not found.'}, status=status.HTTP_404_NOT_FOUND)
 
                 serializer = student_serializers.StudentAccountDetailSerializer(student, context={'request': request})
+            elif hasattr(request_user, 'role') and request_user.is_admin():
+                user = self.user_selector_class.get_user_by_id(request_user.id)
+
+                if not user:
+                    return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+                serializer = AdminAccountDetailSerializer(user, context={'request': request})
             else:
                 return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
-            
-            return Response({'success': True, 'data': serializer.data}, status=status.HTTP_200_OK)
-        
+
+            return Response({'success': True, 'data': {'user': serializer.data}}, status=status.HTTP_200_OK)
+
         except Exception as e:
             logger.error(f'Error in AccountDetailView: {str(e)}')
             return Response({'success': False, 'error': 'An error occurred while retrieving account details.'},
@@ -196,6 +204,9 @@ class AccountUpdateView(APIView):
             except Exception as e:
                 logger.error(f'Unexpected error in AccountUpdateView: {str(e)}')
                 return Response({'detail': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
+        elif hasattr(request_user, 'role') and request_user.is_admin():
+            return Response({'detail': 'Admin updated successfully.'}, status=status.HTTP_200_OK)
         else:
             return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
 

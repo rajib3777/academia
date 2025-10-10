@@ -2,16 +2,20 @@ import random
 import requests
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
+from typing import Optional, Dict, Any
 import logging
 from django.conf import settings
-from utils.choices import FAILED, SENT
+from utils.choices import FAILED, SENT, QUEUE
+from account.models import User
 from utils.models import OTPVerification, SMSHistory
 
+logger = logging.getLogger(__name__)
 
 def generate_otp():
     return f"{random.randint(100000, 999999)}"
 
 def send_sms(phone_number, message, sms_type):
+    # not in use
     """
     API View for send sms.
 
@@ -79,3 +83,46 @@ def validate_phone_number(phone_number):
     otp_obj = OTPVerification.objects.filter(phone_number=phone_number, is_verified=True).first()
     if not otp_obj:
         raise ValidationError("Phone number not verified.")
+
+
+def save_sms_history(
+    *,
+    created_by: Optional['User'],
+    created_for: Optional['User'],
+    phone_number: str,
+    message: str,
+    sms_type: str,
+    status: str = QUEUE,
+) -> 'SMSHistory':
+    # Not in use
+    """
+    Global method to save SMSHistory for any type of SMS.
+
+    Args:
+        created_by: User who initiated the SMS.
+        created_for: User who is the recipient.
+        phone_number: Recipient's phone number.
+        message: SMS content.
+        sms_type: Type of SMS (from SMS_TYPE_CHOICES).
+        status: Delivery status (from STATUS_CHOICES).
+    Returns:
+        SMSHistory instance.
+    """
+    from utils.models import SMSHistory
+
+    try:
+        sms_data = {
+            'created_by': created_by,
+            'created_for': created_for,
+            'phone_number': phone_number,
+            'message': message,
+            'sms_type': sms_type,
+            'status': status,
+        }
+
+        sms_history = SMSHistory.objects.create(**sms_data)
+        logger.info(f'SMSHistory saved: {sms_history}')
+        return sms_history
+    except Exception as e:
+        logger.error(f'Error saving SMSHistory: {e}')
+        raise

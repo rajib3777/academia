@@ -19,11 +19,26 @@ class OTPVerificationAdmin(admin.ModelAdmin):
 
 @admin.register(SMSHistory)
 class SMSHistoryAdmin(admin.ModelAdmin):
-    list_display = ('phone_number', 'sms_type', 'status_badge', 'sent_at', 'response_at', 'failed_reason_short')
+    list_display = ('created_for', 'created_by', 'phone_number', 'sms_type', 'status_badge', 'created_at', 'sent_at', 'response_at', 'failed_reason_short')
     search_fields = ('phone_number', 'message', 'failed_reason', 'failed_status_code')
     list_filter = ('sms_type', 'status', ('sent_at', admin.DateFieldListFilter))
-    readonly_fields = ('sent_at', 'updated_at')
+    readonly_fields = ('created_at', 'sent_at', 'updated_at', 'response_at', 'status_badge', 'failed_reason_short')
     ordering = ('-sent_at',)
+    autocomplete_fields = ['created_by', 'created_for']  # Enable autocomplete for user fields
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('created_for', 'created_by', ),
+                ('phone_number', 'sms_type', 'status', 'message', ),
+                ('failed_reason', 'failed_status_code')
+            )
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'sent_at', 'response_at', 'updated_at'),
+            'classes': ('collapse',),
+        }),
+    )
 
     def status_badge(self, obj):
         color = {

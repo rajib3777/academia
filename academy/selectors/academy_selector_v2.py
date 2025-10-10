@@ -13,7 +13,10 @@ class AcademySelector:
 
     def get_by_user(self, user: User) -> Academy:
         return Academy.objects.select_related('user', 'division', 'district', 'upazila').filter(user=user).first()
-    
+
+    def get_academy_by_id(self, academy_id: int) -> Optional[Academy]:
+        return Academy.objects.select_related('user', 'division', 'district', 'upazila').filter(id=academy_id).first()
+
     @staticmethod
     def get_page_range_with_ellipsis(current_page: int, total_pages: int, delta: int = 2) -> List:
         """
@@ -230,7 +233,7 @@ class AcademySelector:
         
         return paginated_data
 
-    def get_academy_by_id(self, academy_id: int) -> Optional[Academy]:
+    def get_academy_details_by_id(self, academy_id: int) -> Optional[Academy]:
         """
         Get academy by ID with optimized related data loading.
         
@@ -264,6 +267,45 @@ class AcademySelector:
             ).annotate(
                 course_count=Count('courses', distinct=True)
             ).get(id=academy_id)
+            
+            return academy
+        except Academy.DoesNotExist:
+            return None
+
+    def get_academy_details_by_user(self, user: User) -> Optional[Academy]:
+        """
+        Get academy by ID with optimized related data loading.
+        
+        Args:
+            user: User requesting the academy details
+
+        Returns:
+            Academy instance or None if not found
+        """
+        try:
+            # Similar optimized query as in list_academies
+            academy = Academy.objects.select_related(
+                'user', 'division', 'district', 'upazila'
+            ).prefetch_related(
+                Prefetch(
+                    'courses',
+                    queryset=Course.objects.prefetch_related(
+                        Prefetch(
+                            'batches',
+                            queryset=Batch.objects.prefetch_related(
+                                Prefetch(
+                                    'batchenrollment_set',
+                                    queryset=BatchEnrollment.objects.select_related(
+                                        'student', 'student__user', 'final_grade'
+                                    )
+                                )
+                            ).annotate(enrollment_count=Count('batchenrollment'))
+                        )
+                    ).annotate(batch_count=Count('batches', distinct=True))
+                )
+            ).annotate(
+                course_count=Count('courses', distinct=True)
+            ).get(user=user)
             
             return academy
         except Academy.DoesNotExist:

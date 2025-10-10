@@ -19,7 +19,7 @@ dropdown_urlpatterns = [
 ]
 
 student_urlpatterns = [
-    path('students/', StudentListCreateAPIView.as_view(), name='student-list-create'),
+    # path('students/', StudentListCreateAPIView.as_view(), name='student-list-create'),
     path('v1/student/account/update/', StudentAccountUpdateView.as_view(), name='student-account-update'), # not in use. use /account/update/ from account app
     path('v1/student/account/details/', StudentAccountDetailView.as_view(), name='student-account-details'), # not in use. use /account/details/ from account app
     path('v1/students/create/', StudentCreateView.as_view(), name='student_create'),

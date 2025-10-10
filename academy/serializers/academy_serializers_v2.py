@@ -246,7 +246,6 @@ class AcademyAccountUpdateSerializer(serializers.Serializer):
     academy = serializers.DictField(required=False)
 
     def validate_user(self, value: dict) -> dict:
-        print('serializer user value:', value)
         # Whitelist allowed user fields
         allowed = {'first_name', 'last_name', 'email', 'phone'}
         return {k: v for k, v in value.items() if k in allowed}
