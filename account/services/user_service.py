@@ -32,6 +32,7 @@ class UserService:
         password=user_data.get('password', generate_secure_password())
         username = user_data.get('username')
         phone = user_data.get('phone')
+        email = user_data.get('email')
 
         # Check for duplicate username
         if username and User.objects.filter(username=username).exists():
@@ -40,6 +41,10 @@ class UserService:
         # Check for duplicate phone
         if phone and User.objects.filter(phone=phone).exists():
             raise DjangoValidationError('A user with this phone number already exists.')
+        
+        # Check for duplicate email
+        if email and User.objects.filter(email=email).exists():
+            raise DjangoValidationError('A user with this email already exists.')
 
         try:
             user = User(**user_data)

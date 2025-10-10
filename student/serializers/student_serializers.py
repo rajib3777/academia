@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from student.models import School, Student
 from account.models import User, Role
+from typing import Dict, Any, List
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from account.serializers import UserSerializer
@@ -455,4 +456,33 @@ class SchoolDropdownSerializer(serializers.Serializer):
             'id': instance.id,
             'name': instance.name
         }
-    
+
+
+class StudentCreateUpdateSerializer(serializers.Serializer):
+    """Serializer for student creation and update operations."""
+    id = serializers.IntegerField(read_only=True)
+    username = serializers.CharField(max_length=150)
+    first_name = serializers.CharField(max_length=255)
+    last_name = serializers.CharField(max_length=255)
+    phone = serializers.CharField(max_length=20)
+    email = serializers.EmailField(allow_blank=True, allow_null=True, required=False)
+    password = serializers.CharField(write_only=True, min_length=8, required=False)
+    profile_picture = serializers.ImageField(required=False, allow_null=True)
+    school = serializers.IntegerField()
+    birth_registration_number = serializers.CharField(max_length=50, allow_blank=True, allow_null=True, required=False)
+    date_of_birth = serializers.DateField(required=False, allow_null=True)
+    guardian_name = serializers.CharField(max_length=255, allow_blank=True, required=False)
+    guardian_phone = serializers.CharField(max_length=20, allow_blank=True, required=False)
+    guardian_email = serializers.EmailField(allow_blank=True, allow_null=True, required=False)
+    guardian_relationship = serializers.CharField(max_length=50, allow_blank=True, required=False)
+    address = serializers.CharField(max_length=255, allow_blank=True, required=False)
+
+    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate student data for creation/update operations."""
+        # Custom validation logic if needed
+        # Example: Validate contact number format
+        contact_number = data.get('contact_number')
+        if contact_number and not contact_number.startswith('+'):
+            data['contact_number'] = f'+{contact_number}'
+            
+        return data

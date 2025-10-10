@@ -1,8 +1,8 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from student.views.student_views import (SchoolNameListAPIView, StudentListCreateAPIView, StudentRetrieveUpdateDestroyAPIView, 
-                           StudentCreateView, StudentUpdateView, StudentListV1View, StudentActivateView, StudentDropdownView, 
-                           StudentAccountUpdateView, StudentAccountDetailView, SchoolDropdownView)
+                           StudentCreateOldView, StudentCreateView,StudentUpdateView, StudentListView, StudentActivateView, StudentDropdownView, 
+                           SchoolDropdownView)
 from student.views.school_views import SchoolListView, SchoolCreateView, SchoolUpdateView, SchoolDeleteView
 
 school_urlpatterns = [
@@ -20,11 +20,9 @@ dropdown_urlpatterns = [
 
 student_urlpatterns = [
     # path('students/', StudentListCreateAPIView.as_view(), name='student-list-create'),
-    path('v1/student/account/update/', StudentAccountUpdateView.as_view(), name='student-account-update'), # not in use. use /account/update/ from account app
-    path('v1/student/account/details/', StudentAccountDetailView.as_view(), name='student-account-details'), # not in use. use /account/details/ from account app
     path('v1/students/create/', StudentCreateView.as_view(), name='student_create'),
     path('v1/students/<str:student_id>/update/', StudentUpdateView.as_view(), name='student_update'),
-    path('v1/students/', StudentListV1View.as_view(), name='student_list'),
+    path('v1/students/', StudentListView.as_view(), name='student_list'),
     path('v1/students/<int:student_id>/', StudentRetrieveUpdateDestroyAPIView.as_view(), name='student_detail'),
     path('v1/students/<int:student_id>/activate/', StudentActivateView.as_view(), name='student-activate'),
     # path('student/<int:pk>/', StudentRetrieveUpdateDestroyAPIView.as_view(), name='student-detail'),

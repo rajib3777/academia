@@ -2,11 +2,13 @@ from typing import Dict, Any, Optional, List
 from django.db import transaction
 from django.core.exceptions import ValidationError
 from functools import cached_property
-
-from account.models import User, Role
+from account.choices import STUDENT
+from account.services.user_service import UserService
+from utils.services.sms_service import SMSService
+from account.models import User
 from student.models import Student, School
 from student.selectors.student_selector import StudentSelector
-
+from utils.choices import ACCOUNT, QUEUE
 
 class StudentService:
     """
@@ -15,7 +17,8 @@ class StudentService:
     
     def __init__(self):
         """Initialize the StudentService."""
-        pass
+        self.user_service = UserService()
+        self.sms_service = SMSService()
     
     @cached_property
     def student_selector(self) -> StudentSelector:
@@ -28,19 +31,22 @@ class StudentService:
         return StudentSelector()
     
     @transaction.atomic
-    def create_student(self, 
-                      user_data: Dict[str, Any], 
-                      student_data: Dict[str, Any]) -> Student:
+    def create_student(self, data: Dict[str, Any]) -> Student:
         """
         Create a new student with associated user account.
         
         Args:
-            user_data: Dictionary containing user information
-                username: str
-                email: str
-                first_name: str
-                last_name: str
-                phone: str
+            data: Dictionary containing user and student information
+                user: dict
+                    username: str
+                    email: str
+                    first_name: str
+                    last_name: str
+                    phone: str
+                student: dict
+                    school_id: int
+                    birth_registration_number: str (optional)
+                    date_of_birth: date (optional)
                 password: str
             student_data: Dictionary containing student information
                 school_id: int
@@ -59,62 +65,54 @@ class StudentService:
             ValidationError: If validation fails
         """
         # Validate school exists
-        school_id = student_data.get('school_id')
+        school_id = data.pop('school', None)
+
         try:
             school = School.objects.get(id=school_id)
         except School.DoesNotExist:
             raise ValidationError(f"School with ID {school_id} does not exist.")
         
-        # Get or create student role
-        student_role, _ = Role.objects.get_or_create(name='student')
-        
         # Create user
         user_fields = {
-            'username': user_data.get('username'),
-            'email': user_data.get('email'),
-            'first_name': user_data.get('first_name'),
-            'last_name': user_data.get('last_name'),
-            'phone': user_data.get('phone'),
-            'role': student_role,
+            'username': data.pop('username'),
+            'email': data.pop('email'),
+            'first_name': data.pop('first_name'),
+            'last_name': data.pop('last_name'),
+            'phone': data.pop('phone'),
+            'password': data.pop('password'),
         }
-        
-        # Check if user with username or email already exists
-        if User.objects.filter(username=user_fields['username']).exists():
-            raise ValidationError(f"User with username '{user_fields['username']}' already exists.")
-        
-        if User.objects.filter(email=user_fields['email']).exists():
-            raise ValidationError(f"User with email '{user_fields['email']}' already exists.")
-            
-        # Create user with password
-        user = User.objects.create_user(
-            **user_fields,
-            password=user_data.get('password')
-        )
-        
-        # Create student
-        student_fields = {
-            'user': user,
-            'school': school,
-            'birth_registration_number': student_data.get('birth_registration_number'),
-            'date_of_birth': student_data.get('date_of_birth'),
-            'guardian_name': student_data.get('guardian_name'),
-            'guardian_phone': student_data.get('guardian_phone'),
-            'guardian_email': student_data.get('guardian_email'),
-            'guardian_relationship': student_data.get('guardian_relationship'),
-            'address': student_data.get('address'),
-        }
+
+        # Create user
+        user, password = self.user_service.create_user(user_fields, STUDENT)
         
         # Check if birth registration number already exists
-        if student_fields['birth_registration_number'] and Student.objects.filter(
-            birth_registration_number=student_fields['birth_registration_number']
+        if data['birth_registration_number'] and Student.objects.filter(
+            birth_registration_number=data['birth_registration_number']
         ).exists():
             raise ValidationError(
-                f"Student with birth registration number '{student_fields['birth_registration_number']}' already exists."
+                f"Student with birth registration number '{data['birth_registration_number']}' already exists."
             )
         
+        if school_id:
+            try:
+                school = School.objects.get(id=school_id)
+                data['school'] = school
+            except School.DoesNotExist:
+                raise ValidationError(f"School with ID {school_id} does not exist.")
+
         # Create student
-        student = Student.objects.create(**student_fields)
-        
+        student = Student.objects.create(user=user, **data)
+
+        # Send SMS with login credentials
+        self.sms_service.save_sms_history(
+            created_by=None,
+            created_for=user,
+            phone_number=user.phone,
+            message=f"Your student account has been created. Phone Number: {user.username}, Password: {password}",
+            sms_type=ACCOUNT,
+            status=QUEUE
+        )
+
         return student
     
     @transaction.atomic

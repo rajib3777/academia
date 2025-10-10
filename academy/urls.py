@@ -5,7 +5,7 @@ from academy.views.academy_views import (
     BatchListCreateAPIView, BatchRetrieveUpdateDestroyAPIView, UpdateAcademyFromUserAPIView,
     AcademyDropdownView
 )
-from academy.views.academy_views_v2 import (AcademyListView, AcademyCreateView, AcademyDetailView, AcademyUpdateView, AcademyDeleteView, AcademyAccountUpdateView, AcademyAccountDetailView)
+from academy.views.academy_views_v2 import (AcademyListView, AcademyCreateView, AcademyDetailView, AcademyUpdateView, AcademyDeleteView,)
 from academy.views.course_views import CourseCreateView, CourseUpdateView, CourseListView, CourseDropdownView, CourseDeleteView, CourseTypeDropdownView
 from academy.views.batch_views import BatchCreateView, BatchUpdateView, BatchListView, BatchDeleteView, BatchDropdownView
 
@@ -30,8 +30,6 @@ academy_urlpatterns = [
 academy_urlpatterns_v2 = [
     path('v1/academies/', AcademyListView.as_view(), name='academy-list'),
     path('v1/academies/create/', AcademyCreateView.as_view(), name='academy-create'),
-    # path('v1/academy/account/update/', AcademyAccountUpdateView.as_view(), name='academy-account-update'), # not in use. use /account/update/ from account app
-    # path('v1/academy/account/details/', AcademyAccountDetailView.as_view(), name='academy-account-details'), # not in use. use /account/details/ from account app
     path('v1/academies/<int:academy_id>/details/', AcademyDetailView.as_view(), name='academy-detail-for-admin'),
     path('v1/academies/details/', AcademyDetailView.as_view(), name='academy-detail-for-academy-user'),
     path('v1/academies/<int:academy_id>/update/', AcademyUpdateView.as_view(), name='academy-update'),

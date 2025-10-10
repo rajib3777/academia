@@ -179,43 +179,6 @@ class AcademyDetailView(APIView):
                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
-class AcademyAccountDetailView(APIView):
-    """Get academy account details by ID."""
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
-    
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.selector_class = academy_selector_v2.AcademySelector()
-
-    def get(self, request, format=None):
-        """
-        Get detailed information about an academy.
-        
-        Args:
-            academy_id: ID of the academy to retrieve
-            
-        Returns:
-            Response with academy details or error
-        """
-        try:
-            request_user = request.user
-            if not request_user.is_academy():
-                return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
-            
-            academy = self.selector_class.get_by_user(request_user)
-            if not academy:
-                return Response({'detail': 'Academy not found.'}, status=status.HTTP_404_NOT_FOUND)
-
-            serializer = academy_serializers_v2.AcademyAccountDetailSerializer(academy, context={'request': request})
-            return Response({'success': True, 'data': serializer.data}, status=status.HTTP_200_OK)
-        
-        except Exception as e:
-            logger.error(f'Error in AcademyAccountDetailView: {str(e)}')
-            return Response({'success': False, 'error': 'An error occurred while retrieving academy details.'},
-                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-
 class AcademyUpdateView(APIView):
     """Update an existing academy."""
     permission_classes = [IsAuthenticated]
@@ -309,39 +272,3 @@ class AcademyDeleteView(APIView):
             return Response({'detail': 'An error occurred while deleting the academy.'}, 
                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
-
-class AcademyAccountUpdateView(APIView):
-    """
-    API for academy users to update their own account and academy profile.
-    Allows password change.
-    """
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
-
-    academy_selector = academy_selector_v2.AcademySelector()
-    academy_service = academy_service_v2.AcademyService()
-    user_service = user_service.UserService()
-
-    def put(self, request):
-        request_user = request.user
-        if not request_user.is_academy():
-            return Response({'detail': 'Permission denied.'}, status=status.HTTP_403_FORBIDDEN)
-
-        academy = self.academy_selector.get_by_user(request_user)
-        serializer = academy_serializers_v2.AcademyAccountUpdateSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        try:
-            # Update user fields
-            user_update_data = serializer.validated_data.get('user', {})
-            if user_update_data:
-                self.user_service.update_user(request_user.id, user_update_data)
-
-            # Update academy fields
-            academy_update_data = serializer.validated_data.get('academy', {})
-            if academy_update_data:
-                self.academy_service.update_academy_account(academy, academy_update_data)
-
-            return Response({'detail': 'Account updated successfully.'}, status=status.HTTP_200_OK)
-        except ValidationError as e:
-            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
