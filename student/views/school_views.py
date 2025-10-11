@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.core.exceptions import ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from student.selectors import school_selector
@@ -10,6 +11,7 @@ from student.serializers.school_serializers import (
     SchoolUpdateSerializer,
     SchoolDetailSerializer,
     SchoolListSerializer,
+    SchoolDropdownSerializer
 )
 from functools import cached_property
 import logging
@@ -141,3 +143,61 @@ class SchoolDeleteView(APIView):
         except Exception as e:
             logger.error(f'Error in SchoolDeleteView: {str(e)}')
             return Response({'success': False, 'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class SchoolDropdownView(APIView):
+    """
+    API endpoint for school dropdown data with role-based filtering.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
+    def get(self, request):
+        """
+        Get filtered schools for dropdown selection.
+
+        Query parameters:
+        - search: Optional search term for school name or ID
+        """
+        try:
+            # Extract query parameters
+            search = request.query_params.get('search')
+
+            # Get schools using selector with role-based filtering
+            schools = school_selector.SchoolSelector().get_schools_for_dropdown(
+                search=search
+            )
+            print('schools', schools)
+
+            # Serialize and return the data
+            serializer = SchoolDropdownSerializer(schools, many=True)
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'count': len(serializer.data)
+            })
+        
+        except ValidationError as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'Invalid parameters',
+                    'details': str(e)
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        except Exception as e:
+            # Log the exception
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.exception("Error in SchoolDropdownView")
+            
+            return Response(
+                {
+                    'success': False,
+                    'error': 'An unexpected error occurred',
+                    'details': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

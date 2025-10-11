@@ -30,9 +30,9 @@ academy_urlpatterns = [
 academy_urlpatterns_v2 = [
     path('v1/academies/', AcademyListView.as_view(), name='academy-list'),
     path('v1/academies/create/', AcademyCreateView.as_view(), name='academy-create'),
+    path('v1/academies/<int:academy_id>/update/', AcademyUpdateView.as_view(), name='academy-update'),
     path('v1/academies/<int:academy_id>/details/', AcademyDetailView.as_view(), name='academy-detail-for-admin'),
     path('v1/academies/details/', AcademyDetailView.as_view(), name='academy-detail-for-academy-user'),
-    path('v1/academies/<int:academy_id>/update/', AcademyUpdateView.as_view(), name='academy-update'),
     path('v1/academies/<int:academy_id>/delete/', AcademyDeleteView.as_view(), name='academy-delete'), # need to work here. user not deleting. also need to add soft delete feature
 ]
 

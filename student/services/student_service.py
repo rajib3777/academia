@@ -64,26 +64,19 @@ class StudentService:
         Raises:
             ValidationError: If validation fails
         """
-        # Validate school exists
-        school_id = data.pop('school', None)
-
-        try:
-            school = School.objects.get(id=school_id)
-        except School.DoesNotExist:
-            raise ValidationError(f"School with ID {school_id} does not exist.")
         
         # Create user
-        user_fields = {
-            'username': data.pop('username'),
+        user_data = {
+            'username': data.get('phone'),
             'email': data.pop('email'),
             'first_name': data.pop('first_name'),
             'last_name': data.pop('last_name'),
             'phone': data.pop('phone'),
-            'password': data.pop('password'),
+            'password': data.pop('password', None),
         }
 
         # Create user
-        user, password = self.user_service.create_user(user_fields, STUDENT)
+        user, password = self.user_service.create_user(user_data, STUDENT)
         
         # Check if birth registration number already exists
         if data['birth_registration_number'] and Student.objects.filter(
@@ -93,6 +86,8 @@ class StudentService:
                 f"Student with birth registration number '{data['birth_registration_number']}' already exists."
             )
         
+        # Validate school exists
+        school_id = data.pop('school_id', None)
         if school_id:
             try:
                 school = School.objects.get(id=school_id)
@@ -116,17 +111,13 @@ class StudentService:
         return student
     
     @transaction.atomic
-    def update_student(self, 
-                      student_id: int, 
-                      user_data: Optional[Dict[str, Any]] = None, 
-                      student_data: Optional[Dict[str, Any]] = None) -> Student:
+    def update_student(self, student_id: int, data: Dict[str, Any]) -> Student:
         """
         Update an existing student and its associated user.
         
         Args:
             student_id: ID of the student to update
-            user_data: Dictionary containing user information to update (optional)
-            student_data: Dictionary containing student information to update (optional)
+            data: Dictionary containing user and student information to update (optional)
                 
         Returns:
             Updated Student instance
@@ -139,67 +130,54 @@ class StudentService:
         if not student:
             raise ValidationError(f"Student with ID {student_id} not found.")
         
-        if user_data:
+        if data:
             user = student.user
+            user_data = {
+                'username': data.get('phone', user.username),
+                'first_name': data.pop('first_name'),
+                'last_name': data.pop('last_name'),
+                'email': data.pop('email'),
+                'phone': data.pop('phone'),
+            }
+            # Update user
+            try:
+                user = self.user_service.update_user(user.id, user_data)
+                student.user = user
+            except ValidationError as e:
+                raise ValidationError(f"Failed to update user: {e}")
+
+        # Update school if provided
+        try:
+            school = School.objects.get(id=data['school_id'])
+            student.school = school
+        except School.DoesNotExist:
+            raise ValidationError(f"School with ID {data['school_id']} does not exist.")
             
-            # Check username uniqueness
-            if 'username' in user_data and user_data['username'] != user.username:
-                if User.objects.filter(username=user_data['username']).exists():
-                    raise ValidationError(f"User with username '{user_data['username']}' already exists.")
-                user.username = user_data['username']
-            
-            # Check email uniqueness
-            if 'email' in user_data and user_data['email'] != user.email:
-                if User.objects.filter(email=user_data['email']).exists():
-                    raise ValidationError(f"User with email '{user_data['email']}' already exists.")
-                user.email = user_data['email']
-            
-            # Update other user fields
-            if 'first_name' in user_data:
-                user.first_name = user_data['first_name']
-            if 'last_name' in user_data:
-                user.last_name = user_data['last_name']
-            if 'phone' in user_data:
-                user.phone = user_data['phone']
-            if 'password' in user_data:
-                user.set_password(user_data['password'])
-            
-            user.save()
-        
-        if student_data:
-            # Update school if provided
-            if 'school_id' in student_data:
-                try:
-                    school = School.objects.get(id=student_data['school_id'])
-                    student.school = school
-                except School.DoesNotExist:
-                    raise ValidationError(f"School with ID {student_data['school_id']} does not exist.")
-            
-            # Check birth registration number uniqueness
-            if 'birth_registration_number' in student_data and student_data['birth_registration_number'] != student.birth_registration_number:
-                if student_data['birth_registration_number'] and Student.objects.filter(
-                    birth_registration_number=student_data['birth_registration_number']
-                ).exclude(id=student.id).exists():
-                    raise ValidationError(
-                        f"Student with birth registration number '{student_data['birth_registration_number']}' already exists."
-                    )
-                student.birth_registration_number = student_data['birth_registration_number']
-            
-            # Update other student fields
-            if 'date_of_birth' in student_data:
-                student.date_of_birth = student_data['date_of_birth']
-            if 'guardian_name' in student_data:
-                student.guardian_name = student_data['guardian_name']
-            if 'guardian_phone' in student_data:
-                student.guardian_phone = student_data['guardian_phone']
-            if 'guardian_email' in student_data:
-                student.guardian_email = student_data['guardian_email']
-            if 'guardian_relationship' in student_data:
-                student.guardian_relationship = student_data['guardian_relationship']
-            if 'address' in student_data:
-                student.address = student_data['address']
-            
-            student.save()
+        # Check birth registration number uniqueness
+        if 'birth_registration_number' in data and data['birth_registration_number'] != student.birth_registration_number:
+            if data['birth_registration_number'] and Student.objects.filter(
+                birth_registration_number=data['birth_registration_number']
+            ).exclude(id=student.id).exists():
+                raise ValidationError(
+                    f"Student with birth registration number '{data['birth_registration_number']}' already exists."
+                )
+            student.birth_registration_number = data['birth_registration_number']
+
+        # Update other student fields
+        if 'date_of_birth' in data:
+            student.date_of_birth = data['date_of_birth']
+        if 'guardian_name' in data:
+            student.guardian_name = data['guardian_name']
+        if 'guardian_phone' in data:
+            student.guardian_phone = data['guardian_phone']
+        if 'guardian_email' in data:
+            student.guardian_email = data['guardian_email']
+        if 'guardian_relationship' in data:
+            student.guardian_relationship = data['guardian_relationship']
+        if 'address' in data:
+            student.address = data['address']
+
+        student.save()
         
         return student
 
@@ -256,16 +234,36 @@ class StudentService:
         Raises:
             ValidationError: If student not found
         """
-        # Using direct query since selector might filter out inactive users
-        try:
-            student = Student.objects.select_related('user', 'school').get(id=student_id)
-        except Student.DoesNotExist:
+        student = self.student_selector.get_student_by_id(student_id)
+        if not student:
             raise ValidationError(f"Student with ID {student_id} not found.")
-        
+
         student.user.is_active = True
         student.user.save()
         
         return student
+    
+    @transaction.atomic
+    def delete_student(self, student_id: int) -> bool:
+        """
+        Delete a student and all related data.
+        
+        Args:
+            student_id: ID of student to delete
+        
+        Returns:
+            True if deletion was successful, False otherwise
+        """
+        try:
+            student = Student.objects.get(id=student_id)
+            student.delete()
+            return True
+        except Student.DoesNotExist:
+            return False
+        except Exception as e:
+            # Log the exception
+            print(f"Error deleting student: {e}")
+            return False
     
     def bulk_create_students(self, students_data: List[Dict[str, Any]]) -> List[Student]:
         """

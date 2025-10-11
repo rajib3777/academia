@@ -61,3 +61,29 @@ class SchoolListSerializer(serializers.Serializer):
                 return request.build_absolute_uri(url)
             return url
         return None
+    
+
+class SchoolDropdownSerializer(serializers.Serializer):
+    """
+    Serializer for school dropdown data.
+    Only includes the fields needed for the dropdown.
+    """
+    id = serializers.CharField(read_only=True)
+    name = serializers.CharField(read_only=True)
+
+    def to_representation(self, instance):
+        """
+        Customize representation for dropdown options.
+        """
+        # If we're using the annotated queryset from the selector
+        if hasattr(instance, 'name'):
+            return {
+                'id': instance.id,
+                'name': instance.name
+            }
+
+        # Fallback if the queryset doesn't have the annotation
+        return {
+            'id': instance.id,
+            'name': instance.name
+        }

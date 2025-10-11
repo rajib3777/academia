@@ -283,7 +283,7 @@ class UserSerializer(serializers.Serializer):
     Serializer for basic user details.
     """
     id = serializers.IntegerField(required=False)
-    username = serializers.CharField(read_only=True)
+    username = serializers.CharField(read_only=True, required=False, allow_blank=True)
     first_name = serializers.CharField()
     last_name = serializers.CharField()
     email = serializers.EmailField(allow_blank=True)

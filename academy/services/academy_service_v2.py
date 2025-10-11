@@ -112,7 +112,9 @@ class AcademyService:
             ValidationError: If validation fails
         """
         try:
-            academy = Academy.objects.get(id=academy_id)
+            academy = self.academy_selector.get_academy_by_id(academy_id)
+            if not academy:
+                return None
         except Academy.DoesNotExist:
             return None
         
@@ -125,32 +127,18 @@ class AcademyService:
         user_data = data.pop('user', None)
         if user_data:
             user = academy.user
-            
-            # Check username uniqueness
-            if 'username' in user_data and user_data['username'] != user.username:
-                if User.objects.filter(username=user_data['username']).exists():
-                    raise ValidationError(f"User with username '{user_data['username']}' already exists.")
-                user.username = user_data['username']
-            
-            # Check email uniqueness
-            if 'email' in user_data and user_data['email'] != user.email:
-                if User.objects.filter(email=user_data['email']).exists():
-                    raise ValidationError(f"User with email '{user_data['email']}' already exists.")
-                user.email = user_data['email']
-                
-            # Update other user fields
-            if 'first_name' in user_data:
-                user.first_name = user_data['first_name']
-            if 'last_name' in user_data:
-                user.last_name = user_data['last_name']
-            if 'phone' in user_data:
-                user.phone = user_data['phone']
-            
-            # Handle password separately if provided
-            if 'password' in user_data and user_data['password']:
-                user.set_password(user_data['password'])
-            
-            user.save()
+            user_data = {
+                'username': user_data.get('phone', user.username),
+                'first_name': user_data.pop('first_name'),
+                'last_name': user_data.pop('last_name'),
+                'email': user_data.pop('email'),
+                'phone': user_data.pop('phone'),
+            }
+            # Update user
+            try:
+                user = self.user_service.update_user(user.id, user_data)
+            except ValidationError as e:
+                raise ValidationError(f"Failed to update user: {e}")
         
         # Handle foreign keys
         if 'division' in data:

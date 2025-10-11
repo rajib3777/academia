@@ -430,45 +430,18 @@ class StudentAccountDetailSerializer(serializers.Serializer):
                 return request.build_absolute_uri(url)
             return url
         return None
-    
-
-class SchoolDropdownSerializer(serializers.Serializer):
-    """
-    Serializer for school dropdown data.
-    Only includes the fields needed for the dropdown.
-    """
-    id = serializers.CharField(read_only=True)
-    name = serializers.CharField(read_only=True)
-
-    def to_representation(self, instance):
-        """
-        Customize representation for dropdown options.
-        """
-        # If we're using the annotated queryset from the selector
-        if hasattr(instance, 'name'):
-            return {
-                'id': instance.id,
-                'name': instance.name
-            }
-
-        # Fallback if the queryset doesn't have the annotation
-        return {
-            'id': instance.id,
-            'name': instance.name
-        }
 
 
 class StudentCreateUpdateSerializer(serializers.Serializer):
     """Serializer for student creation and update operations."""
     id = serializers.IntegerField(read_only=True)
-    username = serializers.CharField(max_length=150)
     first_name = serializers.CharField(max_length=255)
     last_name = serializers.CharField(max_length=255)
     phone = serializers.CharField(max_length=20)
     email = serializers.EmailField(allow_blank=True, allow_null=True, required=False)
     password = serializers.CharField(write_only=True, min_length=8, required=False)
     profile_picture = serializers.ImageField(required=False, allow_null=True)
-    school = serializers.IntegerField()
+    school_id = serializers.IntegerField()
     birth_registration_number = serializers.CharField(max_length=50, allow_blank=True, allow_null=True, required=False)
     date_of_birth = serializers.DateField(required=False, allow_null=True)
     guardian_name = serializers.CharField(max_length=255, allow_blank=True, required=False)

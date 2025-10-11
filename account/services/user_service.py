@@ -30,17 +30,17 @@ class UserService:
             User: Created user instance
         """
         password=user_data.get('password', generate_secure_password())
-        username = user_data.get('username')
+        username = user_data.get('phone')  # Using phone as username
         phone = user_data.get('phone')
         email = user_data.get('email')
 
         # Check for duplicate username
         if username and User.objects.filter(username=username).exists():
-            raise DjangoValidationError('A user with this username already exists.')
+            raise DjangoValidationError('A user with this phone already exists.')
 
         # Check for duplicate phone
         if phone and User.objects.filter(phone=phone).exists():
-            raise DjangoValidationError('A user with this phone number already exists.')
+            raise DjangoValidationError('A user with this phone already exists.')
         
         # Check for duplicate email
         if email and User.objects.filter(email=email).exists():
@@ -75,6 +75,21 @@ class UserService:
             User: Updated user instance
         """
         user = self.user_selector.get_user_by_id(user_id)
+        phone = user_data.get('phone')
+        email = user_data.get('email')
+
+        # Check for duplicate username
+        if User.objects.filter(username=phone).exclude(pk=user_id).exists():
+            raise DjangoValidationError('A user with this phone already exists.')
+
+        # Check for duplicate phone
+        if phone and User.objects.filter(phone=phone).exclude(pk=user_id).exists():
+            raise DjangoValidationError('A user with this phone already exists.')
+
+        # Check for duplicate email
+        if email and User.objects.filter(email=email).exclude(pk=user_id).exists():
+            raise DjangoValidationError('A user with this email already exists.')
+
         
         # Update only the provided fields
         for attr, value in user_data.items():

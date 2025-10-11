@@ -15,7 +15,7 @@ from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from student.serializers.student_serializers import (SchoolNameListSerializer, StudentSerializer, 
                                  StudentCreateSerializer, StudentUpdateSerializer, StudentListSerializer, 
                                  StudentDetailSerializer, StudentDropdownSerializer,
-                                 StudentAccountUpdateSerializer, StudentAccountDetailSerializer, SchoolDropdownSerializer)
+                                 StudentAccountUpdateSerializer, StudentAccountDetailSerializer)
 from student.serializers import student_serializers
 from classmate.permissions import AuthenticatedGenericView
 from classmate.utils import StandardResultsSetPagination
@@ -36,97 +36,6 @@ class SchoolNameListAPIView(AuthenticatedGenericView, generics.ListAPIView):
     filter_backends = [SearchFilter]
     search_fields = ['name', 'address', 'email', 'contact_number']
     queryset = School.objects.all()
-
-
-class StudentListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Student.objects.all().order_by('id')
-    serializer_class = StudentSerializer
-
-# class StudentRetrieveUpdateDestroyAPIView(generics.RetrieveUpdateDestroyAPIView):
-#     queryset = Student.objects.all().order_by('id')
-#     serializer_class = StudentSerializer
-#     lookup_field = 'pk'
-
-class StudentRetrieveUpdateDestroyAPIView(APIView):
-    """API endpoint for detailed student information and operations."""
-    
-    @cached_property
-    def student_selector(self) -> student_selector.StudentSelector:
-        """Lazy initialization of StudentSelector."""
-        return student_selector.StudentSelector()
-
-    @cached_property
-    def student_service(self) -> student_service.StudentService:
-        """Lazy initialization of StudentService."""
-        return student_service.StudentService()
-    
-    def get(self, request, student_id):
-        """
-        Get detailed information for a specific student.
-        """
-        # Use selector to get optimized student data
-        student = self.student_selector.get_student_by_id(student_id)
-        
-        if not student:
-            return Response(
-                {"detail": "Student not found"}, 
-                status=status.HTTP_404_NOT_FOUND
-            )
-        
-        # Serialize and return the data
-        serializer = StudentDetailSerializer(student)
-        return Response(serializer.data)
-    
-    def patch(self, request, student_id):
-        """
-        Partially update a student's information.
-        """
-        try:
-            # Extract user and student data from request
-            user_data = {}
-            student_data = {}
-            
-            # User fields
-            for field in ['username', 'first_name', 'last_name', 'email', 'phone', 'password']:
-                if field in request.data:
-                    user_data[field] = request.data[field]
-            
-            # Student fields
-            for field in ['school_id', 'birth_registration_number', 'date_of_birth', 
-                         'guardian_name', 'guardian_phone', 'guardian_email', 
-                         'guardian_relationship', 'address']:
-                if field in request.data:
-                    student_data[field] = request.data[field]
-            
-            # Update student using service
-            student = self.student_service.update_student(
-                student_id=student_id,
-                user_data=user_data if user_data else None,
-                student_data=student_data if student_data else None
-            )
-            
-            # Return updated student data
-            serializer = StudentDetailSerializer(student)
-            return Response(serializer.data)
-            
-        except ValidationError as e:
-            return Response(
-                {"detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-    
-    def delete(self, request, student_id):
-        """
-        Deactivate a student (soft delete).
-        """
-        try:
-            self.student_service.deactivate_student(student_id)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        except ValidationError as e:
-            return Response(
-                {"detail": str(e)},
-                status=status.HTTP_400_BAD_REQUEST
-            )
 
 
 class StudentActivateView(APIView):
@@ -150,7 +59,28 @@ class StudentActivateView(APIView):
                 {"detail": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+class StudentDeactivateView(APIView):
+    """API endpoint to deactivate a student."""
     
+    @cached_property
+    def student_service(self) -> student_service.StudentService:
+        """Lazy initialization of StudentService."""
+        return student_service.StudentService()
+
+    def post(self, request, student_id):
+        """
+        Deactivate a student.
+        """
+        try:
+            student = self.student_service.deactivate_student(student_id)
+            serializer = StudentDetailSerializer(student)
+            return Response(serializer.data)
+        except ValidationError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 class StudentCreateOldView(APIView):
     #TODO Remove this view after testing
@@ -254,7 +184,8 @@ class StudentCreateOldView(APIView):
 
 
 
-class StudentUpdateView(APIView):
+class StudentUpdateOldView(APIView):
+    #TODO Remove this view after testing
     """
     Class-based view for updating students using StudentUpdateSerializer
     """
@@ -398,6 +329,91 @@ class StudentCreateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
+class StudentUpdateView(APIView):
+    """Update an existing student."""
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.service_class = student_service.StudentService()
+        self.selector_class = student_selector.StudentSelector()
+
+    def put(self, request, student_id, format=None):
+        """
+        Update a student and its associated user.
+
+        Args:
+            student_id: ID of the student to update
+
+        Returns:
+            Response with updated student data or error details
+        """
+        try:
+            # Get the student first to check permissions
+            student = self.selector_class.get_student_by_id(student_id)
+
+            if not student:
+                return Response({'detail': 'Student not found'}, status=status.HTTP_404_NOT_FOUND)
+
+            # Check if user is allowed to update this student
+            if not request.user.is_superuser and not request.user.is_admin() and not request.user.is_student():
+                return Response({'detail': 'You do not have permission to update this student'},
+                                status=status.HTTP_403_FORBIDDEN)
+
+            # Update the student
+            serializer = student_serializers.StudentCreateUpdateSerializer(data=request.data, partial=True)
+
+            if serializer.is_valid():
+                try:
+                    updated_student = self.service_class.update_student(student_id, serializer.validated_data)
+
+                    if updated_student:
+                        # Get the updated student with all related data for response
+                        detailed_student = self.selector_class.get_student_by_id(student_id)
+                        response_serializer = student_serializers.StudentListSerializer(detailed_student)
+                        return Response(response_serializer.data)
+
+                    return Response({'detail': 'Failed to update student'},
+                                    status=status.HTTP_400_BAD_REQUEST)
+
+                except ValidationError as e:
+                    return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        except Exception as e:
+            logger.error(f"Error in StudentUpdateView: {str(e)}")
+            return Response({'detail': 'An error occurred while updating the student.'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+class StudentDetailAPIView(APIView):
+    """API endpoint for detailed student information and operations."""
+    
+    @cached_property
+    def student_selector(self) -> student_selector.StudentSelector:
+        """Lazy initialization of StudentSelector."""
+        return student_selector.StudentSelector()
+    
+    def get(self, request, student_id):
+        """
+        Get detailed information for a specific student.
+        """
+        # Use selector to get optimized student data
+        student = self.student_selector.get_student_by_id(student_id)
+        
+        if not student:
+            return Response(
+                {"detail": "Student not found"}, 
+                status=status.HTTP_404_NOT_FOUND
+            )
+        
+        # Serialize and return the data
+        serializer = StudentDetailSerializer(student)
+        return Response(serializer.data)
+
+
 class StudentListView(APIView):
     """
     Advanced Student List API with filtering, searching, ordering, and pagination.
@@ -405,7 +421,7 @@ class StudentListView(APIView):
     """
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
-    serializer_class = StudentListSerializer
+    serializer_class = student_serializers.StudentListSerializer
     
     @cached_property
     def student_selector(self) -> student_selector.StudentSelector:
@@ -547,59 +563,35 @@ class StudentDropdownView(APIView):
             )
         
 
-class SchoolDropdownView(APIView):
-    """
-    API endpoint for school dropdown data with role-based filtering.
-    """
+class StudentDeleteView(APIView):
+    """Delete a student."""
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
     
-    def get(self, request):
-        """
-        Get filtered schools for dropdown selection.
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.service_class = student_service.StudentService()
 
-        Query parameters:
-        - search: Optional search term for school name or ID
+    def delete(self, request, student_id, format=None):
+        """
+        Delete a student.
+
+        Args:
+            student_id: ID of the student to delete
+
+        Returns:
+            Response indicating success or failure
         """
         try:
-            # Extract query parameters
-            search = request.query_params.get('search')
+            success = self.service_class.delete_student(student_id)
 
-            # Get schools using selector with role-based filtering
-            schools = school_selector.SchoolSelector().get_schools_for_dropdown(
-                search=search
-            )
-            print('schools', schools)
+            if success:
+                return Response(status=status.HTTP_204_NO_CONTENT)
 
-            # Serialize and return the data
-            serializer = SchoolDropdownSerializer(schools, many=True)
-            return Response({
-                'success': True,
-                'data': serializer.data,
-                'count': len(serializer.data)
-            })
+            return Response({'detail': 'Student not found'},
+                           status=status.HTTP_404_NOT_FOUND)
         
-        except ValidationError as e:
-            return Response(
-                {
-                    'success': False,
-                    'error': 'Invalid parameters',
-                    'details': str(e)
-                },
-                status=status.HTTP_400_BAD_REQUEST
-            )
-            
         except Exception as e:
-            # Log the exception
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.exception("Error in SchoolDropdownView")
-            
-            return Response(
-                {
-                    'success': False,
-                    'error': 'An unexpected error occurred',
-                    'details': str(e)
-                },
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            logger.error(f"Error in StudentDeleteView: {str(e)}")
+            return Response({'detail': 'An error occurred while deleting the student.'},
+                           status=status.HTTP_500_INTERNAL_SERVER_ERROR)
