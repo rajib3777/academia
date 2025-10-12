@@ -186,9 +186,21 @@ class StudentService:
         fk_fields = {
             'school': School,
         }
+        # for field, model_cls in fk_fields.items():
+        #     if field in data and isinstance(data[field], int):
+        #         instance = model_cls.objects.filter(pk=data[field]).first()
+        #         if not instance:
+        #             raise ValueError(f'Invalid {field} id: {data[field]}')
+        #         data[field] = instance
+
         for field, model_cls in fk_fields.items():
-            if field in data and isinstance(data[field], int):
-                instance = model_cls.objects.filter(pk=data[field]).first()
+            # Accept both int and str for school id, convert to int if needed
+            if field in data and not isinstance(data[field], model_cls):
+                try:
+                    instance_id = int(data[field])
+                except (TypeError, ValueError):
+                    raise ValueError(f'Invalid {field} id: {data[field]}')
+                instance = model_cls.objects.filter(pk=instance_id).first()
                 if not instance:
                     raise ValueError(f'Invalid {field} id: {data[field]}')
                 data[field] = instance

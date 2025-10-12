@@ -111,7 +111,23 @@ class AccountDetailView(APIView):
             logger.error(f'Error in AccountDetailView: {str(e)}')
             return Response({'success': False, 'error': 'An error occurred while retrieving account details.'},
                             status=status.HTTP_400_BAD_REQUEST)
-        
+
+def parse_nested_form_data(query_dict) -> dict:
+    """
+    Converts flat QueryDict with bracketed keys to nested dicts.
+    Example: {'user[first_name]': 'John'} → {'user': {'first_name': 'John'}}
+    """
+    data = {}
+    for key, value in query_dict.items():
+        if '[' in key and key.endswith(']'):
+            main_key, sub_key = key.split('[', 1)
+            sub_key = sub_key[:-1]  # remove trailing ']'
+            if main_key not in data:
+                data[main_key] = {}
+            data[main_key][sub_key] = value
+        else:
+            data[key] = value
+    return data
 
 class AccountUpdateView(APIView):
     """
@@ -132,7 +148,8 @@ class AccountUpdateView(APIView):
 
         if hasattr(request_user, 'role') and request_user.is_academy():
             academy = self.academy_selector.get_by_user(request_user)
-            serializer = academy_serializers_v2.AcademyAccountUpdateSerializer(data=request.data)
+            parsed_data = parse_nested_form_data(request.data)
+            serializer = academy_serializers_v2.AcademyAccountUpdateSerializer(data=parsed_data)
 
             try:
                 serializer.is_valid(raise_exception=True)
@@ -169,7 +186,8 @@ class AccountUpdateView(APIView):
                 return Response({'detail': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         elif hasattr(request_user, 'role') and request_user.is_student():
             student = self.student_selector.get_student_by_user(request_user)
-            serializer = student_serializers.StudentAccountUpdateSerializer(data=request.data)
+            parsed_data = parse_nested_form_data(request.data)
+            serializer = student_serializers.StudentAccountUpdateSerializer(data=parsed_data)
 
             try:
                 serializer.is_valid(raise_exception=True)
