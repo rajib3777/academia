@@ -1,13 +1,14 @@
 from django.urls import path
-from academy.views.academy_views import (
+from academy.apis.academy_views import (
     AcademyListCreateAPIView, AcademyRetrieveUpdateDestroyAPIView,
     CourseListCreateAPIView, CourseRetrieveUpdateDestroyAPIView,
     BatchListCreateAPIView, BatchRetrieveUpdateDestroyAPIView, UpdateAcademyFromUserAPIView,
     AcademyDropdownView
 )
-from academy.views.academy_views_v2 import (AcademyListView, AcademyCreateView, AcademyDetailView, AcademyUpdateView, AcademyDeleteView,)
-from academy.views.course_views import CourseCreateView, CourseUpdateView, CourseListView, CourseDropdownView, CourseDeleteView, CourseTypeDropdownView
-from academy.views.batch_views import BatchCreateView, BatchUpdateView, BatchListView, BatchDeleteView, BatchDropdownView
+from academy.apis.academy_views_v2 import (AcademyListView, AcademyCreateView, AcademyDetailView, AcademyUpdateView, AcademyDeleteView,)
+from academy.apis.course_views import CourseCreateView, CourseUpdateView, CourseListView, CourseDropdownView, CourseDeleteView, CourseTypeDropdownView
+from academy.apis.batch_views import BatchCreateView, BatchUpdateView, BatchListView, BatchDeleteView, BatchDropdownView
+from academy.apis.batch_enrollment_api import BatchEnrollmentListAPI, BatchEnrollmentCreateAPI, BatchEnrollmentDetailAPI
 
 
 # Admin-only routes
@@ -57,5 +58,11 @@ batch_urlpatterns = [
 
 ]
 
+batch_enrollment_urlpatterns = [
+    path('batch-enrollments/', BatchEnrollmentListAPI.as_view(), name='batch_enrollment_list'),
+    path('batch-enrollments/create/', BatchEnrollmentCreateAPI.as_view(), name='batch_enrollment_create'),
+    path('batch-enrollments/<int:enrollment_id>/', BatchEnrollmentDetailAPI.as_view(), name='batch_enrollment_detail'),
+]
+
 # Combine them into final urlpatterns
-urlpatterns = admin_urlpatterns + academy_urlpatterns + academy_urlpatterns_v2 + course_urlpatterns + batch_urlpatterns
+urlpatterns = admin_urlpatterns + academy_urlpatterns + academy_urlpatterns_v2 + course_urlpatterns + batch_urlpatterns + batch_enrollment_urlpatterns

@@ -75,18 +75,23 @@ class Menu(models.Model):
     name = models.CharField(max_length=100)
     parent = models.ForeignKey('self', null=True, blank=True, related_name='submenus', on_delete=models.CASCADE)
     order = models.PositiveIntegerField(default=0, help_text="Order for menu/submenu display")
+    remarks = models.TextField(null=True, blank=True)
     
     class Meta:
         ordering = ['order', 'id']
         
     def __str__(self):
-        return self.name
+        if self.remarks:
+            return f"{self.name} ({self.remarks})"
+        else:
+            return f"{self.name}"
 
 class RoleMenuPermission(models.Model):
     """Maps a role to menu and its allowed permissions."""
     role = models.ForeignKey(Role, on_delete=models.CASCADE)
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
     permissions = models.ManyToManyField(Permission, blank=True)
+    remarks = models.TextField(null=True, blank=True)
 
     class Meta:
         unique_together = ('role', 'menu')

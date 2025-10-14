@@ -54,13 +54,13 @@ class PermissionAdmin(admin.ModelAdmin):
 
 @admin.register(Menu)
 class MenuAdmin(admin.ModelAdmin):
-    list_display = ('name', 'parent', 'order')
+    list_display = ('name', 'parent', 'order', 'remarks')
     search_fields = ('name',)
     list_filter = ('parent',)
 
 @admin.register(RoleMenuPermission)
 class RoleMenuPermissionAdmin(admin.ModelAdmin):
-    list_display = ('role', 'menu')
+    list_display = ('role', 'menu', 'remarks')
     filter_horizontal = ('permissions',)
     search_fields = ('role__name', 'menu__name')
     list_filter = ('role', )
