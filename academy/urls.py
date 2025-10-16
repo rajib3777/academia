@@ -8,7 +8,7 @@ from academy.apis.academy_views import (
 from academy.apis.academy_views_v2 import (AcademyListView, AcademyCreateView, AcademyDetailView, AcademyUpdateView, AcademyDeleteView,)
 from academy.apis.course_views import CourseCreateView, CourseUpdateView, CourseListView, CourseDropdownView, CourseDeleteView, CourseTypeDropdownView
 from academy.apis.batch_views import BatchCreateView, BatchUpdateView, BatchListView, BatchDeleteView, BatchDropdownView
-from academy.apis.batch_enrollment_api import BatchEnrollmentListAPI, BatchEnrollmentCreateAPI, BatchEnrollmentDetailAPI
+from academy.apis import batch_enrollment_api
 
 
 # Admin-only routes
@@ -59,9 +59,11 @@ batch_urlpatterns = [
 ]
 
 batch_enrollment_urlpatterns = [
-    path('batch-enrollments/', BatchEnrollmentListAPI.as_view(), name='batch_enrollment_list'),
-    path('batch-enrollments/create/', BatchEnrollmentCreateAPI.as_view(), name='batch_enrollment_create'),
-    path('batch-enrollments/<int:enrollment_id>/', BatchEnrollmentDetailAPI.as_view(), name='batch_enrollment_detail'),
+    path('batch-enrollments/', batch_enrollment_api.BatchEnrollmentListAPI.as_view(), name='batch_enrollment_list'),
+    path('batch-enrollments/create/', batch_enrollment_api.BatchEnrollmentCreateAPI.as_view(), name='batch_enrollment_create'),
+    path('batch-enrollments/<int:enrollment_id>/update/', batch_enrollment_api.BatchEnrollmentUpdateAPI.as_view(), name='batch_enrollment_update'),
+    path('batch-enrollments/<int:enrollment_id>/details/', batch_enrollment_api.BatchEnrollmentDetailAPI.as_view(), name='batch_enrollment_detail'),
+    path('batch-enrollments/<int:enrollment_id>/delete/', batch_enrollment_api.BatchEnrollmentDeleteAPI.as_view(), name='batch_enrollment_delete'),
 ]
 
 # Combine them into final urlpatterns
