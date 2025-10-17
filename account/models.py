@@ -78,8 +78,8 @@ class Menu(models.Model):
     remarks = models.TextField(null=True, blank=True)
     
     class Meta:
-        ordering = ['order', 'id']
-        
+        ordering = ['name', 'order']
+
     def __str__(self):
         if self.remarks:
             return f"{self.name} ({self.remarks})"

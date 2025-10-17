@@ -53,7 +53,7 @@ batch_urlpatterns = [
     path('v1/batches/', BatchListView.as_view(), name='batch-list'),
     path('v1/batches/create/', BatchCreateView.as_view(), name='batch-create'),
     path('v1/batches/<int:batch_id>/update/', BatchUpdateView.as_view(), name='batch-update'),
-    path('v1/batches/<int:batch_id>/', BatchDeleteView.as_view(), name='batch-delete'),
+    path('v1/batches/<int:batch_id>/delete/', BatchDeleteView.as_view(), name='batch-delete'),
     path('batches/dropdown/', BatchDropdownView.as_view(), name='batch-dropdown'),
 
 ]
