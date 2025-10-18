@@ -24,12 +24,9 @@ class BatchEnrollmentService:
         ).exists():
             raise ValidationError('Student already enrolled in this batch.')
         enrollment = BatchEnrollment.objects.create(
-            student_id=data['student_id'],
             batch_id=data['batch_id'],
-            completion_date=data.get('completion_date'),
+            student_id=data['student_id'],
             is_active=data.get('is_active', True),
-            attendance_percentage=data.get('attendance_percentage'),
-            final_grade_id=data.get('final_grade_id'),
             remarks=data.get('remarks', '')
         )
         return enrollment
@@ -40,7 +37,7 @@ class BatchEnrollmentService:
         enrollment = BatchEnrollmentSelector.get_by_id(enrollment_id)
         if not enrollment:
             raise ValidationError('BatchEnrollment not found.')
-        for field in ['completion_date', 'is_active', 'attendance_percentage', 'final_grade_id', 'remarks']:
+        for field in ['batch_id', 'student_id', 'is_active', 'remarks']:
             if field in data:
                 setattr(enrollment, field, data[field])
         enrollment.save()
