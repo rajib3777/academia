@@ -167,7 +167,6 @@ class SchoolDropdownView(APIView):
             schools = school_selector.SchoolSelector().get_schools_for_dropdown(
                 search=search
             )
-            print('schools', schools)
 
             # Serialize and return the data
             serializer = SchoolDropdownSerializer(schools, many=True)

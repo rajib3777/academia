@@ -352,6 +352,6 @@ class CourseTypeSelector:
             List of dictionaries with course type values and display names
         """
         return [
-            {'value': value, 'display_name': display_name} 
+            {'id': value, 'name': display_name} 
             for value, display_name in COURSE_TYPE_CHOICES
         ]

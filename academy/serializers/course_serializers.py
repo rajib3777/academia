@@ -131,9 +131,9 @@ class CourseDropdownSerializer(serializers.Serializer):
 class CourseTypeDropdownSerializer(serializers.Serializer):
     """
     Serializer for course type choices.
-    
-    This serializer represents course type choices as value-display_name pairs.
+
+    This serializer represents course type choices as id-name pairs.
     """
-    value = serializers.CharField(read_only=True)
-    display_name = serializers.CharField(read_only=True)
+    id = serializers.CharField(read_only=True)
+    name = serializers.CharField(read_only=True)
 
