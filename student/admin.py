@@ -12,7 +12,7 @@ class SchoolAdmin(admin.ModelAdmin):
 
 @admin.register(Student)
 class StudentAdmin(ClassMateAdmin):
-    list_display = ('student_id', 'school', 'user', 'date_of_birth', 'guardian_name')
+    list_display = ('student_id', 'school', 'user__first_name', 'user__last_name', 'user', 'date_of_birth', 'guardian_name')
     ordering = ('user__first_name', 'school__name')
     fields = [
         ('user', 'student_id', 'birth_registration_number', 'date_of_birth','school'),

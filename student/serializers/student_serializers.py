@@ -370,15 +370,15 @@ class StudentDropdownSerializer(serializers.Serializer):
         # If we're using the annotated queryset from the selector
         if hasattr(instance, 'full_name'):
             return {
-                'student_id': instance.student_id,
-                'full_name': instance.full_name
+                'id': instance.id,
+                'name': instance.full_name
             }
         
         # Fallback if the queryset doesn't have the annotation
         user = instance.user
         return {
-            'student_id': instance.student_id,
-            'full_name': f"{user.first_name} {user.last_name}".strip() or user.username
+            'id': instance.id,
+            'name': f"{user.first_name} {user.last_name}".strip() or user.username
         }
     
 
