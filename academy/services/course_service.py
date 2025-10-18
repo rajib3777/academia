@@ -191,6 +191,8 @@ class CourseService:
                     course.description = data['description']
                 if 'fee' in data:
                     course.fee = data['fee']
+                if 'course_type' in data:
+                    course.course_type = data['course_type']
                 if 'academy_id' in data:
                     course.academy_id = data['academy_id']
                 
