@@ -42,7 +42,7 @@ course_urlpatterns = [
     path('v1/courses/', CourseListView.as_view(), name='course-list'),
     path('v1/courses/create/', CourseCreateView.as_view(), name='course-create'),
     path('v1/courses/<int:course_id>/update/', CourseUpdateView.as_view(), name='course-update'),
-    path('v1/courses/<int:course_id>/', CourseDeleteView.as_view(), name='course-delete'),
+    path('v1/courses/<int:course_id>/delete/', CourseDeleteView.as_view(), name='course-delete'),
     path('courses/dropdown/', CourseDropdownView.as_view(), name='course-dropdown'),
     path('course-types/dropdown/', CourseTypeDropdownView.as_view(), name='course-type-dropdown'),
 

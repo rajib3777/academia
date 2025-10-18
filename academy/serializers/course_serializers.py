@@ -96,6 +96,7 @@ class CourseCreateSerializer(serializers.Serializer):
     description = serializers.CharField(required=True)
     fee = serializers.DecimalField(required=True, max_digits=10, decimal_places=2)
     academy_id = serializers.IntegerField(required=True)
+    course_type = serializers.CharField(required=True)
     batches = serializers.ListField(
         child=BatchInCourseSerializer(),
         required=False
