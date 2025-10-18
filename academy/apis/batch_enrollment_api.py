@@ -31,7 +31,14 @@ class BatchEnrollmentListAPI(APIView):
         search = request.GET.get('search')
         enrollments = self.selector.list_enrollments(request.user, filters, search)
         serializer = BatchEnrollmentSerializer(enrollments, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        
+        response_data = {
+                'success': True,
+                'data': serializer.data,
+                'total_count': len(enrollments),
+            }
+            
+        return Response(response_data, status=status.HTTP_200_OK)
         
 
 class BatchEnrollmentCreateAPI(APIView):
