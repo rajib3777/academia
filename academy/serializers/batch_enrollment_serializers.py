@@ -39,14 +39,19 @@ class BatchEnrollmentSerializer(serializers.Serializer):
                 'id': instance.student.id,
                 'name': str(instance.student),
             },
+            'academy': {
+                'id': instance.batch.course.academy.id,
+                'name': str(instance.batch.course.academy),
+            },
+            'course': {
+                'id': instance.batch.course.id,
+                'name': str(instance.batch.course.name),
+            },
             'batch': {
                 'id': instance.batch.id,
-                'name': str(instance.batch),
+                'name': str(instance.batch.name),
             },
             'enrollment_date': instance.enrollment_date,
-            'completion_date': instance.completion_date,
             'is_active': instance.is_active,
-            'attendance_percentage': instance.attendance_percentage,
-            'final_grade': str(instance.final_grade) if instance.final_grade else None,
             'remarks': instance.remarks,
         }
