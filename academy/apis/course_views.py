@@ -156,11 +156,12 @@ class CourseUpdateView(AuthenticatedGenericView, APIView):
                 'name': serializer.validated_data['name'],
                 'description': serializer.validated_data['description'],
                 'fee': serializer.validated_data['fee'],
-                'academy_id': serializer.validated_data['academy_id']
+                'academy_id': serializer.validated_data['academy_id'],
+                'course_type': serializer.validated_data['course_type']
             }
-            
+
             batches_data = serializer.validated_data.get('batches', None)
-            
+
             # Update course with optional batches
             updated_course = self.course_service.update_course(
                 course_id=course_id,

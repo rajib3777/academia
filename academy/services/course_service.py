@@ -183,6 +183,8 @@ class CourseService:
                 
                 # Get course
                 course = Course.objects.get(id=course_id)
+                print('course found for update:', course)
+                print('update data:', data)
                 
                 # Update course fields
                 if 'name' in data:
