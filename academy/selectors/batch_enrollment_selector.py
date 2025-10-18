@@ -69,7 +69,8 @@ class BatchEnrollmentSelector:
         if filters.get('completion_date'):
             qs = qs.filter(completion_date=filters['completion_date'])
         if filters.get('is_active') is not None:
-            qs = qs.filter(is_active=filters['is_active'])
+            is_active = filters['is_active'].lower() == 'true'
+            qs = qs.filter(is_active=is_active)
         if filters.get('final_grade'):
             qs = qs.filter(final_grade__grade__icontains=filters['final_grade'])
 
