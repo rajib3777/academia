@@ -300,7 +300,7 @@ class StudentSelector:
     
     @staticmethod
     def list_students(
-        request_user: Any,
+        request_user: User,
         academy_id: Optional[int] = None,
         filters: Dict[str, Any] = None,
         search_query: Optional[str] = None,

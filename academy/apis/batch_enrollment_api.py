@@ -1,8 +1,11 @@
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework.response import Response
 from rest_framework import status
+from functools import cached_property
 from academy.serializers.batch_enrollment_serializers import BatchEnrollmentSerializer
-from academy.selectors.batch_enrollment_selector import BatchEnrollmentSelector
+from academy.selectors import batch_enrollment_selector
 from academy.services.batch_enrollment_service import BatchEnrollmentService
 from django.core.exceptions import ValidationError
 
@@ -10,36 +13,61 @@ class BatchEnrollmentListAPI(APIView):
     """
     API for listing batch enrollments with role-based and filter logic.
     """
-    selector = BatchEnrollmentSelector()
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    serializer_class = BatchEnrollmentSerializer
+
+    @cached_property
+    def batch_enrollment_selector(self) -> batch_enrollment_selector.BatchEnrollmentSelector:
+        """Lazy initialization of BatchEnrollmentSelector."""
+        return batch_enrollment_selector.BatchEnrollmentSelector()
 
     def get(self, request):
-        filters = {
-            'academy_id': request.GET.get('academy_id'),
-            'course_id': request.GET.get('course_id'),
-            'course_type': request.GET.get('course_type'),
-            'batch_id': request.GET.get('batch_id'),
-            'batch_start_date': request.GET.get('batch_start_date'),
-            'batch_end_date': request.GET.get('batch_end_date'),
-            'batch_is_active': request.GET.get('batch_is_active'),
-            'enrollment_date': request.GET.get('enrollment_date'),
-            'completion_date': request.GET.get('completion_date'),
-            'is_active': request.GET.get('is_active'),
-            'final_grade': request.GET.get('final_grade'),
-        }
-        # Only accept known keys
-        filters = {k: v for k, v in filters.items() if v is not None}
-        search = request.GET.get('search')
-        enrollments = self.selector.list_enrollments(request.user, filters, search)
-        serializer = BatchEnrollmentSerializer(enrollments, many=True)
-        
-        response_data = {
+        try:
+            # Extract pagination parameters
+            page = int(request.GET.get('page', 1))
+            page_size = int(request.GET.get('page_size', 20))
+
+            # Extract search and ordering parameters
+            search_query = request.GET.get('search', '').strip()
+            ordering = request.GET.get('ordering')
+
+            pagination_info = self.batch_enrollment_selector.list_enrollments(
+                request_user=request.user,
+                filters=request.GET.dict(),
+                search_query=search_query,
+                ordering=ordering,
+                page=page,
+                page_size=page_size
+            )
+
+            # Serialize data
+            serializer = self.serializer_class(pagination_info['results'], many=True)
+
+            # Build response
+            response_data = {
                 'success': True,
                 'data': serializer.data,
-                'total_count': len(enrollments),
+                'pagination': pagination_info['pagination'],
+                'filters_applied': dict(request.GET),
+                'total_count': pagination_info['pagination']['total_items']
             }
-            
-        return Response(response_data, status=status.HTTP_200_OK)
-        
+
+            return Response(response_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            # Log the exception
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.exception("Error in BatchEnrollmentListAPI")
+            return Response(
+                {
+                    'success': False,
+                    'error': 'Failed to retrieve batch enrollments',
+                    'details': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 class BatchEnrollmentCreateAPI(APIView):
     """
@@ -62,7 +90,7 @@ class BatchEnrollmentUpdateAPI(APIView):
     """
     API for updating a batch enrollment.
     """
-    selector = BatchEnrollmentSelector()
+    selector = batch_enrollment_selector.BatchEnrollmentSelector()
     service = BatchEnrollmentService()
     serializer_class = BatchEnrollmentSerializer
 
@@ -80,7 +108,7 @@ class BatchEnrollmentDetailAPI(APIView):
     """
     API for retrieving a batch enrollment.
     """
-    selector = BatchEnrollmentSelector()
+    selector = batch_enrollment_selector.BatchEnrollmentSelector()
     serializer_class = BatchEnrollmentSerializer
 
     def get(self, request, enrollment_id: int):

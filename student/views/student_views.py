@@ -4,8 +4,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from student.models import School, Student
 from rest_framework import generics
-from rest_framework.filters import SearchFilter, OrderingFilter
-from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.filters import SearchFilter
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -19,14 +18,9 @@ from student.serializers.student_serializers import (SchoolNameListSerializer, S
 from student.serializers import student_serializers
 from classmate.permissions import AuthenticatedGenericView
 from classmate.utils import StandardResultsSetPagination
-from django.db.models import Q
-from django.core.paginator import Paginator
-from student.utils import StudentFilter
 from functools import cached_property
-from student.selectors import student_selector, school_selector
+from student.selectors import student_selector
 from student.services import student_service
-from account.selectors import user_selector
-from account.services import user_service
 logger = logging.getLogger(__name__)
 
 
