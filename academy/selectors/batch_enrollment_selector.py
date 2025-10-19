@@ -89,12 +89,12 @@ class BatchEnrollmentSelector:
     ) -> QuerySet:
         if search:
             queryset = queryset.filter(
-                Q(student__name__icontains=search) |
+                Q(student__user__first_name__icontains=search) |
+                Q(student__user__last_name__icontains=search) |
                 Q(batch__name__icontains=search) |
                 Q(batch__course__name__icontains=search) |
                 Q(batch__course__course_type__icontains=search) |
                 Q(batch__course__academy__name__icontains=search) |
-                Q(final_grade__grade__icontains=search) |
                 Q(remarks__icontains=search)
             )
         return queryset.order_by('-enrollment_date')
