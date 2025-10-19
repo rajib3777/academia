@@ -56,16 +56,24 @@ class BatchEnrollmentSelector:
             queryset = queryset.filter(batch__course__course_type=filters['course_type'])
         if filters.get('batch_id'):
             queryset = queryset.filter(batch_id=filters['batch_id'])
-        if filters.get('batch_start_date'):
-            queryset = queryset.filter(batch__start_date__gte=filters['batch_start_date'])
-        if filters.get('batch_end_date'):
-            queryset = queryset.filter(batch__end_date__lte=filters['batch_end_date'])
+        if filters.get('batch_start_date_from'):
+            queryset = queryset.filter(batch__start_date__gte=filters['batch_start_date_from'])
+        if filters.get('batch_start_date_to'):
+            queryset = queryset.filter(batch__start_date__lte=filters['batch_start_date_to'])
+        if filters.get('batch_end_date_from'):
+            queryset = queryset.filter(batch__end_date__gte=filters['batch_end_date_from'])
+        if filters.get('batch_end_date_to'):
+            queryset = queryset.filter(batch__end_date__lte=filters['batch_end_date_to'])
         if filters.get('batch_is_active') is not None:
             queryset = queryset.filter(batch__is_active=filters['batch_is_active'])
-        if filters.get('enrollment_date'):
-            queryset = queryset.filter(enrollment_date=filters['enrollment_date'])
-        if filters.get('completion_date'):
-            queryset = queryset.filter(completion_date=filters['completion_date'])
+        if filters.get('enrollment_date_from'):
+            queryset = queryset.filter(enrollment_date__gte=filters['enrollment_date_from'])
+        if filters.get('enrollment_date_to'):
+            queryset = queryset.filter(enrollment_date__lte=filters['enrollment_date_to'])
+        if filters.get('completion_date_from'):
+            queryset = queryset.filter(completion_date__gte=filters['completion_date_from'])
+        if filters.get('completion_date_to'):
+            queryset = queryset.filter(completion_date__lte=filters['completion_date_to'])
         if filters.get('is_active') is not None:
             is_active = filters['is_active'].lower() == 'true'
             queryset = queryset.filter(is_active=is_active)
