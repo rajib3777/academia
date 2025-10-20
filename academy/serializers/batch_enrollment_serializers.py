@@ -37,18 +37,22 @@ class BatchEnrollmentSerializer(serializers.Serializer):
             'id': instance.id,
             'student': {
                 'id': instance.student.id,
+                'student_id': instance.student.student_id,
                 'name': f"{instance.student.user.first_name} {instance.student.user.last_name} - {instance.student.student_id}",
             },
             'academy': {
                 'id': instance.batch.course.academy.id,
+                'academy_id': instance.batch.course.academy.academy_id,
                 'name': str(instance.batch.course.academy),
             },
             'course': {
                 'id': instance.batch.course.id,
+                'course_id': instance.batch.course.course_id,
                 'name': str(instance.batch.course.name),
             },
             'batch': {
                 'id': instance.batch.id,
+                'batch_id': instance.batch.batch_id,
                 'name': str(instance.batch.name),
             },
             'enrollment_date': instance.enrollment_date,

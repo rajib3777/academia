@@ -1,13 +1,30 @@
-import django_filters
+from datetime import datetime
+from django.db import transaction
 from django_filters import rest_framework as filters
 from django.db.models import Q
 from .models import Student
 from datetime import date, datetime
 
-def generate_student_id(prefix: str = "STD") -> str:
-    count = Student.objects.count() + 1
-    padded_number = str(count).zfill(6)
-    return f"{prefix}-{padded_number}"
+def generate_student_id(prefix: str = "SID") -> str:
+    
+    current_year = datetime.now().year
+    year_prefix = f'{prefix}-{current_year}'
+    
+    with transaction.atomic():
+        students = Student.objects.filter(
+            student_id__startswith=f'{year_prefix}-'
+        ).exclude(batch_id__isnull=True).values_list('student_id', flat=True)
+
+        max_number = 0
+        for student_id in students:
+            try:
+                parts = student_id.split('-')
+                if len(parts) >= 3 and parts[2].isdigit():
+                    max_number = max(max_number, int(parts[2]))
+            except (IndexError, ValueError):
+                continue
+        next_number = max_number + 1
+        return f'{year_prefix}-{next_number:05d}'
 
 
 class StudentFilter(filters.FilterSet):

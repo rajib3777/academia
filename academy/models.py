@@ -4,6 +4,9 @@ from classmate.models import ClassMateModel
 from django.core.exceptions import ValidationError
 from account.utils import phone_validator
 from smart_selects.db_fields import ChainedForeignKey
+from academy import utils as academy_utils
+from django.db.models.signals import pre_save
+from django.dispatch import receiver
 from utils.models import Division, District, Upazila
 from academy.choices_fields import YEAR_CHOICES, COURSE_TYPE_CHOICES, COURSE_TYPE_BANGLA
 
@@ -14,6 +17,7 @@ class Academy(ClassMateModel):
     website = models.URLField(null=True, blank=True)
     contact_number = models.CharField(max_length=15, validators=[phone_validator])
     email = models.EmailField(null=True, blank=True)
+    academy_id = models.CharField(max_length=20, unique=True, help_text="Unique ID for the Academy", editable=False, null=True, blank=True)
     # user = models.ForeignKey(User, on_delete=models.PROTECT, limit_choices_to={'role__name': 'academy'}, related_name='academy')
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='academy')
     established_year = models.CharField(max_length=20, null=True, blank=True, default='2025', choices=YEAR_CHOICES)
@@ -59,6 +63,7 @@ class Course(ClassMateModel):
     description = models.TextField()
     fee = models.DecimalField(max_digits=10, decimal_places=2)
     academy = models.ForeignKey(Academy, on_delete=models.PROTECT, null=True, related_name='courses')
+    course_id = models.CharField(max_length=20, unique=True, help_text="Unique ID for the Course", editable=False, null=True, blank=True)
     course_type = models.CharField(
         max_length=50,
         choices=COURSE_TYPE_CHOICES,
@@ -85,6 +90,7 @@ class Batch(ClassMateModel):
     end_date = models.DateField(null=True, blank=True)
     description = models.TextField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
+    batch_id = models.CharField(max_length=20, unique=True, help_text="Unique ID for the Batch", editable=False, null=True, blank=True)
     students = models.ManyToManyField(
         'student.Student',
         through='BatchEnrollment',
@@ -141,3 +147,32 @@ class BatchEnrollment(ClassMateModel):
 
     def __str__(self):
         return f"{self.student} in {self.batch}"
+
+
+@receiver(pre_save, sender=Academy)
+def set_academy_id_on_create(sender, instance, **kwargs):
+    """
+    Signal to auto-generate academy_id only when creating a new Academy.
+    """
+    print("pre_save signal triggered for Academy")
+    if (not instance.pk and not instance.academy_id) or (instance.pk and not instance.academy_id):
+        instance.academy_id = academy_utils.generate_academy_id()
+
+
+@receiver(pre_save, sender=Course)
+def set_course_id_on_create(sender, instance, **kwargs):
+    """
+    Signal to auto-generate course_id only when creating a new Course.
+    """
+    if (not instance.pk and not instance.course_id) or (instance.pk and not instance.course_id):
+        instance.course_id = academy_utils.generate_course_id()
+
+
+@receiver(pre_save, sender=Batch)
+def set_batch_id_on_create(sender, instance, **kwargs):
+    """
+    Signal to auto-generate batch_id only when creating a new Batch.
+    """
+    if (not instance.pk and not instance.batch_id) or (instance.pk and not instance.batch_id):
+        instance.batch_id = academy_utils.generate_batch_id()
+

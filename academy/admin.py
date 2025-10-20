@@ -17,7 +17,7 @@ class CourseInline(admin.StackedInline):
 
 @admin.register(Academy)
 class AcademyAdmin(ClassMateAdmin):
-    list_display = ('name', 'contact_number', 'email', 'user')
+    list_display = ('name', 'academy_id', 'contact_number', 'email', 'user')
     list_filter = ('user', 'name',)
     search_fields = ('name', 'user__username', 'contact_number', 'email')
     autocomplete_fields = ('user',)
@@ -42,7 +42,7 @@ class BatchInline(admin.TabularInline):
 
 @admin.register(Course)
 class CourseAdmin(ClassMateAdmin):
-    list_display = ('name', 'fee', 'course_type', 'academy')
+    list_display = ('name', 'course_id', 'fee', 'course_type', 'academy')
     list_filter = ('academy', 'course_type',)
     autocomplete_fields = ('academy',)
     search_fields = ('name', 'academy__name')
@@ -76,7 +76,7 @@ class BatchEnrollmentInline(admin.TabularInline):
 
 @admin.register(Batch)
 class BatchAdmin(ClassMateAdmin):
-    list_display = ('name', 'course', 'start_date', 'end_date')
+    list_display = ('name', 'batch_id', 'course', 'start_date', 'end_date')
     list_filter = ('is_active', 'course__academy', 'course', 'start_date', 'end_date')
     search_fields = ('name', 'course__name')
     inlines = [BatchEnrollmentInline]
