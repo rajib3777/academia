@@ -4,6 +4,36 @@ from django.core.paginator import Paginator
 from account import choices as account_choices
 from academy.models import Academy, Batch, BatchEnrollment, Course
 from account.models import User
+from academy.choices_fields import YEAR_CHOICES
+
+
+class YearSelector:
+    """Selector for year-related operations."""
+
+    def list_years(self) -> List[Tuple[str, str]]:
+        """
+        Get all available year choices.
+        
+        Returns:
+            List of tuples containing (value, display_name) for years.
+        """
+        return YEAR_CHOICES
+    
+    def get_year_range(self, start_year: int = 2000, end_year: int = 2040) -> List[Tuple[str, str]]:
+        """
+        Get years within a specific range.
+        
+        Args:
+            start_year: Starting year (inclusive)
+            end_year: Ending year (inclusive)
+            
+        Returns:
+            List of tuples containing (value, display_name) for years in range.
+        """
+        return [
+            (str(year), str(year))
+            for year in range(start_year, end_year + 1)
+        ]
 
 
 class AcademySelector:

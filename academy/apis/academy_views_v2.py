@@ -268,3 +268,61 @@ class AcademyDeleteView(APIView):
             return Response({'detail': 'An error occurred while deleting the academy.'}, 
                            status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
+
+class YearListAPIView(APIView):
+    """API view to list available years."""
+    
+    selector = academy_selector_v2.YearSelector
+    
+    def get(self, request):
+        """
+        Get list of available years.
+        
+        Query Parameters:
+            start_year (optional): Starting year for filtering
+            end_year (optional): Ending year for filtering
+        """
+        try:
+            # Get query parameters
+            start_year = request.query_params.get('start_year')
+            end_year = request.query_params.get('end_year')
+            
+            selector = self.selector()
+            
+            # Apply filtering if parameters provided
+            if start_year and end_year:
+                try:
+                    start_year_int = int(start_year)
+                    end_year_int = int(end_year)
+                    
+                    if start_year_int > end_year_int:
+                        return Response(
+                            {'error': 'start_year cannot be greater than end_year'},
+                            status=status.HTTP_400_BAD_REQUEST
+                        )
+                    
+                    years = selector.get_year_range(start_year_int, end_year_int)
+                except ValueError:
+                    return Response(
+                        {'error': 'start_year and end_year must be valid integers'},
+                        status=status.HTTP_400_BAD_REQUEST
+                    )
+            else:
+                years = selector.list_years()
+            
+            # Serialize the data
+            serializer = academy_serializers_v2.YearChoiceSerializer(years, many=True)
+
+            data = {
+                'success': True,
+                'data': serializer.data,
+                'total_count': len(serializer.data),
+            }
+
+            return Response(data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            return Response(
+                {'error': 'An error occurred while fetching years'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

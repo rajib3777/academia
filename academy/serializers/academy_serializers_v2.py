@@ -311,3 +311,19 @@ class AcademyAccountDetailSerializer(serializers.Serializer):
                 return request.build_absolute_uri(url)
             return url
         return None
+    
+
+class YearChoiceSerializer(serializers.Serializer):
+    """Serializer for year choice data."""
+    
+    value = serializers.CharField(help_text="Year value")
+    display_name = serializers.CharField(help_text="Year display name")
+    
+    def to_representation(self, instance):
+        """Convert tuple to dict format."""
+        if isinstance(instance, tuple) and len(instance) == 2:
+            return {
+                'id': instance[0],
+                'name': instance[1]
+            }
+        return super().to_representation(instance)

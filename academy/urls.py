@@ -5,7 +5,7 @@ from academy.apis.academy_views import (
     BatchListCreateAPIView, BatchRetrieveUpdateDestroyAPIView, UpdateAcademyFromUserAPIView,
     AcademyDropdownView
 )
-from academy.apis.academy_views_v2 import (AcademyListView, AcademyCreateView, AcademyDetailView, AcademyUpdateView, AcademyDeleteView,)
+from academy.apis.academy_views_v2 import (AcademyListView, AcademyCreateView, AcademyDetailView, AcademyUpdateView, AcademyDeleteView, YearListAPIView)
 from academy.apis.course_views import CourseCreateView, CourseUpdateView, CourseListView, CourseDropdownView, CourseDeleteView, CourseTypeDropdownView
 from academy.apis.batch_views import BatchCreateView, BatchUpdateView, BatchListView, BatchDeleteView, BatchDropdownView
 from academy.apis import batch_enrollment_api
@@ -35,6 +35,8 @@ academy_urlpatterns_v2 = [
     path('v1/academies/<int:academy_id>/details/', AcademyDetailView.as_view(), name='academy-detail-for-admin'),
     path('v1/academies/details/', AcademyDetailView.as_view(), name='academy-detail-for-academy-user'),
     path('v1/academies/<int:academy_id>/delete/', AcademyDeleteView.as_view(), name='academy-delete'), # need to work here. user not deleting. also need to add soft delete feature
+    path('year-choice/dropdown/', YearListAPIView.as_view(), name='year-choice-dropdown'),
+
 ]
 
 course_urlpatterns = [
