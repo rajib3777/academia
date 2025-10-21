@@ -129,40 +129,40 @@ class AcademyListSerializer(serializers.Serializer):
         
         # Add division data if available
         if instance.division:
-            data.update({
-                'division_id': instance.division.id,
-                'division_name': instance.division.name,
-            })
+            data['division'] = {
+                'id': instance.division.id,
+                'name': instance.division.name,
+            }
         else:
-            data.update({
-                'division_id': None,
-                'division_name': None,
-            })
+            data['division'] = {
+                'id': None,
+                'name': None,
+            }
             
         # Add district data if available
         if instance.district:
-            data.update({
-                'district_id': instance.district.id,
-                'district_name': instance.district.name,
-            })
+            data['district'] = {
+                'id': instance.district.id,
+                'name': instance.district.name,
+            }
         else:
-            data.update({
-                'district_id': None,
-                'district_name': None,
-            })
-            
+            data['district'] = {
+                'id': None,
+                'name': None,
+            }
+
         # Add upazila data if available
         if instance.upazila:
-            data.update({
-                'upazila_id': instance.upazila.id,
-                'upazila_name': instance.upazila.name,
-            })
+            data['upazila'] = {
+                'id': instance.upazila.id,
+                'name': instance.upazila.name,
+            }
         else:
-            data.update({
-                'upazila_id': None,
-                'upazila_name': None,
-            })
-            
+            data['upazila'] = {
+                'id': None,
+                'name': None,
+            }
+
         # Add user data
         user = instance.user
         data['user'] = {
