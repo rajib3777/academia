@@ -86,6 +86,7 @@ class AcademyListSerializer(serializers.Serializer):
     name = serializers.CharField(read_only=True)
     description = serializers.CharField(read_only=True, allow_null=True)
     logo = serializers.ImageField(read_only=True, allow_null=True)
+    academy_id = serializers.CharField(read_only=True, allow_null=True)
     website = serializers.URLField(read_only=True, allow_null=True)
     contact_number = serializers.CharField(read_only=True)
     established_year = serializers.CharField(read_only=True, allow_null=True)
@@ -116,6 +117,7 @@ class AcademyListSerializer(serializers.Serializer):
             'name': instance.name,
             'description': instance.description,
             'logo': instance.logo.url if instance.logo else None,
+            'academy_id': instance.academy_id,
             'website': instance.website,
             'contact_number': instance.contact_number,
             'established_year': instance.established_year,
