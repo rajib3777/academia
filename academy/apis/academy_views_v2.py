@@ -48,10 +48,6 @@ class AcademyListView(APIView):
             ordering = request.GET.get('ordering')
             academy_id = request.GET.get('academy_id')
             
-            # Whitelist allowed filter parameters
-            # allowed_filters = {'division', 'district', 'upazila', 'is_active', 'established_year'}
-            # filters = {k: v for k, v in request.query_params.items() if k in allowed_filters}
-            
             # Get academies with selector
             pagination_info = self.academy_selector.list_academies(
                 request_user=request.user,
@@ -64,7 +60,7 @@ class AcademyListView(APIView):
             )
             
             # Serialize data
-            serializer = self.serializer_class(pagination_info['results'], many=True)
+            serializer = self.serializer_class(pagination_info['results'], context={'request': request}, many=True)
             
             # Build response
             response_data = {

@@ -106,6 +106,15 @@ class AcademyListSerializer(serializers.Serializer):
     user = UserSerializer(read_only=True)
     courses = CourseSerializer(many=True, read_only=True)
     course_count = serializers.IntegerField(read_only=True)
+
+    def get_logo(self, obj) -> str:
+        request = self.context.get('request')
+        if obj.logo and hasattr(obj.logo, 'url'):
+            url = obj.logo.url
+            if request is not None:
+                return request.build_absolute_uri(url)
+            return url
+        return None
     
     def to_representation(self, instance: Academy) -> Dict[str, Any]:
         """
@@ -116,7 +125,7 @@ class AcademyListSerializer(serializers.Serializer):
             'id': instance.id,
             'name': instance.name,
             'description': instance.description,
-            'logo': instance.logo.url if instance.logo else None,
+            'logo': self.get_logo(instance),
             'academy_id': instance.academy_id,
             'website': instance.website,
             'contact_number': instance.contact_number,
