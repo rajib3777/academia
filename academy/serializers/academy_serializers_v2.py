@@ -13,7 +13,6 @@ class AcademyCreateUpdateSerializer(serializers.Serializer):
     logo = serializers.ImageField(required=False, allow_null=True)
     website = serializers.URLField(required=False, allow_blank=True, allow_null=True)
     contact_number = serializers.CharField(max_length=15)
-    email = serializers.EmailField(required=False, allow_blank=True, allow_null=True)
     established_year = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     division = serializers.IntegerField(required=False, allow_null=True)
     district = serializers.IntegerField(required=False, allow_null=True)
@@ -89,7 +88,6 @@ class AcademyListSerializer(serializers.Serializer):
     logo = serializers.ImageField(read_only=True, allow_null=True)
     website = serializers.URLField(read_only=True, allow_null=True)
     contact_number = serializers.CharField(read_only=True)
-    email = serializers.EmailField(read_only=True, allow_null=True)
     established_year = serializers.CharField(read_only=True, allow_null=True)
     
     # Address fields
@@ -120,7 +118,6 @@ class AcademyListSerializer(serializers.Serializer):
             'logo': instance.logo.url if instance.logo else None,
             'website': instance.website,
             'contact_number': instance.contact_number,
-            'email': instance.email,
             'established_year': instance.established_year,
             'area_or_union': instance.area_or_union,
             'street_address': instance.street_address,
@@ -170,9 +167,11 @@ class AcademyListSerializer(serializers.Serializer):
             'id': user.id,
             'username': user.username,
             'email': user.email,
+            'phone': getattr(user, 'phone', ''),
             'first_name': user.first_name,
             'last_name': user.last_name,
-            'phone': getattr(user, 'phone', ''),
+            'full_name': user.get_full_name(),
+            'is_active': user.is_active,
         }
         
         # Add courses data if available

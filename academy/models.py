@@ -16,7 +16,6 @@ class Academy(ClassMateModel):
     logo = models.ImageField(upload_to='academy_logos/', null=True, blank=True)
     website = models.URLField(null=True, blank=True)
     contact_number = models.CharField(max_length=15, validators=[phone_validator])
-    email = models.EmailField(null=True, blank=True)
     academy_id = models.CharField(max_length=20, unique=True, help_text="Unique ID for the Academy", editable=False, null=True, blank=True)
     # user = models.ForeignKey(User, on_delete=models.PROTECT, limit_choices_to={'role__name': 'academy'}, related_name='academy')
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='academy')

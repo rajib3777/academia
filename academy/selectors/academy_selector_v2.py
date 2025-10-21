@@ -157,7 +157,6 @@ class AcademySelector:
                 Q(name__icontains=search_query) |
                 Q(description__icontains=search_query) |
                 Q(contact_number__icontains=search_query) |
-                Q(email__icontains=search_query) |
                 Q(user__username__icontains=search_query) |
                 Q(user__email__icontains=search_query) |
                 Q(user__first_name__icontains=search_query) |
