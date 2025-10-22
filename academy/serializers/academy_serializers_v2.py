@@ -291,6 +291,7 @@ class AcademyAccountDetailSerializer(serializers.Serializer):
     website = serializers.URLField(allow_blank=True)
     contact_number = serializers.CharField()
     established_year = serializers.CharField()
+    academy_id = serializers.CharField()
     division_id = serializers.IntegerField(source='division.id', allow_null=True)
     division_name = serializers.CharField(source='division.name', allow_null=True)
     district_id = serializers.IntegerField(source='district.id', allow_null=True)
