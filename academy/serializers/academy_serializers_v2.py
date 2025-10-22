@@ -290,7 +290,6 @@ class AcademyAccountDetailSerializer(serializers.Serializer):
     logo = serializers.ImageField(allow_null=True)
     website = serializers.URLField(allow_blank=True)
     contact_number = serializers.CharField()
-    email = serializers.EmailField(allow_blank=True)
     established_year = serializers.CharField()
     division_id = serializers.IntegerField(source='division.id', allow_null=True)
     division_name = serializers.CharField(source='division.name', allow_null=True)
