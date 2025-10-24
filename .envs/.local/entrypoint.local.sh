@@ -14,6 +14,6 @@ echo "" "Collecting static files..."
 python manage.py collectstatic --noinput
 echo "" "Static files collected"
 
-echo "" "Starting server..."
+echo "" "Starting server... local"
 python manage.py runserver 0.0.0.0:8080
 echo "" "Server started"

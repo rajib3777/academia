@@ -14,7 +14,8 @@ echo "" "Collecting static files..."
 python manage.py collectstatic --noinput
 echo "" "Static files collected"
 
-echo "" "Starting server..."
+echo "" "Starting server... production"
+#
 gunicorn classmate.wsgi:application --bind 0.0.0.0:80 --workers 3 --log-level info --log-file -
 # uvicorn classmate.asgi:application --host 0.0.0.0 --port 80 --workers 3 --log-level info --log-file - -reload &
 
