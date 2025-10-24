@@ -13,7 +13,7 @@ def refresh_role_cache(sender, **kwargs):
     force_update_role_cache()
 
 
-@receiver(post_migrate)
+# @receiver(post_migrate)
 def populate_roles_and_superuser(sender, **kwargs):
     if sender.name != "account":  # Prevent running for other apps
         return
