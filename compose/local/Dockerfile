@@ -7,7 +7,8 @@
 WORKDIR /app
 
 # Install system dependencies (for psycopg2, Pillow, etc.)
-RUN apt-get update && apt-get install -y \ 
+RUN echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99-no-check-valid-until \
+    && apt-get update && apt-get install -y \ 
     curl \
     libpq-dev gcc \
     netcat-traditional \
