@@ -17,7 +17,7 @@ services:
       
 
   db:
-    image: postgres:17
+    image: postgres:18
     restart: always
     container_name: classmate_db
     volumes:
