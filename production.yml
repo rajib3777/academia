@@ -24,8 +24,18 @@ services:
       - classmate_db:/var/lib/postgresql/data/
     ports:
       - "5433:5432"
+    environment:
+      POSTGRES_DB: classmate_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: bME1pUGaTl1BFx5vU7ht
     env_file:
       - ./.envs/.production/.env.production
+    healthcheck:
+      test: ["CMD-SHELL", "PGPASSWORD=bME1pUGaTl1BFx5vU7ht pg_isready -U postgres -d classmate_db"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
 
 volumes:
   classmate_db:
