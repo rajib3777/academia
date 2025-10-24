@@ -26,12 +26,6 @@ services:
       - "5433:5432"
     env_file:
       - ./.envs/.production/.env.production
-    # healthcheck:
-    #   test: ["CMD-SHELL", "PGPASSWORD=${DATABASE_PASSWORD} pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
-    #   interval: 10s
-    #   retries: 5
-    #   start_period: 30s
-    #   timeout: 10s
 
 volumes:
   classmate_db:
