@@ -2,7 +2,7 @@ services:
   web:
     build:
       context: .
-      dockerfile: ./compose/local/Dockerfile
+      dockerfile: ./compose/production/Dockerfile
     container_name: classmate_web
     volumes:
       - .:/app
@@ -13,7 +13,7 @@ services:
         condition: service_healthy
         restart: true
     env_file:
-      - ./.envs/.local/.env.local
+      - ./.envs/.production/.env.production
       
 
   db:
@@ -25,7 +25,7 @@ services:
     ports:
       - "5432:5432"
     env_file:
-      - ./.envs/.local/.env.local
+      - ./.envs/.production/.env.production
     healthcheck:
       test: ["CMD-SHELL", "PGPASSWORD=${DATABASE_PASSWORD} pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
       interval: 10s
