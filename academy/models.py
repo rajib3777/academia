@@ -141,8 +141,8 @@ class BatchEnrollment(ClassMateModel):
 
     class Meta:
         unique_together = ('student', 'batch')
-        verbose_name = "Batch Enrollment"
-        verbose_name_plural = "Batch Enrollments"
+        verbose_name = "Student Enrollment"
+        verbose_name_plural = "Student Enrollments"
 
     def __str__(self):
         return f"{self.student} in {self.batch}"
@@ -153,7 +153,6 @@ def set_academy_id_on_create(sender, instance, **kwargs):
     """
     Signal to auto-generate academy_id only when creating a new Academy.
     """
-    print("pre_save signal triggered for Academy")
     if (not instance.pk and not instance.academy_id) or (instance.pk and not instance.academy_id):
         instance.academy_id = academy_utils.generate_academy_id()
 
