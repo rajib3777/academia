@@ -27,6 +27,7 @@ urlpatterns = [
     path('api/', include("academy.urls")),
     path('api/', include("utils.urls")),
     path('api/', include("student.urls")),
+    path('api/', include("payment.urls")),
     # path('sentry-debug/', trigger_error),
     path('chaining/', include('smart_selects.urls')),
 ]

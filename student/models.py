@@ -17,7 +17,7 @@ class School(models.Model):
         return self.name
 
 class Student(ClassMateModel):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'role__name': 'student'})
+    user = models.OneToOneField(User, on_delete=models.CASCADE, limit_choices_to={'role__name': 'student'}, related_name='student')
     profile_picture = models.ImageField(upload_to='student_profiles/', null=True, blank=True, help_text="Upload a profile picture for the student")
     school = models.ForeignKey(School, on_delete=models.PROTECT)
     student_id = models.CharField(max_length=20, unique=True, help_text="Unique ID for the student", editable=False, null=True, blank=True)

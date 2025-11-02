@@ -8,7 +8,7 @@ from academy import utils as academy_utils
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from utils.models import Division, District, Upazila
-from academy.choices_fields import YEAR_CHOICES, COURSE_TYPE_CHOICES, COURSE_TYPE_BANGLA
+from academy.choices_fields import YEAR_CHOICES, COURSE_TYPE_CHOICES, COURSE_TYPE_BANGLA, SLOT_CATEGORY_CHOICES, JAN_JUN
 
 class Academy(ClassMateModel):
     name = models.CharField(max_length=255, unique=True)
@@ -67,7 +67,7 @@ class Course(ClassMateModel):
         max_length=50,
         choices=COURSE_TYPE_CHOICES,
         default=COURSE_TYPE_BANGLA,
-        help_text="The subject or category this course belongs to"
+        help_text="Subject"
     )
 
     def __str__(self):
@@ -95,13 +95,19 @@ class Batch(ClassMateModel):
         through='BatchEnrollment',
         related_name='enrolled_batches'
     )
+    slot_category = models.CharField(
+        max_length=20,
+        choices=SLOT_CATEGORY_CHOICES,
+        default=JAN_JUN,
+        help_text='Batch duration slot/category'
+    )
 
     def __str__(self):
         return f"{self.name} - {self.course.name}"
 
     class Meta:
         verbose_name = 'Batch'
-        verbose_name_plural = 'Batchs'
+        verbose_name_plural = 'Batches'
         ordering = ['start_date']
         unique_together = ('name', 'course')  # Ensures batch name is unique within a course
 
@@ -145,7 +151,7 @@ class BatchEnrollment(ClassMateModel):
         verbose_name_plural = "Student Enrollments"
 
     def __str__(self):
-        return f"{self.student} in {self.batch}"
+        return f"{self.student.user.get_full_name()} in {self.batch}"
 
 
 @receiver(pre_save, sender=Academy)

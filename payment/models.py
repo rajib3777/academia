@@ -3,36 +3,27 @@ from classmate.models import ClassMateModel
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
 from payment.choices import PAYMENT_METHOD_CHOICES, CASH, PAYMENT_STATUS_CHOICES, PAYMENT_STATUS_PENDING
+from academy.models import BatchEnrollment
+from student.models import Student
 
-class Payment(ClassMateModel):
+
+class StudentPayment(ClassMateModel):
     """
     Represents a payment transaction in the system.
     Supports flexible payer and target using generic relations.
     """
-    payer_content_type = models.ForeignKey(
-        ContentType,
+    batch_enrollment = models.ForeignKey(
+        BatchEnrollment,
         on_delete=models.CASCADE,
-        related_name='payment_payer_type',
-        help_text='Content type of the payer (Student, Academy, Admin, etc.).',
-        db_index=True
+        related_name='student_payments',
+        help_text='The batch enrollment this payment is for.'
     )
-    payer_object_id = models.PositiveIntegerField(
-        help_text='ID of the payer object.',
-        db_index=True
-    )
-    payer = GenericForeignKey('payer_content_type', 'payer_object_id')
-    target_content_type = models.ForeignKey(
-        ContentType,
+    student = models.ForeignKey(
+        Student,
         on_delete=models.CASCADE,
-        related_name='payment_target_type',
-        help_text='Content type of the payment target (Enrollment, Service, etc.).',
-        db_index=True
+        related_name='payments',
+        help_text='The student making the payment.'
     )
-    target_object_id = models.PositiveIntegerField(
-        help_text='ID of the payment target object.',
-        db_index=True
-    )
-    target = GenericForeignKey('target_content_type', 'target_object_id')
     amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -86,17 +77,17 @@ class Payment(ClassMateModel):
     )
 
     class Meta:
-        verbose_name = 'Payment'
-        verbose_name_plural = 'Payments'
+        verbose_name = 'Student Payment'
+        verbose_name_plural = 'Student Payments'
         ordering = ['-date']
         indexes = [
-            models.Index(fields=['payer_content_type', 'payer_object_id']),
-            models.Index(fields=['target_content_type', 'target_object_id']),
+            models.Index(fields=['student']),
+            models.Index(fields=['batch_enrollment']),
             models.Index(fields=['status']),
             models.Index(fields=['transaction_id']),
         ]
 
     def __str__(self) -> str:
         return (
-            f'Payment of {self.amount} by {self.payer} for {self.target}'
+            f'StudentPayment of {self.amount} by {self.student} for {self.batch_enrollment}'
         )

@@ -1,14 +1,16 @@
 from django.contrib import admin
-from payment.models import Payment
+from django.db import models
+from django import forms
+from payment.models import StudentPayment
 
-@admin.register(Payment)
-class PaymentAdmin(admin.ModelAdmin):
+@admin.register(StudentPayment)
+class StudentPaymentAdmin(admin.ModelAdmin):
     """
-    Admin configuration for Payment model.
+    Admin configuration for StudentPayment model.
     """
     list_display = (
-        'payer',
-        'target',
+        'batch_enrollment',
+        'student',
         'amount',
         'method',
         'status',
@@ -22,24 +24,24 @@ class PaymentAdmin(admin.ModelAdmin):
         'status',
         'is_refunded',
         'refund_date',
-        'payer_content_type',
-        'target_content_type',
+        'batch_enrollment',
+        'student',
     )
     search_fields = (
         'transaction_id',
         'remarks',
+        'student__user__first_name',
+        'student__user__last_name',
+        'student__user__email',
+        'batch_enrollment__batch__name',
     )
-    readonly_fields = ('date', 'created_by', 'created_at', 'modified_at', 
-                       'metadata', 'payer_content_type', 'target_content_type',
-                       'payer_object_id', 'target_object_id'
-        )
+    readonly_fields = ('date', 'created_by', 'created_at', 'modified_at',
+                       'metadata',)
     fieldsets = (
         (None, {
             'fields': ((
-                'payer_content_type',
-                'payer_object_id',
-                'target_content_type',
-                'target_object_id',
+                'batch_enrollment',
+                'student',
             ),)
         }),
         (None, {
@@ -66,3 +68,16 @@ class PaymentAdmin(admin.ModelAdmin):
             ),
         }),
     )
+
+    formfield_overrides = {
+        models.TextField: {
+            'widget': forms.Textarea(
+                attrs={
+                    'rows': 3,                     # Adjust height
+                    'cols': 80,                    # Adjust width
+                    'style': 'resize: vertical;',  # Allow vertical resize only
+                    'placeholder': 'Enter payment remarks or notes here...',
+                }
+            )
+        },
+    }
