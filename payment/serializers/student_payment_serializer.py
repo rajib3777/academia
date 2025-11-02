@@ -79,3 +79,23 @@ class StudentPaymentSerializer(serializers.Serializer):
         data['method_display'] = method_dict.get(instance.method, instance.method)
 
         return data
+    
+
+class PaymentMethodDropdownSerializer(serializers.Serializer):
+    """
+    Serializer for payment method choices.
+
+    This serializer represents payment method choices as id-name pairs.
+    """
+    id = serializers.CharField(read_only=True)
+    name = serializers.CharField(read_only=True)
+
+
+class PaymentStatusDropdownSerializer(serializers.Serializer):
+    """
+    Serializer for payment status choices.
+
+    This serializer represents payment status choices as id-name pairs.
+    """
+    id = serializers.CharField(read_only=True)
+    name = serializers.CharField(read_only=True)

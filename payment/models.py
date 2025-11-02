@@ -2,7 +2,7 @@ from django.db import models
 from classmate.models import ClassMateModel
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from payment.choices import PAYMENT_METHOD_CHOICES, CASH, PAYMENT_STATUS_CHOICES, PAYMENT_STATUS_PENDING
+from payment.choices import PAYMENT_METHOD_CHOICES, CASH, PAYMENT_STATUS_CHOICES, PAYMENT_STATUS_PAID
 from academy.models import BatchEnrollment
 from student.models import Student
 
@@ -42,7 +42,7 @@ class StudentPayment(ClassMateModel):
     status = models.CharField(
         max_length=20,
         choices=PAYMENT_STATUS_CHOICES,
-        default=PAYMENT_STATUS_PENDING,
+        default=PAYMENT_STATUS_PAID,
         help_text='Current status of the payment.',
         db_index=True
     )

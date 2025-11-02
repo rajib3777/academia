@@ -1,10 +1,9 @@
-from typing import Optional, Any, Tuple, Dict
+from typing import Optional, Any, Tuple, Dict, List
 from django.core.paginator import Paginator
 from account.models import User
-from django.contrib.contenttypes.models import ContentType
 from django.db.models import QuerySet, Q
 from payment.models import StudentPayment
-
+from payment.choices import PAYMENT_METHOD_CHOICES, PAYMENT_STATUS_CHOICES
 class StudentPaymentSelector:
     """
     Selector for StudentPayment ORM read operations.
@@ -198,3 +197,47 @@ class StudentPaymentSelector:
         paginated_data = StudentPaymentSelector.paginate_queryset(queryset, page_size, page)
 
         return paginated_data
+    
+
+class PaymentMethodSelector:
+    """
+    Selector for payment method choices.
+
+    This selector provides methods to retrieve payment method data
+    from the predefined choices.
+    """
+    
+    @staticmethod
+    def list_payment_methods() -> List[Dict[str, str]]:
+        """
+        Get all available payment methods.
+
+        Returns:
+            List of dictionaries with payment method values and display names
+        """
+        return [
+            {'id': value, 'name': display_name} 
+            for value, display_name in PAYMENT_METHOD_CHOICES
+        ]
+    
+
+class PaymentStatusSelector:
+    """
+    Selector for payment status choices.
+
+    This selector provides methods to retrieve payment status data
+    from the predefined choices.
+    """
+    
+    @staticmethod
+    def list_payment_statuses() -> List[Dict[str, str]]:
+        """
+        Get all available payment statuses.
+
+        Returns:
+            List of dictionaries with payment status values and display names
+        """
+        return [
+            {'id': value, 'name': display_name} 
+            for value, display_name in PAYMENT_STATUS_CHOICES
+        ]
