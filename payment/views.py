@@ -34,16 +34,21 @@ class PaymentMethodDropdownView(APIView):
         try:
             payment_methods = self.payment_method_selector.list_payment_methods()
             serializer = self.serializer_class(payment_methods, many=True)
-
+        
             return Response({
-                'count': len(payment_methods),
-                'results': serializer.data
+                'success': True,
+                'data': serializer.data,
+                'count': len(serializer.data)
             })
             
         except Exception as e:
             logger.error(f"Error in PaymentMethodDropdownView: {str(e)}")
             return Response(
-                {"detail": "An error occurred while retrieving payment methods."},
+                {
+                    'success': False,
+                    'error': 'An unexpected error occurred',
+                    'details': str(e)
+                },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
         
@@ -73,14 +78,19 @@ class PaymentStatusDropdownView(APIView):
             serializer = self.serializer_class(payment_statuses, many=True)
 
             return Response({
-                'count': len(payment_statuses),
-                'results': serializer.data
+                'success': True,
+                'data': serializer.data,
+                'count': len(serializer.data)
             })
             
         except Exception as e:
             logger.error(f"Error in PaymentStatusDropdownView: {str(e)}")
             return Response(
-                {"detail": "An error occurred while retrieving payment statuses."},
+                {
+                    'success': False,
+                    'error': 'An unexpected error occurred',
+                    'details': str(e)
+                },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
+
