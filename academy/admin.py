@@ -100,8 +100,9 @@ class StudentPaymentInline(admin.StackedInline):
     fieldsets = (
         (None, {
             'fields': (
-                ('student', 'amount', 'date', 'method', 'status',),
-                ('transaction_id', 'remarks',),
+                ('student', 'amount', 'date', ),
+                ('method', 'status', 'transaction_id', ),
+                ('remarks',),
             ),
         }),
         ('Refund Information', {
