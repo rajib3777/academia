@@ -109,7 +109,7 @@ class CourseUpdateView(AuthenticatedGenericView, APIView):
         """Lazy initialization of CourseSelector."""
         return CourseSelector()
     
-    def put(self, request, course_id):
+    def put(self, request, course_id: int):
         """
         Update a course with optional batches.
         

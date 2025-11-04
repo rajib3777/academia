@@ -1,6 +1,8 @@
 from rest_framework import serializers
 from academy.models import Grade
 from student.models import Student
+from payment.serializers.student_payment_serializer import StudentPaymentSerializer
+
 
 class BatchEnrollmentSerializer(serializers.Serializer):
     """
@@ -18,6 +20,10 @@ class BatchEnrollmentSerializer(serializers.Serializer):
     final_grade_id = serializers.IntegerField(required=False, allow_null=True)
     remarks = serializers.CharField(required=False, allow_blank=True, allow_null=True)
 
+    payments = serializers.ListField(
+            child=StudentPaymentSerializer(),
+            required=False
+        )
     def validate_student_id(self, value: int) -> int:
         if not Student.objects.filter(id=value).exists():
             raise serializers.ValidationError('Student does not exist.')

@@ -1,9 +1,8 @@
 from typing import Dict, Any, List, Optional
 from functools import cached_property
-from django.db import transaction
 from django.db import transaction, IntegrityError
 from django.core.exceptions import ValidationError
-from academy.models import Course, Batch
+from academy.models import Course
 from account import choices as account_choices
 from academy.selectors.course_selector import CourseSelector
 
