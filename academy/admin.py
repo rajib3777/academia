@@ -2,7 +2,7 @@ from django.contrib import admin
 from django import forms
 from academy.models import Academy, Course, Batch, BatchEnrollment, Grade
 from classmate.admin import ClassMateAdmin
-from academy.forms import AcademyAdminForm, CourseAdminForm
+from academy.forms import AcademyAdminForm, CourseAdminForm, StudentPaymentInlineForm, BatchEnrollmentAdminForm
 from payment.models import StudentPayment
 
 
@@ -87,28 +87,21 @@ class BatchAdmin(ClassMateAdmin):
     autocomplete_fields = ['course']
 
 
-class StudentPaymentInline(admin.TabularInline):
+class StudentPaymentInline(admin.StackedInline):
     """
     Inline admin for StudentPayment in BatchEnrollmentAdmin.
     """
     model = StudentPayment
+    form = StudentPaymentInlineForm
     extra = 0
     autocomplete_fields = ['student']
+    readonly_fields = ('date',)
 
     fieldsets = (
         (None, {
             'fields': (
-                (
-                    'student',
-                    'amount',
-                    'date',
-                    'method',
-                    'status',
-                ),
-                (
-                    'transaction_id',
-                    'remarks',
-                ),
+                ('student', 'amount', 'date', 'method', 'status',),
+                ('transaction_id', 'remarks',),
             ),
         }),
         ('Refund Information', {
@@ -119,13 +112,6 @@ class StudentPaymentInline(admin.TabularInline):
             'classes': ('collapse',),
         }),
     )
-    readonly_fields = ('date',)
-
-    formfield_overrides = {
-        StudentPayment._meta.get_field('remarks'): {
-            'widget': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
-        },
-    }
 
 
 @admin.register(BatchEnrollment)
@@ -148,6 +134,7 @@ class BatchEnrollmentAdmin(ClassMateAdmin):
     )
     autocomplete_fields = ['student', 'batch']
     readonly_fields = ('enrollment_date',)
+    form = BatchEnrollmentAdminForm
     ordering = ['-enrollment_date']
     inlines = [StudentPaymentInline]
     date_hierarchy = 'enrollment_date'
@@ -162,9 +149,9 @@ class BatchEnrollmentAdmin(ClassMateAdmin):
             ),
         }),
     )
-    
+
     formfield_overrides = {
         BatchEnrollment._meta.get_field('remarks'): {
-            'widget': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
+            'widget': forms.Textarea(attrs={'rows': 2, 'cols': 40}),
         },
     }
