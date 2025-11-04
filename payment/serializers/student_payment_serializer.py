@@ -2,7 +2,6 @@ from typing import Any, Dict
 from rest_framework import serializers
 from academy.models import BatchEnrollment
 from student.models import Student
-from django.contrib.contenttypes.models import ContentType
 from payment.choices import PAYMENT_METHOD_CHOICES, PAYMENT_STATUS_CHOICES
 
 class StudentPaymentSerializer(serializers.Serializer):

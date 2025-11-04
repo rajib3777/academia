@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django import forms
 from academy.models import Academy, Course, Batch, BatchEnrollment, Grade
 from classmate.admin import ClassMateAdmin
 from academy.forms import AcademyAdminForm, CourseAdminForm
@@ -93,18 +94,38 @@ class StudentPaymentInline(admin.TabularInline):
     model = StudentPayment
     extra = 0
     autocomplete_fields = ['student']
-    fields = (
-        'student',
-        'amount',
-        'date',
-        'method',
-        'status',
-        'transaction_id',
-        'is_refunded',
-        'refund_date',
-        'remarks',
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                (
+                    'student',
+                    'amount',
+                    'date',
+                    'method',
+                    'status',
+                ),
+                (
+                    'transaction_id',
+                    'remarks',
+                ),
+            ),
+        }),
+        ('Refund Information', {
+            'fields': ((
+                'is_refunded',
+                'refund_date',
+            ),),
+            'classes': ('collapse',),
+        }),
     )
     readonly_fields = ('date',)
+
+    formfield_overrides = {
+        StudentPayment._meta.get_field('remarks'): {
+            'widget': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
+        },
+    }
 
 
 @admin.register(BatchEnrollment)
@@ -130,13 +151,20 @@ class BatchEnrollmentAdmin(ClassMateAdmin):
     ordering = ['-enrollment_date']
     inlines = [StudentPaymentInline]
     date_hierarchy = 'enrollment_date'
-    fields = (
-        'student',
-        'batch',
-        'enrollment_date',
-        'completion_date',
-        'is_active',
-        'attendance_percentage',
-        'final_grade',
-        'remarks'
+
+    fieldsets = (
+        (None, {
+            'fields': (
+                ('student', 'batch'),
+                ('enrollment_date', 'completion_date'),
+                ('is_active', 'attendance_percentage', 'final_grade'),
+                'remarks',
+            ),
+        }),
     )
+    
+    formfield_overrides = {
+        BatchEnrollment._meta.get_field('remarks'): {
+            'widget': forms.Textarea(attrs={'rows': 4, 'cols': 40}),
+        },
+    }
