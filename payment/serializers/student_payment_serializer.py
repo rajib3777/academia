@@ -5,7 +5,7 @@ from student.models import Student
 from payment.choices import PAYMENT_METHOD_CHOICES, PAYMENT_STATUS_CHOICES
 
 class StudentPaymentSerializer(serializers.Serializer):
-    id = serializers.IntegerField(required=True)
+    id = serializers.IntegerField(required=False, read_only=True)
     batch_enrollment_id = serializers.IntegerField(required=True)
     student_id = serializers.IntegerField(required=True)
     created_by_id = serializers.IntegerField(required=False)

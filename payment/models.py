@@ -30,7 +30,6 @@ class StudentPayment(ClassMateModel):
         help_text='Amount paid in this transaction.'
     )
     date = models.DateTimeField(
-        auto_now_add=True,
         help_text='Timestamp when the payment was made.'
     )
     method = models.CharField(

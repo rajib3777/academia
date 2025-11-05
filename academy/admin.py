@@ -95,7 +95,7 @@ class StudentPaymentInline(admin.StackedInline):
     form = StudentPaymentInlineForm
     extra = 0
     autocomplete_fields = ['student']
-    readonly_fields = ('date',)
+    readonly_fields = ('student',)
 
     fieldsets = (
         (None, {

@@ -1,6 +1,6 @@
 import logging
 from typing import Optional, Any, Dict
-from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
 from django.core.exceptions import ValidationError
 from payment.models import StudentPayment
 
@@ -27,6 +27,7 @@ class StudentPaymentService:
                 batch_enrollment_id=data['batch_enrollment_id'],
                 student_id=data['student_id'],
                 amount=data['amount'],
+                date=timezone.now(),
                 method=data['method'],
                 status=data['status'],
                 transaction_id=data.get('transaction_id', ''),
@@ -51,7 +52,7 @@ class StudentPaymentService:
     def update_student_payment(payment: StudentPayment, payment_data: Dict[str, Any]) -> StudentPayment:
         try:
             for field in [
-                'amount', 'method', 'status', 'transaction_id', 'reference',
+                'amount', 'date', 'method', 'status', 'transaction_id', 'reference',
                 'remarks', 'is_refunded', 'refund_date', 'metadata'
             ]:
                 if field in payment_data:
