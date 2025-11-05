@@ -71,10 +71,18 @@ class StudentPaymentSerializer(serializers.Serializer):
 
         # Status display
         status_dict = dict(PAYMENT_STATUS_CHOICES)
+        data['status'] = {
+            'id': instance.status,
+            'name': status_dict.get(instance.status, instance.status)
+        }
         data['status_display'] = status_dict.get(instance.status, instance.status)
 
         # Method display
         method_dict = dict(PAYMENT_METHOD_CHOICES)
+        data['method'] = {
+            'id': instance.method,
+            'name': method_dict.get(instance.method, instance.method)
+        }
         data['method_display'] = method_dict.get(instance.method, instance.method)
 
         return data
