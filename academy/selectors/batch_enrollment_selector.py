@@ -1,9 +1,10 @@
 from typing import Optional, Dict, Any
-from django.db.models import QuerySet, Q
+from django.db.models import QuerySet, Q, Prefetch, Sum
 from django.core.paginator import Paginator
 from account.models import User
 from academy.models import BatchEnrollment
 from django.db.models import QuerySet
+from payment.models import StudentPayment
 
 class BatchEnrollmentSelector:
     """
@@ -22,8 +23,32 @@ class BatchEnrollmentSelector:
     @staticmethod
     def get_all_enrollments() -> QuerySet[BatchEnrollment]:
         try:
+            # this query taking 20ms more than below simplified one. keep it for reference.
+            # payment_qs = StudentPayment.objects.only(
+            #     'id', 'amount', 'date', 'method', 'status', 'transaction_id', 'remarks', 'is_refunded', 'refund_date'
+            # )
+            # return (
+            #     BatchEnrollment.objects.select_related(
+            #         'student',
+            #         'batch',
+            #         'batch__course',
+            #         'batch__course__academy',
+            #         'final_grade'
+            #     )
+            #     .prefetch_related(
+            #         Prefetch('student_payments', queryset=payment_qs)
+            #     )
+            #     .annotate(
+            #         total_paid=Sum('student_payments__amount')
+            #     )
+            #     .all()
+            # )
             return BatchEnrollment.objects.select_related(
                 'student', 'batch', 'batch__course', 'batch__course__academy', 'final_grade'
+            ).prefetch_related(
+                'student_payments'
+            ).annotate(
+                total_paid=Sum('student_payments__amount')
             ).all()
         except Exception as e:
             return BatchEnrollment.objects.none()

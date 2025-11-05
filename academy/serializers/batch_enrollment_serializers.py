@@ -64,4 +64,8 @@ class BatchEnrollmentSerializer(serializers.Serializer):
             'enrollment_date': instance.enrollment_date,
             'is_active': instance.is_active,
             'remarks': instance.remarks,
+            'total_paid': getattr(instance, 'total_paid', 0) or 0,
+            'payments': [
+                StudentPaymentSerializer(payment).data for payment in instance.student_payments.all()
+            ],
         }
