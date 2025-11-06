@@ -1,12 +1,36 @@
 import logging
 from typing import Optional, Any, Dict
 from django.utils import timezone
+from datetime import datetime, date, time
 from django.core.exceptions import ValidationError
 from payment.models import StudentPayment
 
 logger = logging.getLogger(__name__)
 
 class StudentPaymentService:
+
+    @staticmethod
+    def _combine_date_with_current_time(date_value: Any) -> datetime:
+        """
+        Combines a date with the current time to create a datetime object.
+        Handles both date strings and date objects.
+        """
+        if isinstance(date_value, str):
+            try:
+                parsed_date = datetime.strptime(date_value, '%Y-%m-%d').date()
+            except ValueError:
+                raise ValidationError(f'Invalid date format. Expected YYYY-MM-DD, got: {date_value}')
+        elif isinstance(date_value, date):
+            parsed_date = date_value
+        elif isinstance(date_value, datetime):
+            # If already datetime, extract date and combine with current time
+            parsed_date = date_value.date()
+        else:
+            raise ValidationError(f'Invalid date type. Expected string, date, or datetime, got: {type(date_value)}')
+        
+        current_time = timezone.now().time()
+        return datetime.combine(parsed_date, current_time)
+
     """
     Service for StudentPayment business logic and write operations.
     """
@@ -22,12 +46,17 @@ class StudentPaymentService:
                 
             if data['amount'] <= 0:
                 raise ValidationError('Amount must be greater than zero.')
+            
+            # Handle date - combine provided date with current time, or use current datetime
+            payment_datetime = timezone.now()  # Default to current datetime
+            if 'date' in data and data['date']:
+                payment_datetime = StudentPaymentService._combine_date_with_current_time(data['date'])
                 
             return StudentPayment.objects.create(
                 batch_enrollment_id=data['batch_enrollment_id'],
                 student_id=data['student_id'],
                 amount=data['amount'],
-                date=timezone.now(),
+                date=payment_datetime,
                 method=data['method'],
                 status=data['status'],
                 transaction_id=data.get('transaction_id', ''),
@@ -47,16 +76,40 @@ class StudentPaymentService:
             raise e
 
 
-
     @staticmethod
     def update_student_payment(payment: StudentPayment, payment_data: Dict[str, Any]) -> StudentPayment:
         try:
+            # Store original date to check if it's being updated
+            original_date = payment.date.date() if payment.date else None
+
             for field in [
-                'amount', 'date', 'method', 'status', 'transaction_id', 'reference',
+                'amount', 'method', 'status', 'transaction_id', 'reference',
                 'remarks', 'is_refunded', 'refund_date', 'metadata'
             ]:
                 if field in payment_data:
                     setattr(payment, field, payment_data[field])
+
+            # Handle date field separately
+            if 'date' in payment_data and payment_data['date']:
+                new_date_value = payment_data['date']
+
+                # Extract date for comparison
+                if isinstance(new_date_value, str):
+                    try:
+                        new_date = datetime.strptime(new_date_value, '%Y-%m-%d').date()
+                    except ValueError:
+                        raise ValidationError(f'Invalid date format. Expected YYYY-MM-DD, got: {new_date_value}')
+                elif isinstance(new_date_value, date):
+                    new_date = new_date_value.date()
+                elif isinstance(new_date_value, datetime):
+                    new_date = new_date_value.date()
+                else:
+                    raise ValidationError(f'Invalid date type. Expected string, date, or datetime, got: {type(new_date_value)}')
+                
+                # Only update if the date has actually changed
+                if original_date != new_date:
+                    payment.date = StudentPaymentService._combine_date_with_current_time(new_date_value)
+            
             payment.save()
             return payment
         except ValidationError as e:

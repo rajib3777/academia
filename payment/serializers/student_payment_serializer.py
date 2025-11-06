@@ -5,12 +5,12 @@ from student.models import Student
 from payment.choices import PAYMENT_METHOD_CHOICES, PAYMENT_STATUS_CHOICES
 
 class StudentPaymentSerializer(serializers.Serializer):
-    id = serializers.IntegerField(required=False, read_only=True)
+    id = serializers.IntegerField(required=False)
     batch_enrollment_id = serializers.IntegerField(required=True)
     student_id = serializers.IntegerField(required=True)
     created_by_id = serializers.IntegerField(required=False)
     amount = serializers.DecimalField(max_digits=10, decimal_places=2)
-    date = serializers.DateTimeField(read_only=True)
+    date = serializers.DateTimeField()
     method = serializers.ChoiceField(choices=PAYMENT_METHOD_CHOICES)
     status = serializers.ChoiceField(choices=PAYMENT_STATUS_CHOICES)
     transaction_id = serializers.CharField(required=False, allow_blank=True)
@@ -66,9 +66,9 @@ class StudentPaymentSerializer(serializers.Serializer):
         # Format amount and dates
         data['amount'] = f'{instance.amount:.2f}'
         if instance.refund_date:
-            data['refund_date'] = instance.refund_date.strftime('%Y-%m-%d %H:%M:%S')
+            data['refund_date'] = instance.refund_date.strftime('%Y-%m-%d')
         if instance.date:
-            data['date'] = instance.date.strftime('%Y-%m-%d %H:%M:%S')
+            data['date'] = instance.date.strftime('%Y-%m-%d')
 
         # Status display
         status_dict = dict(PAYMENT_STATUS_CHOICES)
