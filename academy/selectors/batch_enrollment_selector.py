@@ -16,6 +16,10 @@ class BatchEnrollmentSelector:
         try:
             return BatchEnrollment.objects.select_related(
                 'student', 'batch', 'batch__course', 'batch__course__academy', 'final_grade'
+            ).prefetch_related(
+                'student_payments'
+            ).annotate(
+                total_paid=Sum('student_payments__amount')
             ).get(id=enrollment_id)
         except BatchEnrollment.DoesNotExist:
             return BatchEnrollment.objects.none()
