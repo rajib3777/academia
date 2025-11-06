@@ -3,7 +3,7 @@ from django.core.paginator import Paginator
 from account.models import User
 from django.db.models import QuerySet, Q
 from payment.models import StudentPayment
-from payment.choices import PAYMENT_METHOD_CHOICES, PAYMENT_STATUS_CHOICES
+from payment.choices import PAYMENT_METHOD_CHOICES, PAYMENT_STATUS_CHOICES, PAYMENT_STATUS_PAID
 class StudentPaymentSelector:
     """
     Selector for StudentPayment ORM read operations.
@@ -237,7 +237,11 @@ class PaymentStatusSelector:
         Returns:
             List of dictionaries with payment status values and display names
         """
+        # return [
+        #     {'id': value, 'name': display_name} 
+        #     for value, display_name in PAYMENT_STATUS_CHOICES
+        # ]
         return [
-            {'id': value, 'name': display_name} 
-            for value, display_name in PAYMENT_STATUS_CHOICES
+            {'id': PAYMENT_STATUS_PAID, 'name': 'Paid'},
         ]
+        
