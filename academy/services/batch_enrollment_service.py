@@ -66,12 +66,21 @@ class BatchEnrollmentService:
 
             # Update payments if provided
             if payments_data:
+                # Get existing payment IDs from the database
+                existing_payments = enrollment.student_payments.all()
+                existing_payment_ids = set(existing_payments.values_list('id', flat=True))
+                
+                # Get payment IDs from the frontend data
+                frontend_payment_ids = set()
+
                 for payment_data in payments_data:
                     payment_id = payment_data.pop('id', None)
                     if payment_id:
+                        frontend_payment_ids.add(payment_id)
                         # Update existing payment
                         payment = self.payment_selector.get_by_id(payment_id)
-                        self.payment_service.update_student_payment(payment, payment_data)
+                        if payment:
+                            self.payment_service.update_student_payment(payment, payment_data)
                     else:
                         # Create new payment
                         try:
@@ -81,6 +90,12 @@ class BatchEnrollmentService:
                             })
                         except IntegrityError as e:
                             raise ValidationError(f"Error creating payment: {str(e)}")
+                        
+                # Delete payments that are not in frontend data
+                payments_to_delete = existing_payment_ids - frontend_payment_ids
+                if payments_to_delete:
+                    enrollment.student_payments.filter(id__in=payments_to_delete).delete()
+                    # self.payment_service.delete_student_payments(payments_to_delete)
         except ValidationError as e:
             raise ValidationError(f"Invalid data: {str(e)}")
         except Exception as e:
