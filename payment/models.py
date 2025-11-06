@@ -88,5 +88,5 @@ class StudentPayment(ClassMateModel):
 
     def __str__(self) -> str:
         return (
-            f'StudentPayment of {self.amount} by {self.student} for {self.batch_enrollment}'
+            f'{self.id} StudentPayment of {self.amount} by {self.student} for {self.batch_enrollment}'
         )

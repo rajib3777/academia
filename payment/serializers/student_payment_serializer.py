@@ -1,3 +1,4 @@
+import pytz
 from typing import Any, Dict
 from rest_framework import serializers
 from academy.models import BatchEnrollment
@@ -66,9 +67,13 @@ class StudentPaymentSerializer(serializers.Serializer):
         # Format amount and dates
         data['amount'] = f'{instance.amount:.2f}'
         if instance.refund_date:
-            data['refund_date'] = instance.refund_date.strftime('%Y-%m-%d')
+            dhaka_tz = pytz.timezone('Asia/Dhaka')
+            date_dhaka = instance.refund_date.astimezone(dhaka_tz)
+            data['refund_date'] = date_dhaka.strftime('%Y-%m-%d')
         if instance.date:
-            data['date'] = instance.date.strftime('%Y-%m-%d')
+            dhaka_tz = pytz.timezone('Asia/Dhaka')
+            date_dhaka = instance.date.astimezone(dhaka_tz)
+            data['date'] = date_dhaka.strftime('%Y-%m-%d')
 
         # Status display
         status_dict = dict(PAYMENT_STATUS_CHOICES)

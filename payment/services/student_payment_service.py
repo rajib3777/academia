@@ -1,4 +1,5 @@
 import logging
+import pytz
 from typing import Optional, Any, Dict
 from django.utils import timezone
 from datetime import datetime, date, time
@@ -28,8 +29,18 @@ class StudentPaymentService:
         else:
             raise ValidationError(f'Invalid date type. Expected string, date, or datetime, got: {type(date_value)}')
         
-        current_time = timezone.now().time()
-        return datetime.combine(parsed_date, current_time)
+        # Get Dhaka timezone
+        dhaka_tz = pytz.timezone('Asia/Dhaka')
+        
+        # Get current time in Dhaka timezone
+        now_dhaka = timezone.now().astimezone(dhaka_tz)
+        
+        # Create datetime with current Dhaka time but specified date
+        combined_datetime = dhaka_tz.localize(
+            datetime.combine(parsed_date, now_dhaka.time())
+        )
+    
+        return combined_datetime
 
     """
     Service for StudentPayment business logic and write operations.
