@@ -1,4 +1,5 @@
 import sentry_sdk
+import pytz
 from rest_framework.views import exception_handler as drf_exception_handler
 from rest_framework.exceptions import ValidationError
 from django.http import Http404
@@ -86,3 +87,8 @@ def custom_exception_handler(exc, context):
         },
         status=status.HTTP_500_INTERNAL_SERVER_ERROR
     )
+
+def convert_date_to_dhaka(date_obj):
+    dhaka_tz = pytz.timezone('Asia/Dhaka')
+    date_dhaka = date_obj.astimezone(dhaka_tz)
+    return date_dhaka.strftime('%Y-%m-%d')

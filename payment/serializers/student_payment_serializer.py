@@ -3,6 +3,7 @@ from typing import Any, Dict
 from rest_framework import serializers
 from academy.models import BatchEnrollment
 from student.models import Student
+from classmate.utils import convert_date_to_dhaka
 from payment.choices import PAYMENT_METHOD_CHOICES, PAYMENT_STATUS_CHOICES
 
 class StudentPaymentSerializer(serializers.Serializer):
@@ -67,13 +68,9 @@ class StudentPaymentSerializer(serializers.Serializer):
         # Format amount and dates
         data['amount'] = f'{instance.amount:.2f}'
         if instance.refund_date:
-            dhaka_tz = pytz.timezone('Asia/Dhaka')
-            date_dhaka = instance.refund_date.astimezone(dhaka_tz)
-            data['refund_date'] = date_dhaka.strftime('%Y-%m-%d')
+            data['refund_date'] = convert_date_to_dhaka(instance.refund_date)
         if instance.date:
-            dhaka_tz = pytz.timezone('Asia/Dhaka')
-            date_dhaka = instance.date.astimezone(dhaka_tz)
-            data['date'] = date_dhaka.strftime('%Y-%m-%d')
+            data['date'] = convert_date_to_dhaka(instance.date)
 
         # Status display
         status_dict = dict(PAYMENT_STATUS_CHOICES)

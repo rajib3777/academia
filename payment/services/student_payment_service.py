@@ -3,6 +3,7 @@ import pytz
 from typing import Optional, Any, Dict
 from django.utils import timezone
 from datetime import datetime, date, time
+from classmate.utils import convert_date_to_dhaka
 from django.core.exceptions import ValidationError
 from payment.models import StudentPayment
 
@@ -91,7 +92,7 @@ class StudentPaymentService:
     def update_student_payment(payment: StudentPayment, payment_data: Dict[str, Any]) -> StudentPayment:
         try:
             # Store original date to check if it's being updated
-            original_date = payment.date.date() if payment.date else None
+            original_date = convert_date_to_dhaka(payment.date) if payment.date else None
 
             for field in [
                 'amount', 'method', 'status', 'transaction_id', 'reference',
@@ -118,7 +119,7 @@ class StudentPaymentService:
                     raise ValidationError(f'Invalid date type. Expected string, date, or datetime, got: {type(new_date_value)}')
                 
                 # Only update if the date has actually changed
-                if original_date != new_date:
+                if original_date != str(new_date):
                     payment.date = StudentPaymentService._combine_date_with_current_time(new_date_value)
             
             payment.save()
