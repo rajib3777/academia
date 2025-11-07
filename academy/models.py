@@ -163,11 +163,6 @@ class BatchEnrollment(ClassMateModel):
         return f"{self.student.user.get_full_name()} in {self.batch}"
     
     @property
-    def effective_fee(self):
-        """Returns the discounted fee if set, otherwise returns the course fee."""
-        return self.discounted_fee if self.discounted_fee is not None else self.batch.course.fee
-    
-    @property
     def discount_amount(self):
         """Calculates the discount amount."""
         if self.discounted_fee is not None:
