@@ -149,8 +149,7 @@ class BatchEnrollment(ClassMateModel):
     discount_fee = models.DecimalField(
         max_digits=10, 
         decimal_places=2, 
-        null=True, 
-        blank=True,
+        default=0.0,
         help_text='Discount fee for this student. If null, uses the course default fee.'
     )
 
@@ -167,7 +166,7 @@ class BatchEnrollment(ClassMateModel):
         """Calculates the effective fee."""
         if self.discount_fee is not None:
             return self.batch.course.fee - self.discount_fee
-        return 0
+        return self.batch.course.fee
 
 
 @receiver(pre_save, sender=Academy)
