@@ -144,7 +144,7 @@ class BatchEnrollmentAdmin(ClassMateAdmin):
         (None, {
             'fields': (
                 ('student', 'batch'),
-                ('enrollment_date', 'completion_date'),
+                ('discounted_fee', 'enrollment_date', 'completion_date'),
                 ('is_active', 'attendance_percentage', 'final_grade'),
                 'remarks',
             ),

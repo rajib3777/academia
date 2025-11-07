@@ -55,16 +55,24 @@ class BatchEnrollmentSerializer(serializers.Serializer):
                 'id': instance.batch.course.id,
                 'course_id': instance.batch.course.course_id,
                 'name': str(instance.batch.course.name),
+                'course_fee': instance.batch.course.fee,
             },
             'batch': {
                 'id': instance.batch.id,
                 'batch_id': instance.batch.batch_id,
                 'name': str(instance.batch.name),
             },
+            'fee': {
+                'actual_fee': instance.batch.course.fee,
+                'discounted_fee': instance.discounted_fee,
+                'effective_fee': instance.effective_fee,
+                'discount_amount': instance.discount_amount,
+                'total_paid': getattr(instance, 'total_paid', 0) or 0,
+                'outstanding_fee': (instance.effective_fee - (getattr(instance, 'total_paid', 0) or 0)),
+            },
             'enrollment_date': instance.enrollment_date,
             'is_active': instance.is_active,
             'remarks': instance.remarks,
-            'total_paid': getattr(instance, 'total_paid', 0) or 0,
             'payments': [
                 StudentPaymentSerializer(payment).data for payment in instance.student_payments.all()
             ],
