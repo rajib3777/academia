@@ -87,7 +87,8 @@ class BatchEnrollmentCreateAPI(AuthenticatedGenericView, APIView):
                 'student_id': serializer.validated_data['student_id'],
                 'batch_id': serializer.validated_data['batch_id'],
                 'is_active': serializer.validated_data['is_active'],
-                'remarks': serializer.validated_data['remarks']
+                'remarks': serializer.validated_data['remarks'],
+                'discount_fee': serializer.validated_data['discount_fee']
             }
 
             payments_data = serializer.validated_data.get('payments', None)

@@ -19,6 +19,9 @@ class BatchEnrollmentSerializer(serializers.Serializer):
     )
     final_grade_id = serializers.IntegerField(required=False, allow_null=True)
     remarks = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    discount_fee = serializers.DecimalField(
+        max_digits=10, decimal_places=2, required=False, default=0.0
+    )
 
     payments = serializers.ListField(
             child=StudentPaymentSerializer(),
