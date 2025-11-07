@@ -199,9 +199,17 @@ class CourseService:
                 
                 # Update batches if provided
                 if batches_data:
+                    # Get existing batch IDs from the database
+                    existing_batches = course.batches.all()
+                    existing_batch_ids = set(existing_batches.values_list('id', flat=True))
+
+                    # Get batch IDs from the frontend data
+                    frontend_batch_ids = set()
+                    
                     for batch_data in batches_data:
                         batch_id = batch_data.pop('id', None)
                         if batch_id:
+                            frontend_batch_ids.add(batch_id)
                             # Update existing batch
                             self.batch_service.update_batch(batch_id, batch_data)
                         else:
@@ -216,7 +224,12 @@ class CourseService:
                                     batch_name = batch_data.get('name', 'Unknown')
                                     raise ValidationError(f"Batch with name '{batch_name}' already exists for this course.")
                                 raise
-                
+
+                    # Delete batches that are not in frontend data
+                    batches_to_delete = existing_batch_ids - frontend_batch_ids
+                    if batches_to_delete:
+                        course.batches.filter(id__in=batches_to_delete).delete()
+
                 return course
         except IntegrityError as e:
             if 'unique_course_name_per_academy' in str(e):

@@ -95,7 +95,6 @@ class BatchEnrollmentService:
                 payments_to_delete = existing_payment_ids - frontend_payment_ids
                 if payments_to_delete:
                     enrollment.student_payments.filter(id__in=payments_to_delete).delete()
-                    # self.payment_service.delete_student_payments(payments_to_delete)
         except ValidationError as e:
             raise ValidationError(f"Invalid data: {str(e)}")
         except Exception as e:
