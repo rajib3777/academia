@@ -67,7 +67,7 @@ class BatchEnrollmentSerializer(serializers.Serializer):
                 'discounted_fee': instance.discounted_fee,
                 'discount_amount': instance.discount_amount,
                 'total_paid': getattr(instance, 'total_paid', 0) or 0,
-                'outstanding_fee': (instance.discounted_fee - (getattr(instance, 'total_paid', 0) or 0)),
+                'outstanding_fee': (instance.effective_fee - (getattr(instance, 'total_paid', 0) or 0)),
             },
             'enrollment_date': instance.enrollment_date,
             'is_active': instance.is_active,
