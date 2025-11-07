@@ -145,13 +145,13 @@ class BatchEnrollment(ClassMateModel):
     final_grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True, blank=True)
     remarks = models.TextField(null=True, blank=True)
 
-    # New field for custom/discounted fee
-    discounted_fee = models.DecimalField(
+    # New field for discount fee
+    discount_fee = models.DecimalField(
         max_digits=10, 
         decimal_places=2, 
         null=True, 
         blank=True,
-        help_text='Discounted fee for this student. If null, uses the course default fee.'
+        help_text='Discount fee for this student. If null, uses the course default fee.'
     )
 
     class Meta:
@@ -164,14 +164,9 @@ class BatchEnrollment(ClassMateModel):
     
     @property
     def effective_fee(self):
-        """Returns the discounted fee if set, otherwise returns the course fee."""
-        return self.discounted_fee if self.discounted_fee is not None else self.batch.course.fee
-    
-    @property
-    def discount_amount(self):
-        """Calculates the discount amount."""
-        if self.discounted_fee is not None:
-            return self.batch.course.fee - self.discounted_fee
+        """Calculates the effective fee."""
+        if self.discount_fee is not None:
+            return self.batch.course.fee - self.discount_fee
         return 0
 
 
