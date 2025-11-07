@@ -137,6 +137,7 @@ class BatchEnrollmentUpdateAPI(AuthenticatedGenericView, APIView):
                 'student_id': serializer.validated_data['student_id'],
                 'batch_id': serializer.validated_data['batch_id'],
                 'is_active': serializer.validated_data['is_active'],
+                'discount_fee': serializer.validated_data['discount_fee'],
                 'remarks': serializer.validated_data['remarks']
             }
             payments_data = serializer.validated_data.get('payments', None)
