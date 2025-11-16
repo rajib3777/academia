@@ -3,8 +3,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.core.paginator import Paginator
-from django.shortcuts import get_object_or_404
-from typing import Dict, Any
+from student.serializers import student_serializers
 from functools import cached_property
 from classmate.permissions import AuthenticatedGenericView
 from exam.selectors import exam_selector
@@ -676,7 +675,7 @@ class BatchExamResultsView(AuthenticatedGenericView, APIView):
 
 class ExamStudentsView(AuthenticatedGenericView, APIView):
     """Get students enrolled in exam batch"""
-    permission_classes = [IsAuthenticated]
+    serializer_class = student_serializers.StudentSerializer
     
     @cached_property
     def exam_selector(self) -> exam_selector.ExamSelector:
@@ -685,12 +684,52 @@ class ExamStudentsView(AuthenticatedGenericView, APIView):
     
     def get(self, request, exam_id):
         """Get list of students for an exam"""
-        students = self.exam_selector.get_exam_students(exam_id)
-        # You'll need to create a StudentSerializer or use existing one
-        from student.serializers import student_serializers
-        serializer = student_serializers.StudentSerializer(students, many=True)
-        return Response(serializer.data)
+        try:
+            # Extract pagination parameters
+            page = int(request.GET.get('page', 1))
+            page_size = int(request.GET.get('page_size', 20))
+            
+            # Extract search and ordering parameters
+            search_query = request.GET.get('search', '').strip()
+            ordering = request.GET.get('ordering')
 
+            pagination_info = self.exam_selector.list_exams_student(
+                exam_id=exam_id,
+                filters=request.GET,
+                search_query=search_query,
+                ordering=ordering,
+                page=page,
+                page_size=page_size
+            )
+
+            # Serialize data
+            serializer = self.serializer_class(pagination_info['results'], many=True)
+
+            # Build response
+            response_data = {
+                'success': True,
+                'data': serializer.data,
+                'pagination': pagination_info['pagination'],
+                'filters_applied': dict(request.GET),
+                'total_count': pagination_info['pagination']['total_items']
+            }
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            # Log the exception
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.exception("Error in ExamStudentListView")
+            
+            return Response(
+                {
+                    'success': False,
+                    'error': 'Failed to retrieve exam students',
+                    'details': str(e)
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 class ExamSessionStatusView(AuthenticatedGenericView, APIView):
     """Update exam session status"""

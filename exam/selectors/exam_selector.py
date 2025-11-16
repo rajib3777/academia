@@ -6,6 +6,8 @@ from exam.models import (
     Exam, ExamResult, StudentExamSession, 
     StudentAnswer, OnlineExamResult, Grade
 )
+from academy.models import BatchEnrollment
+from student.models import Student
 from account.models import User
 
 class ExamSelector:
@@ -220,17 +222,105 @@ class ExamSelector:
             return None
 
     @staticmethod
-    def get_exam_students(exam_id: str) -> QuerySet:
+    def get_exam_students_queryset(exam_id: str) -> QuerySet:
         """Get students enrolled in exam batch"""
         try:
             exam = Exam.objects.get(exam_id=exam_id)
             return exam.batch.students.select_related(
                 'user'
+            ).prefetch_related(
+                Prefetch(
+                    'batchenrollment_set',
+                    queryset=BatchEnrollment.objects.select_related('batch').filter(
+                        batch=exam.batch,
+                        is_active=True
+                    ),
+                    to_attr='current_enrollment'
+                )
             ).filter(
+                batchenrollment__batch=exam.batch,
                 batchenrollment__is_active=True
-            ).order_by('user__first_name', 'user__last_name')
+            ).distinct()
         except Exam.DoesNotExist:
-            return []
+            return Student.objects.none()
+
+    @staticmethod
+    def apply_list_exams_student_filters(queryset: QuerySet, filters: Dict[str, Any]) -> QuerySet:
+        """Apply filters to the student exams queryset"""
+        if filters:
+            for key, value in filters.items():
+                if key == 'enrollment_date':
+                    queryset = queryset.filter(batchenrollment__enrollment_date=value)
+                elif key == 'enrollment_date_from':
+                    queryset = queryset.filter(batchenrollment__enrollment_date__gte=value)
+                elif key == 'enrollment_date_to':
+                    queryset = queryset.filter(batchenrollment__enrollment_date__lte=value)
+                elif key == 'is_active':
+                    is_active = value.lower() == 'true' if isinstance(value, str) else value
+                    queryset = queryset.filter(batchenrollment__is_active=is_active)
+                elif key == 'student_id':
+                    queryset = queryset.filter(id=value)
+        return queryset
+
+    @staticmethod
+    def apply_list_exams_student_search(queryset: QuerySet, search_query: str) -> QuerySet:
+        """Apply search to student queryset"""
+        if search_query:
+            queryset = queryset.filter(
+                Q(user__first_name__icontains=search_query) |
+                Q(user__last_name__icontains=search_query) |
+                Q(user__email__icontains=search_query) |
+                Q(student_id__icontains=search_query)
+            )
+        return queryset
+
+    @staticmethod
+    def apply_list_exams_student_ordering(queryset: QuerySet, ordering: str) -> QuerySet:
+        """Apply ordering to student queryset including enrollment date"""
+        if ordering:
+            if ordering.startswith('-'):
+                field = ordering[1:]
+                if field == 'enrollment_date':
+                    queryset = queryset.order_by('-batchenrollment__enrollment_date')
+                elif field in ['id', 'user__first_name', 'user__last_name', 'user__date_joined']:
+                    queryset = queryset.order_by(ordering)
+            else:
+                if ordering == 'enrollment_date':
+                    queryset = queryset.order_by('batchenrollment__enrollment_date')
+                elif ordering in ['id', 'user__first_name', 'user__last_name', 'user__date_joined']:
+                    queryset = queryset.order_by(ordering)
+        else:
+            # Default ordering by enrollment date (earliest first)
+            queryset = queryset.order_by('batchenrollment__enrollment_date')
+        
+        return queryset
+
+    @staticmethod
+    def list_exams_student(
+        exam_id: str,
+        filters: Dict[str, Any] = None,
+        search_query: Optional[str] = None,
+        ordering: Optional[str] = None,
+        page: int = 1,
+        page_size: int = 20
+    ) -> QuerySet[Exam]:
+        """List exams for a specific student"""
+        # Get base queryset with optimized joins
+        queryset = ExamSelector.get_exam_students_queryset(exam_id)
+
+        # Apply filters
+        queryset = ExamSelector.apply_list_exams_student_filters(queryset, filters)
+
+        # Apply search
+        queryset = ExamSelector.apply_list_exams_student_search(queryset, search_query)
+
+        # Apply ordering
+        queryset = ExamSelector.apply_list_exams_student_ordering(queryset, ordering)
+
+        # Apply pagination
+        paginated_data = ExamSelector.paginate_queryset(queryset, page_size, page)
+        
+        return paginated_data
 
     @staticmethod
     def can_student_take_exam(exam_id: str, student_id: int) -> bool:

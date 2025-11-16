@@ -29,7 +29,7 @@ urlpatterns = [
     path('api/', include("student.urls")),
     path('api/', include("payment.urls")),
     path('api/', include("exam.urls")),
-    path('api/', include("question.urls")),
+    # path('api/', include("question.urls")),
     # path('sentry-debug/', trigger_error),
     path('chaining/', include('smart_selects.urls')),
 ]
