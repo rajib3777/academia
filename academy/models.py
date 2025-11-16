@@ -8,7 +8,7 @@ from academy import utils as academy_utils
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from utils.models import Division, District, Upazila
-from academy.choices_fields import YEAR_CHOICES, COURSE_TYPE_CHOICES, COURSE_TYPE_BANGLA, SLOT_CATEGORY_CHOICES, JAN_JUN
+from academy.choices_fields import YEAR_CHOICES, SUBJECT_TYPE_CHOICES, SUBJECT_TYPE_BANGLA, SLOT_CATEGORY_CHOICES, JAN_JUN
 
 class Academy(ClassMateModel):
     name = models.CharField(max_length=255, unique=True)
@@ -63,10 +63,10 @@ class Course(ClassMateModel):
     fee = models.DecimalField(max_digits=10, decimal_places=2)
     academy = models.ForeignKey(Academy, on_delete=models.PROTECT, null=True, related_name='courses')
     course_id = models.CharField(max_length=20, unique=True, help_text="Unique ID for the Course", editable=False, null=True, blank=True)
-    course_type = models.CharField(
+    subject = models.CharField(
         max_length=50,
-        choices=COURSE_TYPE_CHOICES,
-        default=COURSE_TYPE_BANGLA,
+        choices=SUBJECT_TYPE_CHOICES,
+        default=SUBJECT_TYPE_BANGLA,
         help_text="Subject"
     )
 
@@ -116,23 +116,6 @@ class Batch(ClassMateModel):
             raise ValidationError('End date cannot be before start date.')
         
 
-class Grade(models.Model):
-    GRADE_CHOICES = [
-        ('A+', 'A+'),
-        ('A', 'A'),
-        ('A-', 'A-'),
-        ('B', 'B'),
-        ('C', 'C'),
-        ('D', 'D'),
-        ('F', 'F'),
-    ]
-
-    grade = models.CharField(max_length=2, choices=GRADE_CHOICES, unique=True)
-
-    def __str__(self):
-        return self.grade
-        
-
 class BatchEnrollment(ClassMateModel):
     student = models.ForeignKey('student.Student', on_delete=models.CASCADE)
     batch = models.ForeignKey(Batch, on_delete=models.CASCADE)
@@ -142,7 +125,6 @@ class BatchEnrollment(ClassMateModel):
     is_active = models.BooleanField(default=True)
 
     attendance_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
-    final_grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True, blank=True)
     remarks = models.TextField(null=True, blank=True)
 
     # New field for discount fee

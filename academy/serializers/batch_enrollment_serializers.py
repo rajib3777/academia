@@ -1,5 +1,4 @@
 from rest_framework import serializers
-from academy.models import Grade
 from student.models import Student
 from payment.serializers.student_payment_serializer import StudentPaymentSerializer
 
@@ -17,7 +16,6 @@ class BatchEnrollmentSerializer(serializers.Serializer):
     attendance_percentage = serializers.DecimalField(
         max_digits=5, decimal_places=2, required=False, allow_null=True
     )
-    final_grade_id = serializers.IntegerField(required=False, allow_null=True)
     remarks = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     discount_fee = serializers.DecimalField(
         max_digits=10, decimal_places=2, required=False, default=0.0
@@ -30,11 +28,6 @@ class BatchEnrollmentSerializer(serializers.Serializer):
     def validate_student_id(self, value: int) -> int:
         if not Student.objects.filter(id=value).exists():
             raise serializers.ValidationError('Student does not exist.')
-        return value
-
-    def validate_final_grade_id(self, value: int) -> int:
-        if value and not Grade.objects.filter(id=value).exists():
-            raise serializers.ValidationError('Grade does not exist.')
         return value
 
     def validate(self, data: dict) -> dict:

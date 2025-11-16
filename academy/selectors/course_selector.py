@@ -4,7 +4,7 @@ from django.core.paginator import Paginator
 from academy.models import Course, Batch
 from student.models import Student
 from account import choices as account_choices
-from academy.choices_fields import COURSE_TYPE_CHOICES
+from academy.choices_fields import SUBJECT_TYPE_CHOICES
 
 class CourseSelector:
     """
@@ -335,7 +335,7 @@ class CourseSelector:
             return True
     
 
-class CourseTypeSelector:
+class SubjectSelector:
     """
     Selector for course type choices.
     
@@ -353,5 +353,5 @@ class CourseTypeSelector:
         """
         return [
             {'id': value, 'name': display_name} 
-            for value, display_name in COURSE_TYPE_CHOICES
+            for value, display_name in SUBJECT_TYPE_CHOICES
         ]

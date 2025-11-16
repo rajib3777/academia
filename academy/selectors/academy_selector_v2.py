@@ -110,7 +110,7 @@ class AcademySelector:
         # Optimize with prefetch_related for related collections with nested prefetches
         batch_enrollments = Prefetch(
             'batchenrollment_set',
-            queryset=BatchEnrollment.objects.select_related('student', 'student__user', 'final_grade')
+            queryset=BatchEnrollment.objects.select_related('student', 'student__user',)
         )
         
         batches = Prefetch(
@@ -233,17 +233,6 @@ class AcademySelector:
     ) -> Tuple[QuerySet, Dict[str, Any]]:
         """
         List academies with optimized query and pagination.
-        
-        Args:
-            user: Current user for permission filtering
-            search_query: Search text to filter academies
-            filters: Dictionary of filter parameters
-            ordering: Field to order results by
-            page: Page number
-            page_size: Items per page
-        
-        Returns:
-            Tuple of (academies, total count, paginator, page object, page range)
         """
         # Get base queryset with optimized joins
         queryset = AcademySelector.get_all_academies(request_user, academy_id)
@@ -286,7 +275,7 @@ class AcademySelector:
                                 Prefetch(
                                     'batchenrollment_set',
                                     queryset=BatchEnrollment.objects.select_related(
-                                        'student', 'student__user', 'final_grade'
+                                        'student', 'student__user'
                                     )
                                 )
                             ).annotate(enrollment_count=Count('batchenrollment'))
@@ -325,7 +314,7 @@ class AcademySelector:
                                 Prefetch(
                                     'batchenrollment_set',
                                     queryset=BatchEnrollment.objects.select_related(
-                                        'student', 'student__user', 'final_grade'
+                                        'student', 'student__user'
                                     )
                                 )
                             ).annotate(enrollment_count=Count('batchenrollment'))

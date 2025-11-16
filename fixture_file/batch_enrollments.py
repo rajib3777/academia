@@ -21,9 +21,6 @@ remarks = [
 def get_cyclic(lst, idx):
     return lst[idx % len(lst)]
 
-# Grade ID range: 33001 to 33007
-grade_ids = list(range(33001, 33008))
-
 # Update the enrollment list to use grade IDs instead of string grades
 final_batch_enrollments = []
 for i, student_id in enumerate(student_ids):
@@ -39,7 +36,6 @@ for i, student_id in enumerate(student_ids):
             "completion_date": str(date(2025, 7, 1)),
             "is_active": True,
             "attendance_percentage": f"{round(85 + (i % 15) * 0.8, 2):.2f}",
-            "final_grade": random.choice(grade_ids),
             "remarks": get_cyclic(remarks, i)
         }
     }

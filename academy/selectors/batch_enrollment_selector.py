@@ -15,7 +15,7 @@ class BatchEnrollmentSelector:
     def get_by_id(enrollment_id: int) -> Optional[BatchEnrollment]:
         try:
             return BatchEnrollment.objects.select_related(
-                'student', 'batch', 'batch__course', 'batch__course__academy', 'final_grade'
+                'student', 'batch', 'batch__course', 'batch__course__academy'
             ).prefetch_related(
                 'student_payments'
             ).annotate(
@@ -37,7 +37,6 @@ class BatchEnrollmentSelector:
             #         'batch',
             #         'batch__course',
             #         'batch__course__academy',
-            #         'final_grade'
             #     )
             #     .prefetch_related(
             #         Prefetch('student_payments', queryset=payment_qs)
@@ -48,7 +47,7 @@ class BatchEnrollmentSelector:
             #     .all()
             # )
             return BatchEnrollment.objects.select_related(
-                'student', 'batch', 'batch__course', 'batch__course__academy', 'final_grade'
+                'student', 'batch', 'batch__course', 'batch__course__academy'
             ).prefetch_related(
                 'student_payments'
             ).annotate(
@@ -106,8 +105,6 @@ class BatchEnrollmentSelector:
         if filters.get('is_active') is not None:
             is_active = filters['is_active'].lower() == 'true'
             queryset = queryset.filter(is_active=is_active)
-        if filters.get('final_grade'):
-            queryset = queryset.filter(final_grade__grade__icontains=filters['final_grade'])
 
         return queryset
     

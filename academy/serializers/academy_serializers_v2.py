@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from typing import Dict, Any, List
-from academy.models import Academy, Course, Batch, BatchEnrollment, Grade
+from academy.models import Academy, Course, Batch, BatchEnrollment
 from utils.models import Division, District, Upazila
 from account.serializers import UserSerializer
 
@@ -53,7 +53,6 @@ class BatchEnrollmentSerializer(serializers.Serializer):
         read_only=True, 
         allow_null=True
     )
-    final_grade = GradeSerializer(read_only=True, allow_null=True)
     remarks = serializers.CharField(read_only=True, allow_null=True)
 
 
@@ -227,15 +226,6 @@ class AcademyListSerializer(serializers.Serializer):
                                     'attendance_percentage': enrollment.attendance_percentage,
                                     'remarks': enrollment.remarks,
                                 }
-                                
-                                # Add grade data if available
-                                if enrollment.final_grade:
-                                    enrollment_data['final_grade'] = {
-                                        'id': enrollment.final_grade.id,
-                                        'grade': enrollment.final_grade.grade
-                                    }
-                                else:
-                                    enrollment_data['final_grade'] = None
                                     
                                 batch_data['enrollments'].append(enrollment_data)
                                 

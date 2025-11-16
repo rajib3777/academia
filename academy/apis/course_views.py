@@ -6,7 +6,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.core.exceptions import ValidationError
 from functools import cached_property
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from academy.selectors.course_selector import CourseSelector, CourseTypeSelector
+from academy.selectors.course_selector import CourseSelector, SubjectSelector
 from academy.services.course_service import CourseService
 from academy.serializers import course_serializers
 from classmate.permissions import AuthenticatedGenericView
@@ -395,8 +395,8 @@ class CourseTypeDropdownView(APIView):
 
     @cached_property
     def course_type_selector(self):
-        """Lazy initialization of CourseTypeSelector."""
-        return CourseTypeSelector()
+        """Lazy initialization of SubjectSelector."""
+        return SubjectSelector()
     
     def get(self, request, format=None):
         """

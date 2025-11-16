@@ -9,6 +9,9 @@ class ClassMateModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, null=True)
     modified_by = models.CharField(max_length=100, null=True, blank=True)
     modified_at = models.DateTimeField(auto_now=True, null=True)
+    archived_by = models.ForeignKey(
+        'account.User', on_delete=models.PROTECT, null=True, blank=True, related_name='%(class)s_archived_by'
+    )
     archived_at = models.DateTimeField(null=True, blank=True)
     is_archived = models.BooleanField(default=False)
 

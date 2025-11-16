@@ -1,48 +1,48 @@
 [
   {
-    "model": "academy.grade",
+    "model": "exam.grade",
     "pk": 33001,
     "fields": {
       "grade": "A+"
     }
   },
   {
-    "model": "academy.grade",
+    "model": "exam.grade",
     "pk": 33002,
     "fields": {
       "grade": "A"
     }
   },
   {
-    "model": "academy.grade",
+    "model": "exam.grade",
     "pk": 33003,
     "fields": {
       "grade": "A-"
     }
   },
   {
-    "model": "academy.grade",
+    "model": "exam.grade",
     "pk": 33004,
     "fields": {
       "grade": "B"
     }
   },
   {
-    "model": "academy.grade",
+    "model": "exam.grade",
     "pk": 33005,
     "fields": {
       "grade": "C"
     }
   },
   {
-    "model": "academy.grade",
+    "model": "exam.grade",
     "pk": 33006,
     "fields": {
       "grade": "D"
     }
   },
   {
-    "model": "academy.grade",
+    "model": "exam.grade",
     "pk": 33007,
     "fields": {
       "grade": "F"
