@@ -233,6 +233,83 @@ class ExamResultSerializer(serializers.Serializer):
         return data
 
 
+class ExamResultBulkCreateSerializer(serializers.Serializer):
+    """Serializer for bulk creating exam results for all students in a batch"""
+    
+    # Default values to apply to all results
+    default_obtained_marks = serializers.DecimalField(
+        max_digits=6, 
+        decimal_places=2, 
+        required=False, 
+        default=0,
+        help_text="Default marks to assign to all students (can be updated later)"
+    )
+    default_was_present = serializers.BooleanField(
+        default=True,
+        help_text="Default attendance status for all students"
+    )
+    default_remarks = serializers.CharField(
+        required=False, 
+        allow_blank=True, 
+        default="",
+        help_text="Default remarks for all results"
+    )
+    
+    # Options for creation
+    include_inactive_students = serializers.BooleanField(
+        default=False,
+        help_text="Include inactive enrollments in result creation"
+    )
+    overwrite_existing = serializers.BooleanField(
+        default=False,
+        help_text="Overwrite existing results if they exist"
+    )
+    
+    def validate_default_obtained_marks(self, value):
+        """Validate default marks"""
+        if value < 0:
+            raise serializers.ValidationError("Obtained marks cannot be negative")
+        return value
+
+
+class ExamResultBulkPreviewSerializer(serializers.Serializer):
+    """Serializer for bulk create preview"""
+    
+    def to_representation(self, instance):
+        return {
+            'exam': {
+                'exam_id': instance['exam'].exam_id,
+                'title': instance['exam'].title,
+                'total_marks': str(instance['exam'].total_marks),
+                'pass_marks': str(instance['exam'].pass_marks)
+            },
+            'batch': {
+                'id': instance['batch'].id,
+                'name': instance['batch'].name,
+                'batch_id': instance['batch'].batch_id
+            },
+            'statistics': {
+                'total_enrolled_students': instance['total_enrolled_students'],
+                'active_enrollments': instance['active_enrollments'],
+                'existing_results': instance['existing_results'],
+                'results_to_create': instance['results_to_create']
+            },
+            'students_preview': [
+                {
+                    'student_id': student.id,
+                    'student_identifier': student.student_id,
+                    'name': student.user.get_full_name(),
+                    'email': student.user.email,
+                    'enrollment_date': student.batchenrollment_set.filter(
+                        batch=instance['batch']
+                    ).first().enrollment_date,
+                    'has_existing_result': student.id in instance['existing_result_student_ids']
+                }
+                for student in instance['students_preview']
+            ]
+        }
+    
+
 class StudentExamSessionSerializer(serializers.Serializer):
     """Student exam session serializer"""
     id = serializers.IntegerField(read_only=True)
@@ -496,6 +573,7 @@ class ExamResultCreateSerializer(serializers.Serializer):
     """Serializer for creating exam results"""
     exam_id = serializers.CharField()
     student_id = serializers.IntegerField()
+    batch_enrollment_id = serializers.IntegerField()
     obtained_marks = serializers.DecimalField(max_digits=6, decimal_places=2)
     was_present = serializers.BooleanField(default=True)
     remarks = serializers.CharField(required=False, allow_blank=True)

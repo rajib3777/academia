@@ -197,13 +197,19 @@ class ExamResultService:
         except (Exam.DoesNotExist, Student.DoesNotExist):
             raise ValidationError('Exam or Student not found')
 
+        if not BatchEnrollment.objects.filter(id=data['batch_enrollment_id'], student=student).exists():
+            raise ValidationError('BatchEnrollment not found')
+
         # Check if result already exists
         if ExamResult.objects.filter(exam=exam, student=student).exists():
             raise ValidationError('Result already exists for this student and exam')
 
+        enrollment = BatchEnrollment.objects.get(id=data['batch_enrollment_id'], student=student)
+
         result = ExamResult.objects.create(
             exam=exam,
             student=student,
+            enrollment=enrollment,
             obtained_marks=data['obtained_marks'],
             was_present=data.get('was_present', True),
             entered_by=user,
@@ -268,6 +274,232 @@ class ExamResultService:
         ExamResult.objects.bulk_create(results)
         return results
 
+    @staticmethod
+    @transaction.atomic
+    def bulk_create_results_for_batch(
+        exam_id: str, 
+        default_data: Dict[str, Any], 
+        user: User
+    ) -> List[ExamResult]:
+        """
+        Bulk create exam results for all students in the exam's batch
+        
+        Args:
+            exam_id: The exam ID to create results for
+            default_data: Default values for all results
+            user: User creating the results
+            
+        Returns:
+            List of created ExamResult instances
+        """
+        # Get exam with validation
+        exam = exam_selector.ExamSelector.get_exam_by_id(exam_id)
+        if not exam:
+            raise ValidationError('Exam not found')
+        
+        # Validate user permissions
+        ExamResultService._validate_bulk_create_permissions(exam, user)
+        
+        # Validate exam state
+        if exam.exam_type == 'online':
+            raise ValidationError('Bulk creation is only available for paper-based exams')
+            
+        # Get students to create results for
+        students_to_process = ExamResultService._get_students_for_bulk_create(
+            exam, 
+            default_data.get('include_inactive_students', False),
+            default_data.get('overwrite_existing', False)
+        )
+        
+        if not students_to_process:
+            raise ValidationError('No students found to create results for')
+        
+        # Prepare results data
+        results_to_create = []
+        results_to_update = []
+        
+        for student_data in students_to_process:
+            student = student_data['student']
+            enrollment = student_data['enrollment']
+            existing_result = student_data.get('existing_result')
+            
+            result_data = {
+                'exam': exam,
+                'student': student,
+                'enrollment': enrollment,
+                'obtained_marks': default_data.get('default_obtained_marks', 0),
+                'was_present': default_data.get('default_was_present', True),
+                'remarks': default_data.get('default_remarks', ''),
+                'entered_by': user
+            }
+            
+            if existing_result and default_data.get('overwrite_existing', False):
+                # Update existing result
+                for field, value in result_data.items():
+                    if field not in ['exam', 'student', 'enrollment']:
+                        setattr(existing_result, field, value)
+                existing_result.last_modified_by = user
+                existing_result.last_modified_at = timezone.now()
+                results_to_update.append(existing_result)
+            elif not existing_result:
+                # Create new result
+                results_to_create.append(ExamResult(**result_data))
+        
+        # Bulk create new results
+        created_results = []
+        if results_to_create:
+            created_results = ExamResult.objects.bulk_create(
+                results_to_create, 
+                batch_size=100
+            )
+        
+        # Bulk update existing results
+        updated_results = []
+        if results_to_update:
+            ExamResult.objects.bulk_update(
+                results_to_update,
+                fields=['obtained_marks', 'was_present', 'remarks', 'last_modified_by', 'last_modified_at'],
+                batch_size=100
+            )
+            updated_results = results_to_update
+        
+        # Combine and return all processed results
+        all_results = created_results + updated_results
+        
+        # Log the bulk creation
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.info(
+            f"Bulk created {len(created_results)} and updated {len(updated_results)} "
+            f"exam results for exam {exam_id} by user {user.id}"
+        )
+        
+        return all_results
+
+    @staticmethod
+    def get_bulk_create_preview(exam_id: str, user: User) -> Dict[str, Any]:
+        """
+        Get preview data for bulk result creation
+        
+        Args:
+            exam_id: The exam ID to preview
+            user: User requesting the preview
+            
+        Returns:
+            Dictionary containing preview information
+        """
+        # Get exam with validation
+        exam = exam_selector.ExamSelector.get_exam_by_id(exam_id)
+        if not exam:
+            raise ValidationError('Exam not found')
+        
+        # Validate permissions
+        ExamResultService._validate_bulk_create_permissions(exam, user)
+        
+        # Get batch and enrollment statistics
+        batch = exam.batch
+        
+        # Get all enrolled students (active and inactive)
+        active_enrollments = BatchEnrollment.objects.filter(
+            batch=batch,
+            is_active=True
+        ).select_related('student', 'student__user')
+        
+        total_enrollments = BatchEnrollment.objects.filter(
+            batch=batch
+        ).count()
+        
+        # Get existing results
+        existing_results = ExamResult.objects.filter(exam=exam)
+        existing_result_student_ids = list(
+            existing_results.values_list('student_id', flat=True)
+        )
+        
+        # Calculate students that will get new results
+        students_without_results = active_enrollments.exclude(
+            student_id__in=existing_result_student_ids
+        )
+        
+        # Preview data (first 10 students)
+        students_preview = [enrollment.student for enrollment in active_enrollments[:10]]
+        
+        return {
+            'exam': exam,
+            'batch': batch,
+            'total_enrolled_students': total_enrollments,
+            'active_enrollments': active_enrollments.count(),
+            'existing_results': existing_results.count(),
+            'results_to_create': students_without_results.count(),
+            'existing_result_student_ids': existing_result_student_ids,
+            'students_preview': students_preview
+        }
+
+    @staticmethod
+    def _validate_bulk_create_permissions(exam: Exam, user: User) -> None:
+        """Validate user permissions for bulk result creation"""
+        if user.is_admin():
+            return
+        elif user.is_academy():
+            if exam.batch.course.academy != user.academy:
+                raise ValidationError('Access denied: Exam belongs to different academy')
+        elif user.is_teacher():
+            # Check if teacher is assigned to this batch
+            if not exam.batch.teachers.filter(id=user.id).exists():
+                raise ValidationError('Access denied: You are not assigned to this batch')
+        else:
+            raise ValidationError('Access denied: Insufficient permissions')
+
+    @staticmethod
+    def _get_students_for_bulk_create(
+        exam: Exam, 
+        include_inactive: bool = False,
+        overwrite_existing: bool = False
+    ) -> List[Dict[str, Any]]:
+        """
+        Get list of students to create results for
+        
+        Args:
+            exam: The exam instance
+            include_inactive: Include inactive enrollments
+            overwrite_existing: Include students who already have results
+            
+        Returns:
+            List of student data dictionaries
+        """
+        # Base queryset
+        enrollments_query = BatchEnrollment.objects.filter(batch=exam.batch)
+        
+        if not include_inactive:
+            enrollments_query = enrollments_query.filter(is_active=True)
+        
+        enrollments = enrollments_query.select_related(
+            'student', 'student__user'
+        ).prefetch_related('student__exam_results')
+        
+        # Get existing results for this exam
+        existing_results = {
+            result.student_id: result 
+            for result in ExamResult.objects.filter(exam=exam)
+        }
+        
+        students_data = []
+        
+        for enrollment in enrollments:
+            student = enrollment.student
+            existing_result = existing_results.get(student.id)
+            
+            # Skip if result exists and we're not overwriting
+            if existing_result and not overwrite_existing:
+                continue
+            
+            students_data.append({
+                'student': student,
+                'enrollment': enrollment,
+                'existing_result': existing_result
+            })
+        
+        return students_data
+    
     @staticmethod
     @transaction.atomic
     def verify_result(result_id: str, user: User) -> ExamResult:
@@ -701,3 +933,4 @@ class OnlineExamResultService:
         result.save()  # This will trigger the obtained_marks calculation
 
         return result
+

@@ -298,6 +298,71 @@ class ExamResultCreateView(AuthenticatedGenericView, APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+class ExamResultBulkCreateView(AuthenticatedGenericView, APIView):
+    """Bulk create exam results for all students in exam's batch"""
+    serializer_class = exam_serializer.ExamResultSerializer
+
+    @cached_property
+    def exam_result_service(self) -> exam_service.ExamResultService:
+        """Lazy initialization of ExamResultService."""
+        return exam_service.ExamResultService()
+
+    @cached_property
+    def exam_selector(self) -> exam_selector.ExamSelector:
+        """Lazy initialization of ExamSelector."""
+        return exam_selector.ExamSelector()
+
+    def post(self, request, exam_id):
+        """Bulk create exam results for all students in the batch"""
+        serializer = exam_serializer.ExamResultBulkCreateSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            try:
+                results = self.exam_result_service.bulk_create_results_for_batch(
+                    exam_id=exam_id,
+                    default_data=serializer.validated_data,
+                    user=request.user
+                )
+                
+                response_serializer = self.serializer_class(results, many=True)
+                return Response({
+                    'success': True,
+                    'message': f'Created {len(results)} exam results',
+                    'data': response_serializer.data,
+                    'total_created': len(results)
+                }, status=status.HTTP_201_CREATED)
+                
+            except Exception as e:
+                return Response(
+                    {'success': False, 'error': str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        
+        return Response({
+            'success': False,
+            'errors': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, exam_id):
+        """Preview students who will get results created"""
+        try:
+            preview_data = self.exam_result_service.get_bulk_create_preview(
+                exam_id=exam_id,
+                user=request.user
+            )
+            
+            return Response({
+                'success': True,
+                'data': preview_data
+            }, status=status.HTTP_200_OK)
+            
+        except Exception as e:
+            return Response(
+                {'success': False, 'error': str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+
 class ExamResultUpdateView(AuthenticatedGenericView, APIView):
     """Retrieve, update exam result"""
     serializer_class = exam_serializer.ExamResultSerializer

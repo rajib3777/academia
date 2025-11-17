@@ -20,12 +20,13 @@ urlpatterns = [
     # Exam Results
     path('exam-results/', exam_apis.ExamResultListView.as_view(), name='exam-result-list'),
     path('exam-results/create/', exam_apis.ExamResultCreateView.as_view(), name='exam-result-create'),
+    path('exam-results/bulk-create/<str:exam_id>/', exam_apis.ExamResultBulkCreateView.as_view(), name='exam-bulk-results'),
     path('exam-results/<str:result_id>/', exam_apis.ExamResultDetailView.as_view(), name='exam-result-detail'),
     path('exam-results/<str:result_id>/update/', exam_apis.ExamResultUpdateView.as_view(), name='exam-result-update'),
     path('exam-results/<str:result_id>/verify/', exam_apis.ExamResultVerifyView.as_view(), name='exam-result-verify'),
 
     # Batch Operations
-    path('exams/<str:exam_id>/batch-results/', exam_apis.BatchExamResultsView.as_view(), name='exam-batch-results'),
+    # path('exams/<str:exam_id>/batch-results/', exam_apis.BatchExamResultsView.as_view(), name='exam-batch-results'), no in use
     path('exams/<str:exam_id>/export/', exam_apis.ExamResultsExportView.as_view(), name='exam-results-export'),
 
     # Online Exam Sessions
