@@ -184,7 +184,7 @@ class ExamAdmin(admin.ModelAdmin):
 class ExamResultAdmin(admin.ModelAdmin):
     """Admin configuration for ExamResult model"""
     list_display = (
-        'student_name', 'exam_title', 'obtained_marks', 'total_marks',
+        'student', 'student_name', 'exam_title', 'obtained_marks', 'total_marks',
         'percentage', 'grade', 'status', 'is_verified', 'entered_at'
     )
     list_filter = (
@@ -246,7 +246,7 @@ class ExamResultAdmin(admin.ModelAdmin):
         """Display student full name with link"""
         url = reverse('admin:student_student_change', args=[obj.student.pk])
         return format_html('<a href="{}">{}</a>', url, obj.student.user.get_full_name())
-    student_name.short_description = 'Student'
+    student_name.short_description = 'Student Profile'
     student_name.admin_order_field = 'student__user__first_name'
     
     def exam_title(self, obj):

@@ -365,30 +365,148 @@ class ExamSelector:
 
 class ExamResultSelector:
     """Selector for exam result queries"""
-
     @staticmethod
-    def list_exam_results(
-        exam_id: Optional[str] = None,
-        student_id: Optional[int] = None,
-        batch_id: Optional[int] = None,
-        is_passed: Optional[bool] = None
-    ) -> QuerySet[ExamResult]:
-        """List exam results with filters"""
-        queryset = ExamResult.objects.select_related(
+    def get_all_exam_results() -> QuerySet[ExamResult]:
+        """Get all exam results for a user"""
+        return ExamResult.objects.select_related(
             'exam', 'exam__batch', 'student', 'student__user', 
             'grade', 'enrollment', 'entered_by'
         )
 
-        if exam_id:
-            queryset = queryset.filter(exam__exam_id=exam_id)
-        if student_id:
-            queryset = queryset.filter(student_id=student_id)
-        if batch_id:
-            queryset = queryset.filter(exam__batch_id=batch_id)
-        if is_passed is not None:
+    @staticmethod
+    def get_role_based_exam_result_queryset(
+        queryset: QuerySet[ExamResult],
+        request_user: User
+    ) -> QuerySet[ExamResult]:
+        """Get exam result queryset based on user role"""
+
+        if request_user.is_student():
+            queryset = queryset.filter(
+                student=request_user.student
+            )
+        elif request_user.is_academy():
+            queryset = queryset.filter(
+                exam__batch__course__academy=request_user.academy
+            )
+        elif request_user.is_admin():
+            queryset = queryset
+        else:
+            queryset = ExamResult.objects.none()
+
+        return queryset
+    
+    @staticmethod
+    def apply_list_filters(
+        queryset: QuerySet, filters: Dict[str, Any],
+    ) -> QuerySet[ExamResult]:
+        """Get exam queryset with applied filters"""
+
+        if filters.get('exam_id'):
+            queryset = queryset.filter(exam__exam_id=filters['exam_id'])
+        if filters.get('student_id'):
+            queryset = queryset.filter(student__id=filters['student_id'])
+        if filters.get('batch_id'):
+            queryset = queryset.filter(exam__batch_id=filters['batch_id'])
+        # Convert string to boolean for is_passed
+        if filters.get('is_passed'):
+            is_passed = filters.get('is_passed').lower() == 'true'
             queryset = queryset.filter(is_passed=is_passed)
 
-        return queryset.order_by('-obtained_marks')
+        return queryset
+
+    @staticmethod
+    def apply_list_search(
+        queryset: QuerySet, search_query: Optional[str]
+    ) -> QuerySet[ExamResult]:
+        """Get exam queryset with applied search"""
+        if search_query:
+            queryset = queryset.filter(
+                Q(exam__name__icontains=search_query) |
+                Q(student__user__first_name__icontains=search_query) |
+                Q(student__user__last_name__icontains=search_query)
+            )
+        return queryset
+
+    @staticmethod
+    def apply_list_ordering(queryset, ordering):
+        """Apply ordering with multiple fields support"""
+        # Define allowed ordering fields
+        allowed_fields = [
+            'id', 'obtained_marks', 'is_passed'
+        ]
+        
+        # Handle multiple ordering fields
+        if ordering:
+            order_fields = [field.strip() for field in ordering.split(',')]
+            valid_fields = []
+            
+            for field in order_fields:
+                # Remove '-' prefix for validation
+                field_name = field.lstrip('-')
+                if field_name in allowed_fields:
+                    valid_fields.append(field)
+            
+            if valid_fields:
+                return queryset.order_by(*valid_fields)
+            
+        # Default ordering
+        return queryset.order_by('-exam__exam_date')
+
+    @staticmethod
+    def paginate_queryset(queryset, page_size, page):
+        """Apply pagination"""
+        page_size = int(page_size)
+        page_number = int(page)
+        
+        # Limit page size to prevent abuse
+        page_size = min(page_size, 20)
+        
+        paginator = Paginator(queryset, page_size)
+        page = paginator.get_page(page_number)
+        
+        return {
+            'results': page.object_list,
+            'pagination': {
+                'page': page_number,
+                'page_size': page_size,
+                'total_pages': paginator.num_pages,
+                'total_items': paginator.count,
+                'has_next': page.has_next(),
+                'has_previous': page.has_previous(),
+                'next_page': page.next_page_number() if page.has_next() else None,
+                'previous_page': page.previous_page_number() if page.has_previous() else None,
+            }
+        }
+    
+    @staticmethod
+    def list_exam_results(
+        request_user: User,
+        filters: Dict[str, Any] = None,
+        search_query: Optional[str] = None,
+        ordering: Optional[str] = None,
+        page: int = 1,
+        page_size: int = 20
+    ) -> QuerySet[ExamResult]:
+        """List exam results with filters"""
+        # Get base queryset with optimzed joins
+        queryset = ExamResultSelector.get_all_exam_results()
+        
+        # Apply Role based filter
+        queryset = ExamResultSelector.get_role_based_exam_result_queryset(queryset, request_user)
+
+        # Apply filters
+        queryset = ExamResultSelector.apply_list_filters(queryset, filters)
+
+        # Apply search
+        queryset = ExamResultSelector.apply_list_search(queryset, search_query)
+
+        # Apply ordering
+        queryset = ExamResultSelector.apply_list_ordering(queryset, ordering)
+
+        # Apply pagination
+        paginated_data = ExamResultSelector.paginate_queryset(queryset, page_size, page)
+
+        return paginated_data
 
     @staticmethod
     def get_result_by_id(result_id: str) -> Optional[ExamResult]:

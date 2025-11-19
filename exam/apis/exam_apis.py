@@ -1,3 +1,4 @@
+import logging
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -9,6 +10,7 @@ from classmate.permissions import AuthenticatedGenericView
 from exam.selectors import exam_selector
 from exam.services import exam_service
 from exam.serializers import exam_serializer
+logger = logging.getLogger(__name__)
 
 
 class ExamCreateAPI(AuthenticatedGenericView, APIView):
@@ -235,39 +237,49 @@ class ExamResultListView(AuthenticatedGenericView, APIView):
         return exam_selector.ExamResultSelector()
     
     def get(self, request):
-        """List exam results with pagination and filters"""
-        page_number = request.GET.get('page', 1)
-        exam_id = request.GET.get('exam_id')
-        student_id = request.GET.get('student_id')
-        batch_id = request.GET.get('batch_id')
-        is_passed = request.GET.get('is_passed')
+        try:
+            """List exam results with pagination and filters"""
+            page = int(request.GET.get('page', 1))
+            page_size = int(request.GET.get('page_size', 20))
+            
+            # Extract search and ordering parameters
+            search_query = request.GET.get('search', '').strip()
+            ordering = request.GET.get('ordering')
 
-        # Convert string to boolean for is_passed
-        if is_passed:
-            is_passed = is_passed.lower() == 'true'
+            pagination_info = self.exam_result_selector.list_exam_results(
+                request_user=request.user,
+                filters=request.GET,
+                search_query=search_query,
+                ordering=ordering,
+                page=page,
+                page_size=page_size
+            )
 
-        results = self.exam_result_selector.list_exam_results(
-            exam_id=exam_id,
-            student_id=student_id,
-            batch_id=batch_id,
-            is_passed=is_passed
-        )
+            serializer = self.serializer_class(pagination_info['results'], many=True)
 
-        # Pagination
-        paginator = Paginator(results, 10)
-        page = paginator.get_page(page_number)
-
-        serializer = self.serializer_class(page.object_list, many=True)
-        return Response({
-            'results': serializer.data,
-            'pagination': {
-                'current_page': page.number,
-                'total_pages': paginator.num_pages,
-                'total_count': paginator.count,
-                'has_next': page.has_next(),
-                'has_previous': page.has_previous()
+            # Build response
+            response_data = {
+                'success': True,
+                'data': serializer.data,
+                'pagination': pagination_info['pagination'],
+                'filters_applied': dict(request.GET),
+                'total_count': pagination_info['pagination']['total_items']
             }
-        })
+            
+            return Response(response_data, status=status.HTTP_200_OK)
+        
+        except Exception as e:
+            # Log the exception
+            logger.error(f"Error in ExamResultListView: {str(e)}")
+
+            return Response(
+                {
+                    'success': False,
+                    'error': 'An error occurred while retrieving exam results.',
+                    'details': str(e)
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class ExamResultCreateView(AuthenticatedGenericView, APIView):
