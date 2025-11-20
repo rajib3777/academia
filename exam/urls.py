@@ -26,7 +26,7 @@ urlpatterns = [
     path('exam-results/<str:result_id>/verify/', exam_apis.ExamResultVerifyView.as_view(), name='exam-result-verify'),
 
     # Batch Operations
-    # path('exams/<str:exam_id>/batch-results/', exam_apis.BatchExamResultsView.as_view(), name='exam-batch-results'), no in use
+    # path('exams/<str:exam_id>/batch-results/', exam_apis.BatchExamResultsView.as_view(), name='exam-batch-results'),
     path('exams/<str:exam_id>/export/', exam_apis.ExamResultsExportView.as_view(), name='exam-results-export'),
 
     # Online Exam Sessions

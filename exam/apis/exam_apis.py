@@ -926,7 +926,7 @@ class ExamResultVerifyView(AuthenticatedGenericView, APIView):
         try:
             result = self.exam_result_service.verify_result(
                 result_id=result_id,
-                verified_by=request.user
+                user=request.user
             )
             serializer = self.serializer_class(result)
             return Response(serializer.data)
