@@ -16,6 +16,7 @@ from django.db.models import Sum
 import csv
 import uuid
 from exam.selectors import exam_selector
+from exam.utils import IDGenerator
 
 class ExamService:
     """Service for exam operations"""
@@ -271,6 +272,11 @@ class ExamResultService:
             except Student.DoesNotExist:
                 continue
 
+        # Manually generate result_id for each instance since bulk_create bypasses pre_save signal
+        for result in results:
+            if not result.result_id:
+                result.result_id = IDGenerator.generate_result_id()
+        
         ExamResult.objects.bulk_create(results)
         return results
 
@@ -348,6 +354,11 @@ class ExamResultService:
         # Bulk create new results
         created_results = []
         if results_to_create:
+            # Manually generate result_id for each instance since bulk_create bypasses pre_save signal
+            for result in results_to_create:
+                if not result.result_id:
+                    result.result_id = IDGenerator.generate_result_id()
+            
             created_results = ExamResult.objects.bulk_create(
                 results_to_create, 
                 batch_size=100
