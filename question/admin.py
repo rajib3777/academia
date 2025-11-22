@@ -49,7 +49,7 @@ class QuestionBankCategoryAdmin(admin.ModelAdmin):
 
     fieldsets = (
         ('Basic Information', {
-            'fields': ('name', 'description', 'subject')
+            'fields': (('name', 'description', ),)
         }),
         ('Hierarchy', {
             'fields': ('parent_category',)
@@ -58,7 +58,7 @@ class QuestionBankCategoryAdmin(admin.ModelAdmin):
             'fields': ('is_active',)
         }),
         ('System Information', {
-            'fields': ('category_id', 'created_by', 'created_at', 'modified_at'),
+            'fields': (('category_id', 'created_by', 'created_at', 'modified_at'),),
             'classes': ('collapse',)
         })
     )
@@ -134,37 +134,37 @@ class QuestionBankAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Basic Information', {
-            'fields': (
+            'fields': ((
                 'title', 'question_text', 'question_type', 'suggested_marks'
-            )
+            ),)
         }),
         ('Categorization', {
-            'fields': (
+            'fields': ((
                 'subject', 'category', 'difficulty_level', 'tags'
-            )
+            ),)
         }),
         ('Answer Guidelines', {
-            'fields': (
+            'fields': ((
                 'expected_answer', 'marking_scheme'
-            ),
+            ),),
             'classes': ('collapse',)
         }),
         ('Quality Control', {
-            'fields': (
+            'fields': ((
                 'is_approved', 'approved_by', 'approved_at', 'is_active'
-            )
+            ),)
         }),
         ('Usage Statistics', {
-            'fields': (
+            'fields': ((
                 'usage_count', 'last_used_at'
-            ),
+            ),),
             'classes': ('collapse',)
         }),
         ('System Information', {
-            'fields': (
+            'fields': ((
                 'question_bank_id', 'created_by', 'created_at', 'modified_at',
                 'tag_list', 'is_mcq_or_true_false'
-            ),
+            ),),
             'classes': ('collapse',)
         })
     )
@@ -284,13 +284,17 @@ class QuestionBankOptionAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Option Information', {
-            'fields': ('question_bank', 'option_text', 'option_order')
+            'fields': ((
+                'question_bank', 'option_text', 'option_order'
+            ),)
         }),
         ('Answer Details', {
-            'fields': ('is_correct', 'explanation')
+            'fields': ((
+                'is_correct', 'explanation'
+            ),)
         }),
         ('System Information', {
-            'fields': ('created_at', 'modified_at'),
+            'fields': (('created_at', 'modified_at'),),
             'classes': ('collapse',)
         })
     )
@@ -378,25 +382,25 @@ class QuestionAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Basic Information', {
-            'fields': (
+            'fields': ((
                 'exam', 'question_order', 'question_type', 'marks', 'is_required'
-            )
+            ),)
         }),
         ('Question Content', {
-            'fields': (
+            'fields': ((
                 'question_text', 'expected_answer', 'marking_scheme'
-            )
+            ),)
         }),
         ('Question Bank Reference', {
-            'fields': (
+            'fields': ((
                 'question_bank', 'is_from_bank'
-            ),
+            ),),
             'classes': ('collapse',)
         }),
         ('System Information', {
-            'fields': (
+            'fields': ((
                 'question_id', 'created_by', 'created_at', 'modified_at'
-            ),
+            ),),
             'classes': ('collapse',)
         })
     )
@@ -478,17 +482,25 @@ class QuestionOptionAdmin(admin.ModelAdmin):
     
     fieldsets = (
         ('Option Information', {
-            'fields': ('question', 'option_text', 'option_order')
+            'fields': ((
+                'question', 'option_text', 'option_order'
+            ),)
         }),
         ('Answer Details', {
-            'fields': ('is_correct', 'explanation')
+            'fields': ((
+                'is_correct', 'explanation'
+            ),)
         }),
         ('Bank Reference', {
-            'fields': ('bank_option',),
+            'fields': ((
+                'bank_option',
+            ),),
             'classes': ('collapse',)
         }),
         ('System Information', {
-            'fields': ('created_at', 'modified_at'),
+            'fields': ((
+                'created_at', 'modified_at',
+            ),),
             'classes': ('collapse',)
         })
     )
