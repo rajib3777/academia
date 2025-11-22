@@ -509,6 +509,36 @@ class ExamResultSelector:
         return paginated_data
 
     @staticmethod
+    def list_exam_results_export(
+        exam_id: Optional[str] = None,
+        student_id: Optional[int] = None,
+        batch_id: Optional[int] = None,
+        is_passed: Optional[bool] = None
+    ) -> QuerySet[ExamResult]:
+        """List exam results with filters"""
+        queryset = ExamResult.objects.select_related(
+            'exam',
+            'exam__batch',
+            'student',
+            'student__user',
+            'enrollment',
+            'grade',
+            'entered_by',
+            'verified_by'
+        )
+
+        if exam_id:
+            queryset = queryset.filter(exam__exam_id=exam_id)
+        if student_id:
+            queryset = queryset.filter(student_id=student_id)
+        if batch_id:
+            queryset = queryset.filter(exam__batch_id=batch_id)
+        if is_passed is not None:
+            queryset = queryset.filter(is_passed=is_passed)
+
+        return queryset.order_by('-obtained_marks')
+
+    @staticmethod
     def get_result_by_id(result_id: str) -> Optional[ExamResult]:
         """Get exam result by result_id"""
         try:

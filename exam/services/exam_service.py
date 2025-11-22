@@ -560,7 +560,7 @@ class ExamResultService:
         if not exam:
             raise ValidationError('Exam not found')
 
-        results = exam_selector.ExamResultSelector.list_exam_results(exam_id=exam_id)
+        results = exam_selector.ExamResultSelector.list_exam_results_export(exam_id=exam_id)
 
         response = HttpResponse(content_type='text/csv')
         response['Content-Disposition'] = f'attachment; filename="{exam.title}_results.csv"'
