@@ -35,5 +35,6 @@ echo "Reloaded application."
 
 # Restart the application services
 sudo systemctl restart gunicorn
+echo "Restarted Gunicorn service."
 sudo systemctl restart nginx
 echo "Deployment completed successfully."
