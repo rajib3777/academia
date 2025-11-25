@@ -34,6 +34,6 @@ popd
 echo "Reloaded application."
 
 # Restart the application services
-# sudo systemctl restart gunicorn
-# sudo systemctl restart nginx
+sudo systemctl restart gunicorn
+sudo systemctl restart nginx
 echo "Deployment completed successfully."
