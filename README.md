@@ -50,3 +50,5 @@ Data generate in db container:
 - docker exec -it classmate_db bash psql -U postgres du ALTER USER postgres PASSWORD '1234';
 
 # 
+
+To make github action .scripts/deploy.sh executable run chmod +x .scripts/deploy.sh inside the server. 
