@@ -34,8 +34,8 @@ exam_patterns = [
 ]
 
 question_patterns = [
-    # path('api/questions/', question_apis.QuestionListCreateAPI.as_view(), name='question-list-create'),
-    # path('api/questions/<str:question_id>/', question_apis.QuestionDetailUpdateDeleteAPI.as_view(), name='question-detail-update-delete'),
+    # path('questions/', question_apis.QuestionListCreateAPI.as_view(), name='question-list-create'),
+    # path('questions/<str:question_id>/', question_apis.QuestionDetailUpdateDeleteAPI.as_view(), name='question-detail-update-delete'),
 ]
 
 urlpatterns = category_patterns + bank_patterns + exam_patterns + question_patterns
