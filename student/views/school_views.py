@@ -2,7 +2,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.core.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from student.selectors import school_selector
 from student.services.school_service import SchoolService
@@ -11,6 +11,7 @@ from student.serializers.school_serializers import (
     SchoolUpdateSerializer,
     SchoolDetailSerializer,
     SchoolListSerializer,
+    SchoolPublicListSerializer,
     SchoolDropdownSerializer
 )
 from functools import cached_property
@@ -114,6 +115,57 @@ class SchoolListView(APIView):
             return Response(response_data, status=status.HTTP_200_OK)
         except Exception as e:
             logger.error(f'Error in SchoolListView: {str(e)}')
+            return Response(
+                {
+                    'success': False,
+                    'error': 'Failed to retrieve schools',
+                    'details': str(e)
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+
+class PublicSchoolListView(APIView):
+    """
+    Public API to list all schools without authentication.
+    """
+    serializer_class = SchoolPublicListSerializer
+    permission_classes = [AllowAny]
+
+    @cached_property
+    def school_selector(self) -> school_selector.SchoolSelector:
+        """Lazy initialization of SchoolSelector."""
+        return school_selector.SchoolSelector()
+
+    def get(self, request) -> Response:
+        try:
+            page = int(request.GET.get('page', 1))
+            page_size = int(request.GET.get('page_size', 1000))
+            search_query = request.GET.get('search', '').strip()
+
+            pagination_info = self.school_selector.list_schools(
+                search_query=search_query,
+                page=page,
+                page_size=page_size
+            )
+
+            serializer = self.serializer_class(
+                pagination_info['results'],
+                context={'request': request},
+                many=True
+            )
+
+            response_data = {
+                'success': True,
+                'data': serializer.data,
+                'pagination': pagination_info['pagination'],
+                'filters_applied': dict(request.GET),
+                'total_count': pagination_info['pagination']['total_items']
+            }
+
+            return Response(response_data, status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f'Error in PublicSchoolListView: {str(e)}')
             return Response(
                 {
                     'success': False,

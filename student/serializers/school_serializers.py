@@ -61,7 +61,22 @@ class SchoolListSerializer(serializers.Serializer):
                 return request.build_absolute_uri(url)
             return url
         return None
-    
+
+class SchoolPublicListSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    name = serializers.CharField()
+    logo = serializers.ImageField(allow_null=True)
+
+    def get_logo(self, obj) -> str:
+        print('obj:', obj, obj.logo)
+        request = self.context.get('request')
+        if obj.logo and hasattr(obj.logo, 'url'):
+            url = obj.logo.url
+            if request is not None:
+                return request.build_absolute_uri(url)
+            return url
+        return None
+
 
 class SchoolDropdownSerializer(serializers.Serializer):
     """

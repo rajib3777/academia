@@ -8,7 +8,7 @@ from question.models import (
     Question, 
     QuestionOption
 )
-from account.serializers import UserBasicSerializer
+from account.serializers import UserSerializer
 
 
 class QuestionBankCategoryListSerializer(serializers.Serializer):
@@ -73,7 +73,7 @@ class QuestionBankCategoryDetailSerializer(serializers.Serializer):
             ],
             'question_count': instance.questions.filter(is_active=True).count(),
             'is_active': instance.is_active,
-            'created_by': UserBasicSerializer().to_representation(instance.created_by) if instance.created_by else None,
+            'created_by': UserSerializer().to_representation(instance.created_by) if instance.created_by else None,
             'created_at': instance.created_at,
             'updated_at': instance.updated_at,
         }
@@ -209,10 +209,10 @@ class QuestionBankDetailSerializer(serializers.Serializer):
             'usage_count': instance.usage_count,
             'last_used_at': instance.last_used_at,
             'is_approved': instance.is_approved,
-            'approved_by': UserBasicSerializer().to_representation(instance.approved_by) if instance.approved_by else None,
+            'approved_by': UserSerializer().to_representation(instance.approved_by) if instance.approved_by else None,
             'approved_at': instance.approved_at,
             'is_active': instance.is_active,
-            'created_by': UserBasicSerializer().to_representation(instance.created_by) if instance.created_by else None,
+            'created_by': UserSerializer().to_representation(instance.created_by) if instance.created_by else None,
             'options': [
                 QuestionBankOptionListSerializer().to_representation(option)
                 for option in instance.options.all().order_by('option_order')
@@ -357,7 +357,7 @@ class QuestionDetailSerializer(serializers.Serializer):
                 'title': instance.exam.title,
                 'exam_code': instance.exam.exam_code
             } if instance.exam else None,
-            'created_by': UserBasicSerializer().to_representation(instance.created_by) if instance.created_by else None,
+            'created_by': UserSerializer().to_representation(instance.created_by) if instance.created_by else None,
             'options': [
                 QuestionOptionListSerializer().to_representation(option)
                 for option in instance.options.all().order_by('option_order')

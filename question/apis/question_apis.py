@@ -1,4 +1,4 @@
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.template.loader import render_to_string
 from rest_framework.views import APIView
 from functools import cached_property
@@ -7,7 +7,8 @@ from django.core.exceptions import ValidationError
 from django.contrib.auth.mixins import LoginRequiredMixin
 from typing import Dict, Any, Optional
 import json
-
+from django.shortcuts import render, redirect
+from django.contrib import messages
 from question.selectors.question_selector import (
     QuestionBankCategorySelector,
     QuestionBankSelector, 
@@ -23,21 +24,18 @@ from question.services.question_service import (
     QuestionBankOptionService
 )
 
-
-from django.shortcuts import render, redirect
-from django.http import HttpResponse, JsonResponse
-from django.template.loader import render_to_string
-from django.core.exceptions import ValidationError
-from django.contrib import messages
-from typing import Dict, Any
-import json
-
 from question.serializers.question_serializer import (
     QuestionBankCategoryListSerializer,
     QuestionBankCategoryDetailSerializer,
-    QuestionBankCategoryCreateSerializer
+    QuestionBankCategoryCreateSerializer,
+    QuestionBankListSerializer,
+    QuestionBankDetailSerializer,
+    QuestionBankCreateSerializer,
+    QuestionListSerializer,
+    QuestionDetailSerializer,
+    QuestionCreateFromBankSerializer,
+    QuestionCreateCustomSerializer
 )
-
 
 class QuestionBankCategoryListView(AuthenticatedGenericView, APIView):
     """List all question bank categories"""
@@ -233,24 +231,6 @@ class QuestionBankCategoryDeleteView(AuthenticatedGenericView, APIView):
             return self.handle_error_response(str(e))
         except Exception as e:
             return self.handle_error_response(f'Error deleting category: {str(e)}')
-        
-
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.template.loader import render_to_string
-from django.core.exceptions import ValidationError
-from django.contrib import messages
-from typing import Dict, Any, List
-import json
-
-from ..selectors import QuestionBankSelector, QuestionBankCategorySelector
-from ..services import QuestionBankService, QuestionBankOptionService
-from ..serializers import (
-    QuestionBankListSerializer,
-    QuestionBankDetailSerializer,
-    QuestionBankCreateSerializer
-)
-from exam.utils import get_page_range_with_ellipsis
 
 
 class QuestionBankListView(AuthenticatedGenericView, APIView):
@@ -596,24 +576,6 @@ class QuestionBankDuplicateView(AuthenticatedGenericView, APIView):
             return self.handle_error_response(str(e))
         except Exception as e:
             return self.handle_error_response(f'Error duplicating question: {str(e)}')
-        
-
-from django.shortcuts import render, redirect
-from django.http import HttpResponse
-from django.template.loader import render_to_string
-from django.core.exceptions import ValidationError
-from django.contrib import messages
-from typing import Dict, Any, List
-import json
-
-from ..selectors import QuestionSelector, QuestionBankSelector
-from ..services import QuestionService, QuestionOptionService
-from ..serializers import (
-    QuestionListSerializer,
-    QuestionDetailSerializer,
-    QuestionCreateFromBankSerializer,
-    QuestionCreateCustomSerializer
-)
 
 
 class ExamQuestionListView(AuthenticatedGenericView, APIView):

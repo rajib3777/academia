@@ -3,10 +3,11 @@ from rest_framework.routers import DefaultRouter
 from student.views.student_views import (SchoolNameListAPIView, 
                            StudentCreateOldView, StudentCreateView,StudentUpdateView, StudentListView, StudentActivateView, StudentDropdownView, 
                            StudentDetailAPIView, StudentDeleteView)
-from student.views.school_views import SchoolListView, SchoolCreateView, SchoolUpdateView, SchoolDeleteView, SchoolDropdownView
+from student.views.school_views import SchoolListView, SchoolCreateView, SchoolUpdateView, SchoolDeleteView, SchoolDropdownView, PublicSchoolListView
 
 school_urlpatterns = [
     path('v1/schools/', SchoolListView.as_view(), name='school-list'),
+    path('v1/schools/public/', PublicSchoolListView.as_view(), name='public-school-list'),
     path('v1/schools/create/', SchoolCreateView.as_view(), name='school-create'),
     path('v1/schools/<int:school_id>/update/', SchoolUpdateView.as_view(), name='school-update'),
     path('v1/schools/<int:school_id>/delete/', SchoolDeleteView.as_view(), name='school-delete'),

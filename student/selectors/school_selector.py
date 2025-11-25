@@ -21,8 +21,9 @@ class SchoolSelector:
         page_number = int(page)
         
         # Limit page size to prevent abuse
-        page_size = min(page_size, 20)
-        
+        max_page_size = 2000
+        page_size = min(page_size, max_page_size)
+
         paginator = Paginator(queryset, page_size)
         page = paginator.get_page(page_number)
         
