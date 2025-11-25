@@ -33,4 +33,9 @@ exam_patterns = [
     path('exam/questions/<int:question_id>/delete/', question_apis.ExamQuestionDeleteView.as_view(), name='exam-question-delete'),
 ]
 
-urlpatterns = category_patterns + bank_patterns + exam_patterns
+question_patterns = [
+    # path('api/questions/', question_apis.QuestionListCreateAPI.as_view(), name='question-list-create'),
+    # path('api/questions/<str:question_id>/', question_apis.QuestionDetailUpdateDeleteAPI.as_view(), name='question-detail-update-delete'),
+]
+
+urlpatterns = category_patterns + bank_patterns + exam_patterns + question_patterns
