@@ -13,7 +13,7 @@ def generate_student_id(prefix: str = "SID") -> str:
     with transaction.atomic():
         students = Student.objects.filter(
             student_id__startswith=f'{year_prefix}-'
-        ).exclude(batch_id__isnull=True).values_list('student_id', flat=True)
+        ).values_list('student_id', flat=True)
 
         max_number = 0
         for student_id in students:
