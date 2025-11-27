@@ -74,7 +74,7 @@ class CourseSerializer(serializers.Serializer):
     name = serializers.CharField(read_only=True)
     description = serializers.CharField(read_only=True)
     fee = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True)
-    course_type = serializers.CharField(read_only=True)
+    subject = serializers.CharField(read_only=True)
     batches = BatchSerializer(many=True, read_only=True)
     batch_count = serializers.IntegerField(read_only=True)
 
@@ -193,7 +193,7 @@ class AcademyListSerializer(serializers.Serializer):
                     'name': course.name,
                     'description': course.description,
                     'fee': course.fee,
-                    'course_type': course.course_type,
+                    'subject': course.subject,
                     'batch_count': getattr(course, 'batch_count', 0),
                     'batches': []
                 }

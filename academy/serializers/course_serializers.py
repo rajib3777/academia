@@ -40,7 +40,7 @@ class CourseSerializer(serializers.Serializer):
     name = serializers.CharField(required=True, max_length=255)
     description = serializers.CharField(required=True)
     fee = serializers.DecimalField(required=True, max_digits=10, decimal_places=2)
-    course_type = serializers.CharField(required=True, max_length=50)
+    subject = serializers.CharField(required=True, max_length=50)
     academy_id = serializers.IntegerField(required=True)
     batches = BatchInCourseSerializer(many=True, required=False)
     
@@ -75,7 +75,7 @@ class CourseSerializer(serializers.Serializer):
             'name': instance.name,
             'description': instance.description,
             'fee': float(instance.fee),
-            'course_type': instance.course_type,
+            'subject': instance.subject,
             'academy': {
                 'id': instance.academy.id,
                 'name': instance.academy.name,
@@ -96,7 +96,7 @@ class CourseCreateSerializer(serializers.Serializer):
     description = serializers.CharField(required=True)
     fee = serializers.DecimalField(required=True, max_digits=10, decimal_places=2)
     academy_id = serializers.IntegerField(required=True)
-    course_type = serializers.CharField(required=True)
+    subject = serializers.CharField(required=True)
     batches = serializers.ListField(
         child=BatchInCourseSerializer(),
         required=False
@@ -129,11 +129,11 @@ class CourseDropdownSerializer(serializers.Serializer):
         }
 
 
-class CourseTypeDropdownSerializer(serializers.Serializer):
+class SubjectDropdownSerializer(serializers.Serializer):
     """
-    Serializer for course type choices.
+    Serializer for course subject choices.
 
-    This serializer represents course type choices as id-name pairs.
+    This serializer represents course subject choices as id-name pairs.
     """
     id = serializers.CharField(read_only=True)
     name = serializers.CharField(read_only=True)

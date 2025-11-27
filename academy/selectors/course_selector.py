@@ -123,12 +123,12 @@ class CourseSelector:
         Returns:
             Filtered queryset
         """
-        course_type = filters.get('course_type')
+        subject = filters.get('subject')
         min_fee = filters.get('min_fee')
         max_fee = filters.get('max_fee')
 
-        if course_type is not None:
-            queryset = queryset.filter(course_type=course_type)
+        if subject is not None:
+            queryset = queryset.filter(subject=subject)
 
         if min_fee is not None:
             queryset = queryset.filter(fee__gte=min_fee)
@@ -344,12 +344,12 @@ class SubjectSelector:
     """
     
     @staticmethod
-    def list_course_types() -> List[Dict[str, str]]:
+    def list_subjects() -> List[Dict[str, str]]:
         """
-        Get all available course types.
-        
+        Get all available subjects.
+
         Returns:
-            List of dictionaries with course type values and display names
+            List of dictionaries with subject values and display names
         """
         return [
             {'id': value, 'name': display_name} 

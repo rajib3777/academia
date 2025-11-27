@@ -80,8 +80,8 @@ class BatchEnrollmentSelector:
             queryset = queryset.filter(batch__course__academy_id=filters['academy_id'])
         if filters.get('course_id'):
             queryset = queryset.filter(batch__course_id=filters['course_id'])
-        if filters.get('course_type'):
-            queryset = queryset.filter(batch__course__course_type=filters['course_type'])
+        if filters.get('subject'):
+            queryset = queryset.filter(batch__course__subject=filters['subject'])
         if filters.get('batch_id'):
             queryset = queryset.filter(batch_id=filters['batch_id'])
         if filters.get('batch_start_date_from'):
@@ -119,7 +119,7 @@ class BatchEnrollmentSelector:
                 Q(student__user__last_name__icontains=search) |
                 Q(batch__name__icontains=search) |
                 Q(batch__course__name__icontains=search) |
-                Q(batch__course__course_type__icontains=search) |
+                Q(batch__course__subject__icontains=search) |
                 Q(batch__course__academy__name__icontains=search) |
                 Q(remarks__icontains=search)
             )

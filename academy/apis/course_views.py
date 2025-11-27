@@ -157,7 +157,7 @@ class CourseUpdateView(AuthenticatedGenericView, APIView):
                 'description': serializer.validated_data['description'],
                 'fee': serializer.validated_data['fee'],
                 'academy_id': serializer.validated_data['academy_id'],
-                'course_type': serializer.validated_data['course_type']
+                'subject': serializer.validated_data['subject']
             }
 
             batches_data = serializer.validated_data.get('batches', None)
@@ -384,39 +384,39 @@ class CourseDeleteView(APIView):
             )
         
 
-class CourseTypeDropdownView(APIView):
+class SubjectDropdownView(APIView):
     """
-    View to list all available course types.
+    View to list all available subjects.
     """
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
-    serializer_class = course_serializers.CourseTypeDropdownSerializer
+    serializer_class = course_serializers.SubjectDropdownSerializer
 
     @cached_property
-    def course_type_selector(self):
+    def subject_selector(self):
         """Lazy initialization of SubjectSelector."""
         return SubjectSelector()
     
     def get(self, request, format=None):
         """
-        Get list of all available course types.
+        Get list of all available subjects.
         
         Returns:
-            Response with course types data
+            Response with subjects data
         """
         try:
-            course_types = self.course_type_selector.list_course_types()
-            serializer = self.serializer_class(course_types, many=True)
-            
+            subjects = self.subject_selector.list_subjects()
+            serializer = self.serializer_class(subjects, many=True)
+
             return Response({
-                'count': len(course_types),
+                'count': len(subjects),
                 'results': serializer.data
             })
             
         except Exception as e:
-            logger.error(f"Error in CourseTypeListView: {str(e)}")
+            logger.error(f"Error in SubjectListView: {str(e)}")
             return Response(
-                {"detail": "An error occurred while retrieving course types."},
+                {"detail": "An error occurred while retrieving subjects."},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

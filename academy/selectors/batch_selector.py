@@ -84,9 +84,9 @@ class BatchSelector:
         if filters.get('course_id'):
             queryset = queryset.filter(course_id=filters['course_id'])
 
-        if filters.get('course__course_type'):
-            queryset = queryset.filter(course__course_type=filters['course__course_type'])
-            
+        if filters.get('course__subject'):
+            queryset = queryset.filter(course__subject=filters['course__subject'])
+
         if filters.get('name'):
             queryset = queryset.filter(name__icontains=filters['name'])
             

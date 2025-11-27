@@ -50,7 +50,7 @@ class BatchSerializer(serializers.Serializer):
             'course': {
                 'id': course.id,
                 'name': course.name,
-                'course_type': course.course_type,
+                'subject': course.subject,
                 'fee': float(course.fee),
             },
             'academy': {
