@@ -412,3 +412,27 @@ class QuestionReorderSerializer(serializers.Serializer):
         ),
         required=True
     )
+
+class QuestionOptionSerializer(serializers.Serializer):
+    option_text = serializers.CharField(max_length=500)
+    is_correct = serializers.BooleanField(default=False)
+    explanation = serializers.CharField(allow_blank=True, required=False)
+    option_order = serializers.IntegerField(required=False)
+
+class QuestionSerializer(serializers.Serializer):
+    question_id = serializers.CharField(read_only=True)
+    exam_id = serializers.IntegerField()
+    question_text = serializers.CharField()
+    question_type = serializers.ChoiceField(choices=Question.QUESTION_TYPE_CHOICES)
+    marks = serializers.DecimalField(max_digits=5, decimal_places=2)
+    question_order = serializers.IntegerField()
+    is_required = serializers.BooleanField(default=True)
+    expected_answer = serializers.CharField(allow_blank=True, required=False)
+    marking_scheme = serializers.CharField(allow_blank=True, required=False)
+    options = QuestionOptionSerializer(many=True)
+
+    def validate_options(self, value):
+        if not value or len(value) < 2:
+            raise serializers.ValidationError('At least two options are required.')
+        return value
+    

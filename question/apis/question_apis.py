@@ -5,8 +5,10 @@ from functools import cached_property
 from classmate.permissions import AuthenticatedGenericView
 from django.core.exceptions import ValidationError
 from django.contrib.auth.mixins import LoginRequiredMixin
-from typing import Dict, Any, Optional
+from django.shortcuts import get_object_or_404
 import json
+from rest_framework.response import Response
+from rest_framework import status
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from question.selectors.question_selector import (
@@ -34,7 +36,9 @@ from question.serializers.question_serializer import (
     QuestionListSerializer,
     QuestionDetailSerializer,
     QuestionCreateFromBankSerializer,
-    QuestionCreateCustomSerializer
+    QuestionCreateCustomSerializer,
+    QuestionOptionSerializer,
+    QuestionSerializer
 )
 
 class QuestionBankCategoryListView(AuthenticatedGenericView, APIView):
@@ -971,3 +975,104 @@ class ExamQuestionDeleteView(AuthenticatedGenericView, APIView):
             return self.handle_error_response(f'Error deleting question: {str(e)}')
         
 
+class QuestionListCreateAPI(APIView):
+    """API for listing and creating Questions."""
+
+    def get(self, request):
+        exam_id = request.query_params.get('exam_id')
+        questions = QuestionSelector.list_questions(exam_id=exam_id)
+        data = []
+        for q in questions:
+            options = QuestionSelector.get_question_options(q)
+            data.append({
+                'question_id': q.question_id,
+                'exam_id': q.exam_id,
+                'question_text': q.question_text,
+                'question_type': q.question_type,
+                'marks': q.marks,
+                'question_order': q.question_order,
+                'is_required': q.is_required,
+                'expected_answer': q.expected_answer,
+                'marking_scheme': q.marking_scheme,
+                'options': [
+                    {
+                        'option_text': o.option_text,
+                        'is_correct': o.is_correct,
+                        'explanation': o.explanation,
+                        'option_order': o.option_order,
+                    } for o in options
+                ],
+            })
+        return Response(data)
+
+    def post(self, request):
+        serializer = QuestionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated = serializer.validated_data
+
+        # You may want to validate exam ownership/permissions here
+        from exam.models import Exam
+        exam = get_object_or_404(Exam, pk=validated['exam_id'])
+
+        question = QuestionService.create_question(
+            exam=exam,
+            question_text=validated['question_text'],
+            question_type=validated['question_type'],
+            marks=float(validated['marks']),
+            question_order=validated['question_order'],
+            is_required=validated['is_required'],
+            expected_answer=validated.get('expected_answer', ''),
+            marking_scheme=validated.get('marking_scheme', ''),
+            created_by=request.user,
+            options=validated['options'],
+        )
+        return Response({'question_id': question.question_id}, status=status.HTTP_201_CREATED)
+
+class QuestionDetailUpdateDeleteAPI(APIView):
+    """API for retrieving, updating, and deleting a Question."""
+
+    def get(self, request, question_id: str):
+        question = QuestionSelector.get_question(question_id)
+        options = QuestionSelector.get_question_options(question)
+        data = {
+            'question_id': question.question_id,
+            'exam_id': question.exam_id,
+            'question_text': question.question_text,
+            'question_type': question.question_type,
+            'marks': question.marks,
+            'question_order': question.question_order,
+            'is_required': question.is_required,
+            'expected_answer': question.expected_answer,
+            'marking_scheme': question.marking_scheme,
+            'options': [
+                {
+                    'option_text': o.option_text,
+                    'is_correct': o.is_correct,
+                    'explanation': o.explanation,
+                    'option_order': o.option_order,
+                } for o in options
+            ],
+        }
+        return Response(data)
+
+    def put(self, request, question_id: str):
+        question = QuestionSelector.get_question(question_id)
+        serializer = QuestionSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        validated = serializer.validated_data
+
+        question = QuestionService.update_question_new(
+            question=question,
+            question_text=validated['question_text'],
+            marks=float(validated['marks']),
+            is_required=validated['is_required'],
+            expected_answer=validated.get('expected_answer', ''),
+            marking_scheme=validated.get('marking_scheme', ''),
+            options=validated['options'],
+        )
+        return Response({'question_id': question.question_id})
+
+    def delete(self, request, question_id: str):
+        question = QuestionSelector.get_question(question_id)
+        QuestionService.delete_question(question)
+        return Response(status=status.HTTP_204_NO_CONTENT)

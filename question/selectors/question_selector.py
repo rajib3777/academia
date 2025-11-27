@@ -1,7 +1,7 @@
 from django.db.models import QuerySet, Q, Count, Prefetch, Sum
 from django.core.paginator import Paginator
 from typing import Optional, Dict, Any, Tuple, List
-
+from django.shortcuts import get_object_or_404
 from question.models import (
     QuestionBankCategory, 
     QuestionBank, 
@@ -265,6 +265,24 @@ class QuestionSelector:
             total_marks=Sum('marks')
         )
         return float(result['total_marks'] or 0)
+
+    @staticmethod
+    def list_questions(exam_id: Optional[int] = None) -> List[Question]:
+        qs = Question.objects.select_related('exam', 'question_bank', 'created_by').prefetch_related('options')
+        if exam_id:
+            qs = qs.filter(exam_id=exam_id)
+        return qs.order_by('question_order')
+
+    @staticmethod
+    def get_question(question_id: str) -> Question:
+        return get_object_or_404(
+            Question.objects.select_related('exam', 'question_bank', 'created_by').prefetch_related('options'),
+            question_id=question_id
+        )
+
+    @staticmethod
+    def get_question_options(question: Question) -> List[QuestionOption]:
+        return question.options.all().order_by('option_order')
 
 
 class QuestionOptionSelector:

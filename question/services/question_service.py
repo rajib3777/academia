@@ -565,6 +565,104 @@ class QuestionService:
 
     @staticmethod
     @transaction.atomic
+    def create_question(
+        exam,
+        question_text: str,
+        question_type: str,
+        marks: float,
+        question_order: int,
+        is_required: bool,
+        expected_answer: str,
+        marking_scheme: str,
+        created_by: User,
+        options: List[Dict[str, Any]],
+        category: Optional[QuestionBankCategory] = None,
+        subject: Optional[str] = None,
+        difficulty_level: Optional[str] = 'medium',
+        tags: Optional[str] = '',
+    ) -> Question:
+        # Create QuestionBank entry
+        bank = QuestionBank.objects.create(
+            title=question_text[:50],
+            question_text=question_text,
+            question_type=question_type,
+            subject=subject or '',
+            category=category,
+            difficulty_level=difficulty_level,
+            tags=tags,
+            created_by=created_by,
+            suggested_marks=marks,
+            expected_answer=expected_answer,
+            marking_scheme=marking_scheme,
+            is_active=True,
+        )
+
+        # Create Question
+        question = Question.objects.create(
+            exam=exam,
+            question_bank=bank,
+            question_text=question_text,
+            question_type=question_type,
+            marks=marks,
+            question_order=question_order,
+            is_required=is_required,
+            expected_answer=expected_answer,
+            marking_scheme=marking_scheme,
+            created_by=created_by,
+        )
+
+        # Create options for both QuestionBank and Question
+        for idx, opt in enumerate(options, start=1):
+            bank_option = QuestionBankOption.objects.create(
+                question_bank=bank,
+                option_text=opt['option_text'],
+                is_correct=opt.get('is_correct', False),
+                option_order=idx,
+                explanation=opt.get('explanation', ''),
+            )
+            QuestionOption.objects.create(
+                question=question,
+                bank_option=bank_option,
+                option_text=opt['option_text'],
+                is_correct=opt.get('is_correct', False),
+                option_order=idx,
+                explanation=opt.get('explanation', ''),
+            )
+        return question
+
+    @staticmethod
+    @transaction.atomic
+    def update_question_new(
+        question: Question,
+        question_text: str,
+        marks: float,
+        is_required: bool,
+        expected_answer: str,
+        marking_scheme: str,
+        options: List[Dict[str, Any]],
+    ) -> Question:
+        question.question_text = question_text
+        question.marks = marks
+        question.is_required = is_required
+        question.expected_answer = expected_answer
+        question.marking_scheme = marking_scheme
+        question.save()
+
+        # Update options: delete old, create new
+        question.options.all().delete()
+        for idx, opt in enumerate(options, start=1):
+            QuestionOption.objects.create(
+                question=question,
+                option_text=opt['option_text'],
+                is_correct=opt.get('is_correct', False),
+                option_order=idx,
+                explanation=opt.get('explanation', ''),
+            )
+        return question
+
+
+    @staticmethod
+    @transaction.atomic
     def delete_question(question_id: int) -> bool:
         """Delete an exam question"""
 
