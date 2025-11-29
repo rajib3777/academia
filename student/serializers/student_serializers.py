@@ -444,11 +444,11 @@ class StudentCreateUpdateSerializer(serializers.Serializer):
     school_id = serializers.IntegerField()
     birth_registration_number = serializers.CharField(max_length=50, allow_blank=True, allow_null=True, required=False)
     date_of_birth = serializers.DateField(required=False, allow_null=True)
-    guardian_name = serializers.CharField(max_length=255, allow_blank=True, required=False)
-    guardian_phone = serializers.CharField(max_length=20, allow_blank=True, required=False)
+    guardian_name = serializers.CharField(max_length=255, allow_blank=True, allow_null=True, required=False)
+    guardian_phone = serializers.CharField(max_length=20, allow_blank=True, allow_null=True, required=False)
     guardian_email = serializers.EmailField(allow_blank=True, allow_null=True, required=False)
-    guardian_relationship = serializers.CharField(max_length=50, allow_blank=True, required=False)
-    address = serializers.CharField(max_length=255, allow_blank=True, required=False)
+    guardian_relationship = serializers.CharField(max_length=50, allow_blank=True, allow_null=True, required=False)
+    address = serializers.CharField(max_length=255, allow_blank=True, allow_null=True, required=False)
 
     def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
         """Validate student data for creation/update operations."""
