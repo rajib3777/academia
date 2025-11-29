@@ -319,7 +319,7 @@ class StudentCreateView(APIView):
             
             except Exception as e:
                 logger.error(f"Error in StudentCreateView: {str(e)}")
-                return Response({'detail': 'An error occurred while creating the student.'},
+                return Response({'detail': str(e)},
                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
