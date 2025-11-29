@@ -283,8 +283,10 @@ class StudentUpdateOldView(APIView):
 
 class StudentCreateView(APIView):
     """Create a new student."""
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
+    # permission_classes = [IsAuthenticated]
+    # authentication_classes = [JWTAuthentication]
+    authentication_classes = []
+    permission_classes = []
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
