@@ -21,7 +21,7 @@ class Student(ClassMateModel):
     profile_picture = models.ImageField(upload_to='student_profiles/', null=True, blank=True, help_text="Upload a profile picture for the student")
     school = models.ForeignKey(School, on_delete=models.PROTECT)
     student_id = models.CharField(max_length=20, unique=True, help_text="Unique ID for the student", editable=False, null=True, blank=True)
-    birth_registration_number = models.CharField(max_length=50, unique=True, null=True, blank=True, help_text="Unique birth registration number for the student")
+    birth_registration_number = models.CharField(max_length=50, null=True, blank=True, help_text="Unique birth registration number for the student")
     date_of_birth = models.DateField(null=True, blank=True)
     guardian_name = models.CharField(max_length=255, null=True, blank=True)  
     guardian_phone = models.CharField(max_length=20, null=True, blank=True)
