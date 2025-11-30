@@ -12,6 +12,6 @@ class ClassMateAdmin(admin.ModelAdmin):
         obj.save()
 
 
-admin.site.site_header = "ClassMate Admin"
-admin.site.site_title = "ClassMate Admin Portal"
-admin.site.index_title = "Welcome to the ClassMate Admin Portal"
+admin.site.site_header = "ClassMate Admin staging"
+admin.site.site_title = "ClassMate Admin Portal staging"
+admin.site.index_title = "Welcome to the ClassMate Admin Portal staging"
