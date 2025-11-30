@@ -22,4 +22,4 @@ jobs:
         host: ${{ secrets.SSH_HOST }}
         username: ${{ secrets.SSH_USER }}
         key: ${{ secrets.SSH_KEY }}
-        script: "cd /root/classmate-api && ./.scripts/deploy.sh ${{ matrix.python-version }}"
+        script: "cd /root/classmate-api && ./.scripts/deploy-production.sh ${{ matrix.python-version }}"
