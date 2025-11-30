@@ -22,4 +22,4 @@ jobs:
         host: ${{ secrets.SSH_STAGING_HOST }}
         username: ${{ secrets.SSH_STAGING_USER }}
         key: ${{ secrets.SSH_STAGING_KEY }}
-        script: "cd /home/ubuntu/classmate-api && ./.scripts/deploy.sh ${{ matrix.python-version }}"
+        script: "cd /home/ubuntu/classmate-api && ./.scripts/deploy-staging.sh ${{ matrix.python-version }}"
