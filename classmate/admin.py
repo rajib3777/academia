@@ -10,3 +10,8 @@ class ClassMateAdmin(admin.ModelAdmin):
     def save_model(self, request, obj, form, change):
         populate_user_info(request, obj, change)
         obj.save()
+
+
+admin.site.site_header = "ClassMate Admin"
+admin.site.site_title = "ClassMate Admin Portal"
+admin.site.index_title = "Welcome to the ClassMate Admin Portal"
