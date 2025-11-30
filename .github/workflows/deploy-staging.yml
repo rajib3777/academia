@@ -1,0 +1,25 @@
+name: Django CI
+
+on:
+  push:
+    branches: [ "staging" ]
+  pull_request:
+    branches: [ "staging" ]
+
+jobs:
+  deploy:
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [3.12]
+    steps:
+    - uses: actions/checkout@v4
+    - name: Deploy to server with Python ${{ matrix.python-version }}
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        script: "cd /root/classmate-api && ./.scripts/deploy.sh ${{ matrix.python-version }}"
