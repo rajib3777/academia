@@ -7,24 +7,19 @@ on:
     branches: [ "staging" ]
 
 jobs:
-  build:
+  deploy:
 
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
       matrix:
-        python-version: [3.7, 3.8, 3.9]
-
+        python-version: [3.12]
     steps:
     - uses: actions/checkout@v4
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
+    - name: Deploy to server with Python ${{ matrix.python-version }}
+      uses: appleboy/ssh-action@master
       with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install Dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-    - name: Run Tests
-      run: |
-        python manage.py test
+        host: ${{ secrets.SSH_HOST }}
+        username: ${{ secrets.SSH_USER }}
+        key: ${{ secrets.SSH_KEY }}
+        script: "cd /root/classmate-api && ./.scripts/deploy.sh ${{ matrix.python-version }}"
