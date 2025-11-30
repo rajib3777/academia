@@ -16,6 +16,11 @@ jobs:
         python-version: [3.12]
     steps:
     - uses: actions/checkout@v4
+    
+    # Add execute permission
+    - name: Make deploy script executable
+      run: chmod +x .scripts/deploy_production.sh
+
     - name: Deploy to server with Python ${{ matrix.python-version }}
       uses: appleboy/ssh-action@master
       with:
