@@ -323,6 +323,38 @@ class StudentCreateView(APIView):
                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class StudentSignupView(APIView):
+    """Create a new student."""
+    authentication_classes = []
+    permission_classes = []
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.service_class = student_service.StudentService()
+        self.selector_class = student_selector.StudentSelector()
+
+    def post(self, request, format=None):
+        serializer = student_serializers.StudentSignUpSerializer(data=request.data)
+
+        if serializer.is_valid(raise_exception=True):
+            try:
+                serializer.is_valid(raise_exception=True)
+                student = self.service_class.student_signup(serializer.validated_data)
+
+                return Response({'success': True, 'data': student}, status=status.HTTP_201_CREATED)
+            
+            except ValidationError as e:
+                logger.error(f"Validation error in StudentCreateView: {str(e)}")
+                return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            
+            except Exception as e:
+                logger.error(f"Error in Student Signup View: {str(e)}")
+                return Response({'detail': str(e)},
+                               status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
 class StudentUpdateView(APIView):

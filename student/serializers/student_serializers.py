@@ -450,12 +450,50 @@ class StudentCreateUpdateSerializer(serializers.Serializer):
     guardian_relationship = serializers.CharField(max_length=50, allow_blank=True, allow_null=True, required=False)
     address = serializers.CharField(max_length=255, allow_blank=True, allow_null=True, required=False)
 
-    def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
-        """Validate student data for creation/update operations."""
-        # Custom validation logic if needed
-        # Example: Validate contact number format
-        contact_number = data.get('contact_number')
-        if contact_number and not contact_number.startswith('+'):
-            data['contact_number'] = f'+{contact_number}'
+    # def validate(self, data: Dict[str, Any]) -> Dict[str, Any]:
+    #     """Validate student data for creation/update operations."""
+    #     # Custom validation logic if needed
+    #     # Example: Validate contact number format
+    #     contact_number = data.get('contact_number')
+    #     if contact_number and not contact_number.startswith('+'):
+    #         data['contact_number'] = f'+{contact_number}'
             
+    #     return data
+
+
+class StudentSignUpSerializer(serializers.Serializer):
+    """Serializer for student creation and update operations."""
+    id = serializers.IntegerField(read_only=True)
+    first_name = serializers.CharField(max_length=255)
+    last_name = serializers.CharField(max_length=255)
+    phone = serializers.CharField(max_length=20)
+    password = serializers.CharField(write_only=True, min_length=5, required=True)
+    confirm_password = serializers.CharField(write_only=True, min_length=5, required=True)
+    school_id = serializers.IntegerField()
+
+    def validate_school_id(self, value):
+        if not School.objects.filter(id=value).exists():
+            raise serializers.ValidationError("School does not exist.")
+        return value
+    
+    def validate_phone(self, value):
+        errors = []
+        if not value.isdigit():
+            errors.append("Phone number must contain only digits.")
+        if len(value) != 11:
+            errors.append("Phone number must be 11 digits long.")
+        if not value.startswith('0'):
+            errors.append("Phone number must start with 0.")
+            
+        if User.objects.filter(phone=value).exists():
+            errors.append("A user with this phone number already exists.")
+            
+        if errors:
+            raise serializers.ValidationError(errors)
+        return value
+
+    def validate(self, data):
+        if data.get('password') != data.get('confirm_password'):
+            raise serializers.ValidationError({"password": "Passwords do not match."})
         return data
+

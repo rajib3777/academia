@@ -32,39 +32,6 @@ class StudentService:
     
     @transaction.atomic
     def create_student(self, data: Dict[str, Any]) -> Student:
-        """
-        Create a new student with associated user account.
-        
-        Args:
-            data: Dictionary containing user and student information
-                user: dict
-                    username: str
-                    email: str
-                    first_name: str
-                    last_name: str
-                    phone: str
-                student: dict
-                    school_id: int
-                    birth_registration_number: str (optional)
-                    date_of_birth: date (optional)
-                password: str
-            student_data: Dictionary containing student information
-                school_id: int
-                birth_registration_number: str (optional)
-                date_of_birth: date (optional)
-                guardian_name: str (optional)
-                guardian_phone: str (optional)
-                guardian_email: str (optional)
-                guardian_relationship: str (optional)
-                address: str (optional)
-                
-        Returns:
-            Newly created Student instance
-            
-        Raises:
-            ValidationError: If validation fails
-        """
-        
         # Create user
         user_data = {
             'username': data.get('phone'),
@@ -112,19 +79,6 @@ class StudentService:
     
     @transaction.atomic
     def update_student(self, student_id: int, data: Dict[str, Any]) -> Student:
-        """
-        Update an existing student and its associated user.
-        
-        Args:
-            student_id: ID of the student to update
-            data: Dictionary containing user and student information to update (optional)
-                
-        Returns:
-            Updated Student instance
-            
-        Raises:
-            ValidationError: If validation fails or student not found
-        """
         # Get student
         student = self.student_selector.get_student_by_id(student_id)
         if not student:
@@ -180,6 +134,44 @@ class StudentService:
         student.save()
         
         return student
+
+    @transaction.atomic
+    def student_signup(self, data: Dict[str, Any]) -> Student:
+        user_data = {
+            'username': data.get('phone'),
+            'email': None,
+            'first_name': data.pop('first_name'),
+            'last_name': data.pop('last_name'),
+            'phone': data.pop('phone'),
+            'password': data.pop('password', None),
+        }
+
+        # Create user
+        user, password = self.user_service.create_user(user_data, STUDENT)
+
+        # Create student
+        student = Student.objects.create(
+            user=user,
+            school_id=data['school_id']
+        )
+
+        # Send SMS with login credentials
+        self.sms_service.save_sms_history(
+            created_by=None,
+            created_for=user,
+            phone_number=user.phone,
+            message=f"Your student account has been created. Phone Number: {user.username}, Password: {password}",
+            sms_type=ACCOUNT,
+            status=QUEUE
+        )
+
+        response = {
+            'student_id': student.student_id,
+            'phone': user.phone,
+            'password': password,
+        }
+
+        return response
 
     def update_student_account(self, student: Student, data: dict) -> None:
         # Resolve FK fields to instances

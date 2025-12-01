@@ -6,25 +6,19 @@ from .models import Student
 from datetime import date, datetime
 
 def generate_student_id(prefix: str = "SID") -> str:
-    
-    current_year = datetime.now().year
-    year_prefix = f'{prefix}-{current_year}'
-    
     with transaction.atomic():
-        students = Student.objects.filter(
-            student_id__startswith=f'{year_prefix}-'
-        ).values_list('student_id', flat=True)
+        students = Student.objects.all().values_list('student_id', flat=True)
 
         max_number = 0
         for student_id in students:
             try:
-                parts = student_id.split('-')
-                if len(parts) >= 3 and parts[2].isdigit():
-                    max_number = max(max_number, int(parts[2]))
+                parts = student_id.split(prefix)
+                if len(parts) >= 2 and parts[1].isdigit():
+                    max_number = max(max_number, int(parts[1]))
             except (IndexError, ValueError):
                 continue
         next_number = max_number + 1
-        return f'{year_prefix}-{next_number:05d}'
+        return f'{prefix}-{next_number:07d}'
 
 
 class StudentFilter(filters.FilterSet):
