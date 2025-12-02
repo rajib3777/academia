@@ -59,7 +59,7 @@ class ExamListAPI(AuthenticatedGenericView, APIView):
             ordering = request.GET.get('ordering')
 
             pagination_info = self.exam_selector.list_exams(
-                request_user=request.user,
+                request=request,
                 filters=request.GET,
                 search_query=search_query,
                 ordering=ordering,
@@ -247,7 +247,7 @@ class ExamResultListView(AuthenticatedGenericView, APIView):
             ordering = request.GET.get('ordering')
 
             pagination_info = self.exam_result_selector.list_exam_results(
-                request_user=request.user,
+                request=request,
                 filters=request.GET,
                 search_query=search_query,
                 ordering=ordering,

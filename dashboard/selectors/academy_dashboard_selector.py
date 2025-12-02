@@ -1,5 +1,7 @@
-from django.db.models import Sum, Count
+from django.db.models import Sum, Count, F
 from typing import Dict, List, Optional, Tuple, Any
+from django.utils import timezone
+from datetime import timedelta
 from academy.models import Academy, Course, Batch, BatchEnrollment
 from payment.models import StudentPayment
 from student.models import Student
@@ -36,7 +38,7 @@ class AcademyDashboardSelector:
         # ).distinct().count()
 
         enrollment_qs = BatchEnrollment.objects.filter(
-            batch__course__academy_id=academy_id,
+            batch__course__academy=academy,
             is_active=True,
         )
         total_students = (
@@ -50,7 +52,7 @@ class AcademyDashboardSelector:
 
         # Payments for this academy
         payments_qs = StudentPayment.objects.filter(
-            batch_enrollment__batch__course__academy_id=academy_id
+            batch_enrollment__batch__course__academy=academy
         )
 
         total_revenue = (
@@ -61,15 +63,15 @@ class AcademyDashboardSelector:
         now = timezone.now()
         start_period = (now.replace(day=1) - timedelta(days=5 * 30)).replace(day=1)
 
-        monthly = (
-            payments_qs.filter(date__gte=start_period)
-            .annotate(month=timezone.datetime(
-                year=timezone.F("date__year"),
-                month=timezone.F("date__month"),
-                day=1,
-                tzinfo=timezone.utc,
-            ))
-        )
+        # monthly = (
+        #     payments_qs.filter(date__gte=start_period)
+        #     .annotate(month=timezone.datetime(
+        #         year=F("date__year"),
+        #         month=F("date__month"),
+        #         day=1,
+        #         tzinfo=timezone.utc,
+        #     ))
+        # )
         # Simpler: group using date__year / date__month with values
         monthly = (
             payments_qs.filter(date__gte=start_period)

@@ -298,6 +298,7 @@ class ExamResultService:
         Returns:
             List of created ExamResult instances
         """
+        #TODO before exam completion results cannot be created
         # Get exam with validation
         exam = exam_selector.ExamSelector.get_exam_by_id(exam_id)
         if not exam:

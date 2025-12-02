@@ -55,9 +55,11 @@ class ExamSelector:
     @staticmethod
     def get_role_based_exam_queryset(
         queryset: QuerySet[Exam],
-        request_user: User
+        request
     ) -> QuerySet[Exam]:
         """Get exam queryset based on user role"""
+
+        request_user = request.user
 
         if request_user.is_student():
             queryset = queryset.filter(
@@ -67,7 +69,7 @@ class ExamSelector:
             )
         elif request_user.is_academy():
             queryset = queryset.filter(
-                batch__course__academy=request_user.academy,
+                batch__course__academy__user=request_user,
                 is_active=True
             )
         elif request_user.is_admin():
@@ -159,7 +161,7 @@ class ExamSelector:
 
     @staticmethod
     def list_exams(
-        request_user: User,
+        request,
         filters: Dict[str, Any] = None,
         search_query: Optional[str] = None,
         ordering: Optional[str] = None,
@@ -172,7 +174,7 @@ class ExamSelector:
         queryset = ExamSelector.get_exam_queryset()
 
         # Apply role-based filtering
-        queryset = ExamSelector.get_role_based_exam_queryset(queryset, request_user)
+        queryset = ExamSelector.get_role_based_exam_queryset(queryset, request)
 
         # Apply filters
         queryset = ExamSelector.apply_list_filters(queryset, filters)
@@ -376,9 +378,10 @@ class ExamResultSelector:
     @staticmethod
     def get_role_based_exam_result_queryset(
         queryset: QuerySet[ExamResult],
-        request_user: User
+        request
     ) -> QuerySet[ExamResult]:
         """Get exam result queryset based on user role"""
+        request_user = request.user
 
         if request_user.is_student():
             queryset = queryset.filter(
@@ -386,7 +389,7 @@ class ExamResultSelector:
             )
         elif request_user.is_academy():
             queryset = queryset.filter(
-                exam__batch__course__academy=request_user.academy
+                exam__batch__course__academy__user=request_user
             )
         elif request_user.is_admin():
             queryset = queryset
@@ -404,7 +407,7 @@ class ExamResultSelector:
         if filters.get('exam_id'):
             queryset = queryset.filter(exam__exam_id=filters['exam_id'])
         if filters.get('student_id'):
-            queryset = queryset.filter(student__id=filters['student_id'])
+            queryset = queryset.filter(student_id=filters['student_id'])
         if filters.get('batch_id'):
             queryset = queryset.filter(exam__batch_id=filters['batch_id'])
         # Convert string to boolean for is_passed
@@ -480,7 +483,7 @@ class ExamResultSelector:
     
     @staticmethod
     def list_exam_results(
-        request_user: User,
+        request,
         filters: Dict[str, Any] = None,
         search_query: Optional[str] = None,
         ordering: Optional[str] = None,
@@ -489,10 +492,11 @@ class ExamResultSelector:
     ) -> QuerySet[ExamResult]:
         """List exam results with filters"""
         # Get base queryset with optimzed joins
+
         queryset = ExamResultSelector.get_all_exam_results()
-        
+
         # Apply Role based filter
-        queryset = ExamResultSelector.get_role_based_exam_result_queryset(queryset, request_user)
+        queryset = ExamResultSelector.get_role_based_exam_result_queryset(queryset, request)
 
         # Apply filters
         queryset = ExamResultSelector.apply_list_filters(queryset, filters)
