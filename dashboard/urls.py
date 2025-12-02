@@ -1,5 +1,5 @@
-from django.urls import path
-from dashboard.apis.academy_dashboard import AcademyDashboardApi
+from django.urls import path, include
+from dashboard.apis.academy_dashboard_api import AcademyDashboardApi
 
 
 academy_urlpatterns = [

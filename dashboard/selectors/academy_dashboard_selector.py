@@ -1,7 +1,9 @@
 from django.db.models import Sum, Count
+from typing import Dict, List, Optional, Tuple, Any
 from academy.models import Academy, Course, Batch, BatchEnrollment
 from payment.models import StudentPayment
 from student.models import Student
+from account.models import User
 
 class AcademyDashboardSelector:
     def __init__(self, user):

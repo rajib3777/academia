@@ -2,15 +2,14 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from academy.selectors.dashboard_selector import AcademyDashboardSelector
-from academy.serializers.dashboard_serializers import AcademyDashboardSerializer
+from dashboard.selectors.academy_dashboard_selector import AcademyDashboardSelector
+from dashboard.serializers.academy_dashboard_serializers import AcademyDashboardSerializer
 
 class AcademyDashboardApi(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        selector = AcademyDashboardSelector(user=request.user)
-        data = selector.get_dashboard_data()
+        data = AcademyDashboardSelector.get_dashboard_data_for_academy(user=request.user)
 
         if data is None:
             return Response(
