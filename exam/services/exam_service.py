@@ -126,7 +126,7 @@ class ExamService:
             raise ValidationError('Exam not found')
 
         if not exam.can_publish_results:
-            raise ValidationError('Cannot publish results for this exam')
+            raise ValidationError('Cannot publish results for this exam before exam completion')
 
         exam.results_published = True
         exam.result_published_at = timezone.now()
