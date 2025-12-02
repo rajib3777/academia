@@ -7,16 +7,20 @@ from datetime import date, datetime
 
 def generate_student_id(prefix: str = "SID") -> str:
     with transaction.atomic():
-        students = Student.objects.all().values_list('student_id', flat=True)
-
+        # Filter for student IDs that match the format "PREFIX-NNNNNNN" using regex
+        # This assumes a 7-digit padded number based on the f-string formatting below.
+        regex_pattern = rf"^{prefix}-\d{{7}}$"
+        students = Student.objects.filter(student_id__regex=regex_pattern).values_list('student_id', flat=True)
+        
         max_number = 0
         for student_id in students:
             try:
-                parts = student_id.split(prefix)
-                if len(parts) >= 2 and parts[1].isdigit():
-                    max_number = max(max_number, int(parts[1]))
+                # Extract the number part after the prefix and hyphen
+                number_str = student_id.split(f'{prefix}-')[1]
+                max_number = max(max_number, int(number_str))
             except (IndexError, ValueError):
                 continue
+        
         next_number = max_number + 1
         return f'{prefix}-{next_number:07d}'
 
