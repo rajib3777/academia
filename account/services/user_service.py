@@ -29,6 +29,8 @@ class UserService:
         Returns:
             User: Created user instance
         """
+        first_name=user_data.get('first_name')
+        last_name=user_data.get('last_name')
         password=user_data.get('password', generate_secure_password())
         username = user_data.get('phone')  # Using phone as username
         phone = user_data.get('phone')
@@ -47,9 +49,16 @@ class UserService:
             raise DjangoValidationError('A user with this email already exists.')
 
         try:
-            user = User(**user_data)
+            role, _ = Role.objects.get_or_create(name=role)
+            user = User.objects.create_user(
+                username=username,
+                phone=phone,
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
+                role=role
+            )
             user.set_password(password)
-            user.role, _ = Role.objects.get_or_create(name=role)
             user.save()
             return user, password
         except DjangoValidationError as e:
