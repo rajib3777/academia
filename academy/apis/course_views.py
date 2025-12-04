@@ -32,7 +32,6 @@ class CourseCreateView(AuthenticatedGenericView, APIView):
             "name": "Course Name",
             "description": "Course description",
             "fee": 1000.00,
-            "academy_id": 1,
             "batches": [  // Optional
                 {
                     "name": "Batch 1",
@@ -53,12 +52,20 @@ class CourseCreateView(AuthenticatedGenericView, APIView):
                     'errors': serializer.errors
                 }, status=status.HTTP_400_BAD_REQUEST)
             
+            academy_id = self.request.user.academy_id
+
+            if not academy_id:
+                return Response({
+                    'success': False,
+                    'error': 'Academy not found'
+                }, status=status.HTTP_404_NOT_FOUND)
+            
             # Extract data
             course_data = {
                 'name': serializer.validated_data['name'],
                 'description': serializer.validated_data['description'],
                 'fee': serializer.validated_data['fee'],
-                'academy_id': serializer.validated_data['academy_id']
+                'academy_id': academy_id
             }
             
             batches_data = serializer.validated_data.get('batches', None)
