@@ -553,7 +553,7 @@ class StudentDropdownView(APIView):
             # Get students using selector with role-based filtering
             students = student_selector.StudentSelector().get_students_for_dropdown(
                 user=request.user,
-                academy_id=academy_id,
+                # academy_id=academy_id,
                 search=search
             )
 

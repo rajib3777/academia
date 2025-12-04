@@ -25,8 +25,8 @@ class OTPVerification(models.Model):
 
 
 class SMSHistory(models.Model):
-    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sms_history', null=True, default=None)
-    created_for = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sms_history_for', null=True, default=None)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sms_history', null=True, blank=True, default=None)
+    created_for = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sms_history_for', null=True, blank=True, default=None)
     phone_number = models.CharField(max_length=15, help_text="Recipient's phone number")
     message = models.TextField(help_text="The content of the SMS")
     sms_type = models.CharField(max_length=20, choices=SMS_TYPE_CHOICES, default=OTHER, help_text="Type of SMS")
