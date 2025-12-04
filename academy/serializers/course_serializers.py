@@ -95,20 +95,11 @@ class CourseCreateSerializer(serializers.Serializer):
     name = serializers.CharField(required=True, max_length=255)
     description = serializers.CharField(required=True)
     fee = serializers.DecimalField(required=True, max_digits=10, decimal_places=2)
-    academy_id = serializers.IntegerField(required=True)
     subject = serializers.CharField(required=True)
     batches = serializers.ListField(
         child=BatchInCourseSerializer(),
         required=False
     )
-    
-    def validate_academy_id(self, value):
-        """Validate that academy exists."""
-        try:
-            Academy.objects.get(id=value)
-        except Academy.DoesNotExist:
-            raise serializers.ValidationError(f"Academy with ID {value} does not exist.")
-        return value
     
 
 class CourseDropdownSerializer(serializers.Serializer):

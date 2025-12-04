@@ -52,9 +52,9 @@ class CourseCreateView(AuthenticatedGenericView, APIView):
                     'errors': serializer.errors
                 }, status=status.HTTP_400_BAD_REQUEST)
             
-            academy_id = self.request.user.academy_id
+            academy = Academy.objects.get(user=self.request.user)
 
-            if not academy_id:
+            if not academy:
                 return Response({
                     'success': False,
                     'error': 'Academy not found'
@@ -65,7 +65,7 @@ class CourseCreateView(AuthenticatedGenericView, APIView):
                 'name': serializer.validated_data['name'],
                 'description': serializer.validated_data['description'],
                 'fee': serializer.validated_data['fee'],
-                'academy_id': academy_id
+                'academy_id': academy.id
             }
             
             batches_data = serializer.validated_data.get('batches', None)
