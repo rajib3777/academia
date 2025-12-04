@@ -9,6 +9,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from academy.selectors.course_selector import CourseSelector, SubjectSelector
 from academy.services.course_service import CourseService
 from academy.serializers import course_serializers
+from academy.models import Academy
 from classmate.permissions import AuthenticatedGenericView
 logger = logging.getLogger(__name__)
 
