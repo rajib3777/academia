@@ -297,6 +297,46 @@ class StudentSelector:
         
         # Order by name for better usability
         return query.order_by('user__first_name', 'user__last_name')
+
+    @staticmethod
+    def get_students_for_enrollment_dropdown(
+        search: Optional[str] = None,
+    ) -> QuerySet:
+        """
+        Get students for dropdown based on user role.
+        
+        Args:
+            search: Optional search term for name or student_id
+            
+        Returns:
+            QuerySet of students with optimized fields for dropdown
+        """
+        # Start with an optimized query using select_related for user data
+        query = Student.objects.select_related('user', 'school').only(
+            'student_id', 'school_id', 'user__first_name', 'user__last_name'
+        )
+
+        # Apply search filter if provided
+        if search and search != "" and len(search) > 7:
+            query = query.filter(
+                Q(user__first_name__icontains=search) |
+                Q(user__last_name__icontains=search) |
+                Q(student_id__icontains=search)
+            )
+        
+            # Annotate with full name
+            query = query.annotate(
+                full_name=Concat(
+                    'user__first_name', 
+                    Value(' '), 
+                    'user__last_name',
+                    output_field=CharField()
+                )
+            )
+            
+            # Order by name for better usability
+            return query.order_by('user__first_name', 'user__last_name')
+        query.none()
     
     @staticmethod
     def list_students(

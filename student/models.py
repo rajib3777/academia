@@ -50,4 +50,4 @@ def set_student_id_on_create(sender, instance, **kwargs):
     from student.utils import generate_student_id
 
     if (not instance.pk and not instance.student_id) or (instance.pk and not instance.student_id):
-        instance.student_id = generate_student_id()
+        instance.student_id = generate_student_id(instance)

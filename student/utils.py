@@ -4,25 +4,31 @@ from django_filters import rest_framework as filters
 from django.db.models import Q
 from .models import Student
 from datetime import date, datetime
+import random
 
-def generate_student_id(prefix: str = "SID") -> str:
-    with transaction.atomic():
-        # Filter for student IDs that match the format "PREFIX-NNNNNNN" using regex
-        # This assumes a 7-digit padded number based on the f-string formatting below.
-        regex_pattern = rf"^{prefix}-\d{{7}}$"
-        students = Student.objects.filter(student_id__regex=regex_pattern).values_list('student_id', flat=True)
-        
-        max_number = 0
-        for student_id in students:
-            try:
-                # Extract the number part after the prefix and hyphen
-                number_str = student_id.split(f'{prefix}-')[1]
-                max_number = max(max_number, int(number_str))
-            except (IndexError, ValueError):
-                continue
-        
-        next_number = max_number + 1
-        return f'{prefix}-{next_number:07d}'
+def generate_student_id(instance) -> str:
+    from datetime import datetime
+
+    year_suffix = str(datetime.now().year)[-2:]
+    phone = getattr(instance.user, 'phone', None)
+    if phone and len(phone) >= 6:
+        phone_suffix = phone[-6:]
+    else:
+        # If phone is missing or too short, use random 6 digits
+        phone_suffix = f"{random.randint(0, 999999):06d}"
+
+    student_id = f"SID-{year_suffix}-{phone_suffix}"
+
+    # Check for duplicate
+    if Student.objects.filter(student_id=student_id).exists():
+        # Generate a random 6-digit number until unique
+        while True:
+            random_suffix = f"{random.randint(0, 999999):06d}"
+            student_id = f"STU-{year_suffix}-{random_suffix}"
+            if not Student.objects.filter(student_id=student_id).exists():
+                break
+
+    return student_id
 
 
 class StudentFilter(filters.FilterSet):

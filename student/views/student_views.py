@@ -553,7 +553,7 @@ class StudentDropdownView(APIView):
             # Get students using selector with role-based filtering
             students = student_selector.StudentSelector().get_students_for_dropdown(
                 user=request.user,
-                # academy_id=academy_id,
+                academy_id=academy_id,
                 search=search
             )
 
@@ -589,7 +589,64 @@ class StudentDropdownView(APIView):
                 },
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
+
+
+class StudentEnrollmentDropdownView(APIView):
+    """
+    API endpoint for student dropdown data with role-based filtering.
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
+    
+    def get(self, request):
+        """
+        Get filtered students for dropdown selection.
         
+        Query parameters:
+        - search: Optional search term for student name or ID
+        """
+        try:
+            # Extract query parameters
+            search = request.query_params.get('search')
+
+            # Get students using selector with role-based filtering
+            students = student_selector.StudentSelector().get_students_for_enrollment_dropdown(
+                search=search
+            )
+
+            # Serialize and return the data
+            serializer = StudentDropdownSerializer(students, many=True)
+            return Response({
+                'success': True,
+                'data': serializer.data,
+                'count': len(serializer.data)
+            })
+        
+        except ValidationError as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'Invalid parameters',
+                    'details': str(e)
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
+            
+        except Exception as e:
+            # Log the exception
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.exception("Error in StudentEnrollmentDropdownView")
+            
+            return Response(
+                {
+                    'success': False,
+                    'error': 'An unexpected error occurred',
+                    'details': str(e)
+                },
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
 
 class StudentDeleteView(APIView):
     """Delete a student."""

@@ -13,7 +13,8 @@ school_urlpatterns = [
 ]
 
 dropdown_urlpatterns = [
-    path('students/dropdown/', student_views.StudentDropdownView.as_view(), name='student-dropdown'),
+    path('students/dropdown/', student_views.StudentDropdownView.as_view(), name='student-dropdown-for-filter'),
+    path('students/dropdown/enrollment/', student_views.StudentEnrollmentDropdownView.as_view(), name='student-dropdown-for-enrollment'),
     path('schools/dropdown/', school_views.SchoolDropdownView.as_view(), name='school-dropdown'),
 ]
 
