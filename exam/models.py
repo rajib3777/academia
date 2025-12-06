@@ -65,10 +65,6 @@ class Exam(ClassMateModel):
         ordering = ['-exam_date']
         constraints = [
             models.UniqueConstraint(fields=['batch', 'title'], name='unique_exam_title_per_batch'),
-            models.CheckConstraint(
-                check=models.Q(pass_marks__lte=models.F('total_marks')), 
-                name='pass_marks_not_greater_than_total'
-            )
         ]
 
     def __str__(self):
