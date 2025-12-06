@@ -31,6 +31,7 @@ urlpatterns = [
     path('api/', include("exam.urls")),
     path('api/', include("question.urls")),
     path('api/', include("dashboard.urls")),
+    path('api/', include("landingpage.urls")),
     # path('sentry-debug/', trigger_error),
     path('chaining/', include('smart_selects.urls')),
 ]

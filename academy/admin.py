@@ -4,7 +4,7 @@ from academy.models import Academy, Course, Batch, BatchEnrollment
 from classmate.admin import ClassMateAdmin
 from academy.forms import AcademyAdminForm, CourseAdminForm, StudentPaymentInlineForm, BatchEnrollmentAdminForm
 from payment.models import StudentPayment
-
+from landingpage.admin import AcademyGalleryInline, AcademyFacilityInline, AcademyProgramInline, AcademyReviewInline
 
 # Inline for Course inside Academy
 class CourseInline(admin.StackedInline):
@@ -17,18 +17,22 @@ class CourseInline(admin.StackedInline):
 
 @admin.register(Academy)
 class AcademyAdmin(ClassMateAdmin):
-    list_display = ('name', 'academy_id', 'contact_number', 'user', 'modified_by')
+    list_display = ('name', 'academy_id', 'contact_number', 'user', 'is_featured', 'average_rating', 'total_students', 'modified_by')
     list_filter = ('user', 'name',)
     search_fields = ('name', 'user__username', 'contact_number', 'user__email', 'user__first_name', 'user__last_name', 'academy_id', 'user__phone',)
     autocomplete_fields = ('user',)
     ordering = ('name',)
-    inlines = [CourseInline]
+    inlines = [CourseInline, AcademyGalleryInline, AcademyFacilityInline, AcademyProgramInline, AcademyReviewInline]
     form = AcademyAdminForm
+
+    readonly_fields = ('average_rating', 'total_students', 'total_reviews')
 
     fields = [
         ('user', 'name', 'contact_number', ),
         ('established_year', 'website', 'logo', 'description',),
         ('division', 'district', 'upazila', 'area_or_union', 'street_address', 'postal_code'),
+        ('cover_image', 'featured_image', 'is_featured', 'short_description', 'hours_text', ), 
+        ('average_rating', 'total_students', 'total_reviews')
     ]
 
 

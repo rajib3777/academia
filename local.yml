@@ -27,7 +27,7 @@ services:
     env_file:
       - ./.envs/.local/.env.local
     healthcheck:
-      test: ["CMD-SHELL", "PGPASSWORD=${DATABASE_PASSWORD} pg_isready -U ${DATABASE_USER} -d ${DATABASE_NAME}"]
+      test: ["CMD", "pg_isready", "-U", "postgres"]
       interval: 10s
       retries: 5
       start_period: 30s

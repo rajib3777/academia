@@ -48,6 +48,35 @@ class Academy(ClassMateModel):
     street_address = models.CharField(max_length=255, help_text="House/Road/Village")
     postal_code = models.CharField(max_length=10)
 
+    cover_image = models.ImageField(
+        upload_to='academy_covers/', 
+        null=True, 
+        blank=True,
+        help_text="Cover/banner image for academy"
+    )
+    featured_image = models.ImageField(
+        upload_to='academy_featured/', 
+        null=True, 
+        blank=True,
+        help_text="Featured image for academy cards"
+    )
+    is_featured = models.BooleanField(
+        default=False,
+        help_text="Whether this academy is featured on landing page"
+    )
+    short_description = models.CharField(
+        max_length=500,
+        null=True,
+        blank=True,
+        help_text="Short description for academy cards"
+    )
+    hours_text = models.CharField(
+        max_length=255,
+        null=True,
+        blank=True,
+        help_text="Contact hours text (e.g., Mon-Fri: 8:00 AM - 5:00 PM)"
+    )
+
     def __str__(self):
         return self.name
     
@@ -55,6 +84,33 @@ class Academy(ClassMateModel):
         verbose_name = 'Academy'
         verbose_name_plural = 'Academies'
         ordering = ['name']
+
+    @property
+    def total_students(self):
+        """Get total number of enrolled students"""
+        from django.db.models import Count
+        return BatchEnrollment.objects.filter(
+            batch__course__academy=self,
+            is_active=True
+        ).values('student').distinct().count()
+    
+    @property
+    def average_rating(self):
+        """Get average rating from reviews"""
+        from django.db.models import Avg
+        avg = self.reviews.filter(
+            is_approved=True,
+            is_active=True
+        ).aggregate(Avg('rating'))['rating__avg']
+        return round(avg, 1) if avg else 0.0
+    
+    @property
+    def total_reviews(self):
+        """Get total number of approved reviews"""
+        return self.reviews.filter(
+            is_approved=True,
+            is_active=True
+        ).count()
 
 
 class Course(ClassMateModel):
