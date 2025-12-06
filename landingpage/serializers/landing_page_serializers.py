@@ -21,17 +21,14 @@ class AcademyProgramSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = AcademyProgram
-        fields = ['id', 'name', 'description', 'icon']
+        fields = ['id', 'name']
 
-class AcademyCardSerializer(serializers.Serializer):
-    """
-    Serializer for academy cards on listing pages.
-    Optimized for minimal data transfer.
-    """
+class FeaturedAcademySerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     name = serializers.CharField(read_only=True)
     short_description = serializers.CharField(read_only=True)
     featured_image = serializers.ImageField(read_only=True)
+    featured_subject = serializers.SerializerMethodField()
     logo = serializers.ImageField(read_only=True)
     location = serializers.SerializerMethodField()
     total_students = serializers.IntegerField(read_only=True)
@@ -41,11 +38,13 @@ class AcademyCardSerializer(serializers.Serializer):
         read_only=True
     )
     review_count = serializers.IntegerField(read_only=True)
-    programs = AcademyProgramSerializer(many=True, read_only=True)
+    # programs = AcademyProgramSerializer(many=True, read_only=True)
     established_year = serializers.CharField(read_only=True)
+
+    def get_featured_subject(self, obj):
+        return obj.get_featured_subject_display() if obj.featured_subject else None
     
     def get_location(self, obj):
-        """Get formatted location string"""
         location_parts = []
         if obj.district:
             location_parts.append(obj.district.name)
@@ -54,10 +53,8 @@ class AcademyCardSerializer(serializers.Serializer):
         return ", ".join(location_parts) if location_parts else "N/A"
     
     def to_representation(self, instance):
-        """Custom representation"""
         data = super().to_representation(instance)
         
-        # Handle None values for ratings
         if data.get('average_rating') is None:
             data['average_rating'] = 0.0
         
@@ -66,18 +63,24 @@ class AcademyCardSerializer(serializers.Serializer):
             data['average_rating'] = round(float(data['average_rating']), 1)
         
         return data
+
+
 class AcademyGallerySerializer(serializers.ModelSerializer):
     """Serializer for academy gallery images"""
     
     class Meta:
         model = AcademyGallery
         fields = ['id', 'image', 'title', 'description', 'order']
+
+
 class AcademyFacilitySerializer(serializers.ModelSerializer):
     """Serializer for academy facilities"""
     
     class Meta:
         model = AcademyFacility
-        fields = ['id', 'name', 'icon', 'description']
+        fields = ['id', 'name' ]
+
+
 class AcademyReviewSerializer(serializers.ModelSerializer):
     """Serializer for academy reviews"""
     reviewer_name = serializers.CharField(read_only=True)
@@ -198,6 +201,11 @@ class AcademyDetailSerializer(serializers.Serializer):
         if obj.division:
             location_parts.append(obj.division.name)
         return ", ".join(location_parts) if location_parts else "N/A"
+
+    def get_reviews(self, obj):
+        """Get latest reviews"""
+        reviews = getattr(obj, 'latest_reviews', [])
+        return AcademyReviewSerializer(reviews, many=True).data
     
     def to_representation(self, instance):
         """Custom representation"""

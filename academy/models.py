@@ -9,6 +9,7 @@ from django.db.models.signals import pre_save
 from django.dispatch import receiver
 from utils.models import Division, District, Upazila
 from academy.choices_fields import YEAR_CHOICES, SUBJECT_TYPE_CHOICES, SUBJECT_TYPE_BANGLA, SLOT_CATEGORY_CHOICES, JAN_JUN
+    
 
 class Academy(ClassMateModel):
     name = models.CharField(max_length=255, unique=True)
@@ -63,6 +64,13 @@ class Academy(ClassMateModel):
     is_featured = models.BooleanField(
         default=False,
         help_text="Whether this academy is featured on landing page"
+    )
+    featured_subject = models.CharField(
+        max_length=100,
+        choices=SUBJECT_TYPE_CHOICES,
+        null=True,
+        blank=True,
+        help_text="Featured subject"
     )
     short_description = models.CharField(
         max_length=500,

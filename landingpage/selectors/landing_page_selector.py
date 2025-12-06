@@ -40,29 +40,30 @@ class LandingPageAcademySelector:
             'division', 
             'district', 
             'upazila'
-        ).prefetch_related(
-            'programs'
-        ).annotate(
-            total_students=Count(
-                'courses__batches__batchenrollment',
-                filter=Q(courses__batches__batchenrollment__is_active=True),
-                distinct=True
-            ),
-            average_rating=Avg(
-                'reviews__rating',
-                filter=Q(
-                    reviews__is_approved=True,
-                    reviews__is_active=True
-                )
-            ),
-            review_count=Count(
-                'reviews',
-                filter=Q(
-                    reviews__is_approved=True,
-                    reviews__is_active=True
-                )
-            )
         ).order_by('-created_at')[:limit]
+        # .prefetch_related(
+        #     'programs'
+        # ).annotate(
+        #     total_student=Count(
+        #         'courses__batches__batchenrollment',
+        #         filter=Q(courses__batches__batchenrollment__is_active=True),
+        #         distinct=True
+        #     ),
+        #     average_rating=Avg(
+        #         'reviews__rating',
+        #         filter=Q(
+        #             reviews__is_approved=True,
+        #             reviews__is_active=True
+        #         )
+        #     ),
+        #     review_count=Count(
+        #         'reviews',
+        #         filter=Q(
+        #             reviews__is_approved=True,
+        #             reviews__is_active=True
+        #         )
+        #     )
+        # ).order_by('-created_at')[:limit]
     
     @staticmethod
     def get_all_academies_for_listing(
@@ -99,25 +100,25 @@ class LandingPageAcademySelector:
         ).prefetch_related(
             'programs'
         ).annotate(
-            total_students=Count(
-                'courses__batches__batchenrollment',
-                filter=Q(courses__batches__batchenrollment__is_active=True),
-                distinct=True
-            ),
-            average_rating=Avg(
+            # total_students=Count(
+            #     'courses__batches__batchenrollment',
+            #     filter=Q(courses__batches__batchenrollment__is_active=True),
+            #     distinct=True
+            # ),
+            average_ratings=Avg(
                 'reviews__rating',
                 filter=Q(
                     reviews__is_approved=True,
                     reviews__is_active=True
                 )
             ),
-            review_count=Count(
-                'reviews',
-                filter=Q(
-                    reviews__is_approved=True,
-                    reviews__is_active=True
-                )
-            )
+            # review_count=Count(
+            #     'reviews',
+            #     filter=Q(
+            #         reviews__is_approved=True,
+            #         reviews__is_active=True
+            #     )
+            # )
         )
         
         # Apply search filter
@@ -144,10 +145,10 @@ class LandingPageAcademySelector:
         
         # Apply rating filter
         if min_rating:
-            queryset = queryset.filter(average_rating__gte=min_rating)
+            queryset = queryset.filter(average_ratings__gte=min_rating)
         
         # Order by featured first, then by rating
-        queryset = queryset.order_by('-is_featured', '-average_rating', '-created_at')
+        queryset = queryset.order_by('-is_featured', '-average_ratings', '-created_at')
         
         # Paginate
         paginator = Paginator(queryset, page_size)
@@ -185,8 +186,7 @@ class LandingPageAcademySelector:
             ).select_related(
                 'division',
                 'district',
-                'upazila',
-                'contact_hours'
+                'upazila'
             ).prefetch_related(
                 Prefetch(
                     'gallery_images',
@@ -205,7 +205,8 @@ class LandingPageAcademySelector:
                     queryset=AcademyReview.objects.filter(
                         is_approved=True,
                         is_active=True
-                    ).order_by('-created_at')[:10]  # Latest 10 reviews
+                    ).order_by('-created_at')[:10],  # Latest 10 reviews
+                    to_attr='latest_reviews'  # Store in a separate attribute
                 ),
                 Prefetch(
                     'courses',
@@ -216,27 +217,28 @@ class LandingPageAcademySelector:
                         )
                     )
                 )
-            ).annotate(
-                total_students=Count(
-                    'courses__batches__batchenrollment',
-                    filter=Q(courses__batches__batchenrollment__is_active=True),
-                    distinct=True
-                ),
-                average_rating=Avg(
-                    'reviews__rating',
-                    filter=Q(
-                        reviews__is_approved=True,
-                        reviews__is_active=True
-                    )
-                ),
-                review_count=Count(
-                    'reviews',
-                    filter=Q(
-                        reviews__is_approved=True,
-                        reviews__is_active=True
-                    )
-                )
             ).first()
+            # .annotate(
+            #     total_students=Count(
+            #         'courses__batches__batchenrollment',
+            #         filter=Q(courses__batches__batchenrollment__is_active=True),
+            #         distinct=True
+            #     ),
+            #     average_rating=Avg(
+            #         'reviews__rating',
+            #         filter=Q(
+            #             reviews__is_approved=True,
+            #             reviews__is_active=True
+            #         )
+            #     ),
+            #     review_count=Count(
+            #         'reviews',
+            #         filter=Q(
+            #             reviews__is_approved=True,
+            #             reviews__is_active=True
+            #         )
+            #     )
+            # ).first()
         except Academy.DoesNotExist:
             return None
     

@@ -31,7 +31,7 @@ class AcademyAdmin(ClassMateAdmin):
         ('user', 'name', 'contact_number', ),
         ('established_year', 'website', 'logo', 'description',),
         ('division', 'district', 'upazila', 'area_or_union', 'street_address', 'postal_code'),
-        ('cover_image', 'featured_image', 'is_featured', 'short_description', 'hours_text', ), 
+        ('cover_image', 'featured_image', 'is_featured', 'featured_subject', 'short_description', 'hours_text', ), 
         ('average_rating', 'total_students', 'total_reviews')
     ]
 

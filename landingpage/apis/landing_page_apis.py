@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny
 import logging
 from landingpage.selectors.landing_page_selector import LandingPageAcademySelector
 from landingpage.serializers.landing_page_serializers import (
-    AcademyCardSerializer,
+    FeaturedAcademySerializer,
     AcademyDetailSerializer,
     ProgramFilterSerializer
 )
@@ -30,13 +30,13 @@ class FeaturedAcademiesAPIView(APIView):
         """
         try:
             limit = int(request.GET.get('limit', 6))
-            limit = min(limit, 20)  # Max 20 academies
+            limit = min(limit, 12)  # Max 12 academies
             
             # Get featured academies using selector
             academies = LandingPageAcademySelector.get_featured_academies(limit=limit)
             
             # Serialize data
-            serializer = AcademyCardSerializer(academies, many=True)
+            serializer = FeaturedAcademySerializer(academies, many=True)
             
             return Response({
                 'success': True,
@@ -109,7 +109,7 @@ class AcademyListingAPIView(APIView):
             )
             
             # Serialize data
-            serializer = AcademyCardSerializer(result['results'], many=True)
+            serializer = FeaturedAcademySerializer(result['results'], many=True)
             
             return Response({
                 'success': True,
@@ -138,6 +138,8 @@ class AcademyListingAPIView(APIView):
                 'error': 'An error occurred while fetching academies.',
                 'details': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class AcademyDetailAPIView(APIView):
     """
     Public API to get detailed academy information.
@@ -180,6 +182,8 @@ class AcademyDetailAPIView(APIView):
                 'error': 'An error occurred while fetching academy details.',
                 'details': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class ProgramFilterOptionsAPIView(APIView):
     """
     Public API to get available program filter options.

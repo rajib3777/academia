@@ -157,3 +157,4 @@ class AcademyReview(models.Model):
         ]
     def __str__(self):
         return f"{self.academy.name} - {self.student} ({self.rating}★)"
+        
