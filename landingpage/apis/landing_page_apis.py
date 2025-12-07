@@ -84,7 +84,7 @@ class AcademyListingAPIView(APIView):
             district_id = request.GET.get('district')
             min_rating = request.GET.get('min_rating')
             page = int(request.GET.get('page', 1))
-            page_size = int(request.GET.get('page_size', 12))
+            page_size = int(request.GET.get('page_size', 24))
             
             # Validate and limit page_size
             page_size = min(page_size, 24)

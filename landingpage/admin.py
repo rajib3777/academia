@@ -3,7 +3,11 @@ from landingpage.models import (
     AcademyGallery,
     AcademyFacility,
     AcademyProgram,
-    AcademyReview
+    AcademyReview,
+    TeacherSubject,
+    TeacherEducation,
+    TeacherAchievement,
+    TeacherReview
 )
 
 
@@ -73,3 +77,72 @@ class AcademyReviewAdmin(admin.ModelAdmin):
         queryset.update(is_verified=True)
     verify_reviews.short_description = "Verify selected reviews"
 
+
+class TeacherSubjectInline(admin.TabularInline):
+    model = TeacherSubject
+    extra = 1
+    fields = ['subject', 'is_primary']
+
+
+class TeacherEducationInline(admin.TabularInline):
+    model = TeacherEducation
+    extra = 1
+    fields = ['degree', 'institution', 'year', 'order']
+
+
+class TeacherAchievementInline(admin.TabularInline):
+    model = TeacherAchievement
+    extra = 1
+    fields = ['title', 'description', 'year', 'order']
+
+
+@admin.register(TeacherSubject)
+class TeacherSubjectAdmin(admin.ModelAdmin):
+    list_display = ['teacher', 'subject', 'is_primary']
+    list_filter = ['teacher', 'subject', 'is_primary']
+    search_fields = ['teacher__full_name', 'subject__name']
+    autocomplete_fields = ['teacher']
+
+
+@admin.register(TeacherEducation)
+class TeacherEducationAdmin(admin.ModelAdmin):
+    list_display = ['teacher', 'degree', 'institution', 'year', 'order']
+    list_filter = ['teacher', 'degree', 'institution', 'year', 'order']
+    search_fields = ['teacher__full_name', 'degree', 'institution']
+    autocomplete_fields = ['teacher']
+
+
+@admin.register(TeacherAchievement)
+class TeacherAchievementAdmin(admin.ModelAdmin):
+    list_display = ['teacher', 'title', 'description', 'year', 'order']
+    list_filter = ['teacher', 'title', 'description', 'year', 'order']
+    search_fields = ['teacher__full_name', 'title', 'description']
+    autocomplete_fields = ['teacher']
+
+
+@admin.register(TeacherReview)
+class TeacherReviewAdmin(admin.ModelAdmin):
+    list_display = [
+        'teacher',
+        'student_name',
+        'rating',
+        'is_approved',
+        'is_active',
+        'reviewed_at'
+    ]
+    list_filter = ['is_approved', 'is_active', 'rating', 'reviewed_at']
+    search_fields = ['teacher__full_name', 'student_name', 'review_text']
+    readonly_fields = ['reviewed_at', 'created_at', 'updated_at']
+    
+    fieldsets = (
+        ('Review Information', {
+            'fields': ('teacher', 'student', 'student_name', 'rating', 'review_text')
+        }),
+        ('Status', {
+            'fields': ('is_approved', 'is_active')
+        }),
+        ('Timestamps', {
+            'fields': ('reviewed_at', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )

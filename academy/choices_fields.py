@@ -1,6 +1,6 @@
 YEAR_CHOICES = [
     (str(year), str(year))
-    for year in range(2000, 2041)
+    for year in range(1980, 2041)
 ]
 
 # SUBJECT type choices
