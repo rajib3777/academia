@@ -91,3 +91,8 @@ To make github action .scripts/deploy.sh executable run chmod +x .scripts/deploy
 upgrade django version:
 pip install pip-review
 pip-review --auto
+-------------
+pm2 stop classmate-web
+or kill all: pm2 stop all
+pm2 kill
+restart: pm2 start classmate-web
