@@ -87,7 +87,7 @@ during docker first time run update local.yml file.
       start_period: 30s
       timeout: 10s
 To make github action .scripts/deploy.sh executable run chmod +x .scripts/deploy.sh inside the server. 
---------------
+-------------
 upgrade django version:
 pip install pip-review
 pip-review --auto
