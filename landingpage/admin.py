@@ -7,7 +7,8 @@ from landingpage.models import (
     TeacherSubject,
     TeacherEducation,
     TeacherAchievement,
-    TeacherReview
+    TeacherReview,
+    ContactUs
 )
 
 
@@ -143,6 +144,23 @@ class TeacherReviewAdmin(admin.ModelAdmin):
         }),
         ('Timestamps', {
             'fields': ('reviewed_at', 'created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+
+@admin.register(ContactUs)
+class ContactUsAdmin(admin.ModelAdmin):
+    list_display = ['first_name', 'last_name', 'email', 'phone', 'subject', 'created_at']
+    list_filter = ['created_at']
+    search_fields = ['first_name', 'last_name', 'email', 'phone', 'subject']
+    readonly_fields = ['created_at', 'updated_at']
+
+    fieldsets = (
+        ('Contact Information', {
+            'fields': (('first_name', 'last_name', 'email', 'phone', 'subject', ), ('message'))
+        }),
+        ('Timestamps', {
+            'fields': (('created_at', 'updated_at')),
             'classes': ('collapse',)
         }),
     )

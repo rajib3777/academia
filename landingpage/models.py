@@ -322,3 +322,43 @@ class TeacherReview(models.Model):
     
     def __str__(self):
         return f"{self.student_name} - {self.teacher.full_name} ({self.rating}★)"
+
+
+class ContactUs(models.Model):
+    first_name = models.CharField(
+        max_length=255
+    )
+    last_name = models.CharField(
+        max_length=255
+    )
+    email = models.EmailField(
+        null=True,
+        blank=True
+    )
+    phone = models.CharField(
+        max_length=20,
+        help_text="Phone number of the person"
+    )
+    subject = models.CharField(
+        max_length=255,
+        help_text="Subject of the message"
+    )
+    message = models.TextField(
+        help_text="Message content"
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True,
+        help_text="Contact us submission timestamp"
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True,
+        help_text="Contact us update timestamp"
+    )
+    
+    class Meta:
+        verbose_name = 'Contact Us'
+        verbose_name_plural = 'Contact Us'
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return f"{self.name} - {self.email}"

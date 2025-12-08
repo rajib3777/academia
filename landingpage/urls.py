@@ -3,7 +3,8 @@ from landingpage.apis.landing_page_apis import (
     FeaturedAcademiesAPIView,
     AcademyListingAPIView,
     AcademyDetailAPIView,
-    ProgramFilterOptionsAPIView
+    ProgramFilterOptionsAPIView,
+    ContactUsAPIView
 )
 from landingpage.apis.landing_page_teacher_api import (
     FeaturedTeachersAPIView,
@@ -30,4 +31,5 @@ teacher_urlpatterns = [
 urlpatterns = [
     *academy_urlpatterns,
     *teacher_urlpatterns,
+    path('contact-us/', ContactUsAPIView.as_view(), name='contact-us'),
 ]

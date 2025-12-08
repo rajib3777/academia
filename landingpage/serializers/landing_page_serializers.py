@@ -4,7 +4,7 @@ from landingpage.models import (
     AcademyFacility, 
     AcademyProgram,
     AcademyReview,
-
+    ContactUs
 )
 
 from academy.models import (
@@ -224,3 +224,24 @@ class AcademyDetailSerializer(serializers.Serializer):
 class ProgramFilterSerializer(serializers.Serializer):
     """Serializer for program filter options"""
     name = serializers.CharField()
+
+
+class ContactUsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ContactUs
+        fields = [
+            'id',
+            'first_name',
+            'last_name',
+            'email',
+            'phone',
+            'subject',
+            'message'
+        ]
+    
+    def validate_phone(self, value):
+        """Validate phone number"""
+        if not value:
+            raise serializers.ValidationError("Phone number is required")
+        # Add custom phone validation if needed
+        return value

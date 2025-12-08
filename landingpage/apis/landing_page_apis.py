@@ -7,7 +7,8 @@ from landingpage.selectors.landing_page_selector import LandingPageAcademySelect
 from landingpage.serializers.landing_page_serializers import (
     FeaturedAcademySerializer,
     AcademyDetailSerializer,
-    ProgramFilterSerializer
+    ProgramFilterSerializer,
+    ContactUsSerializer
 )
 logger = logging.getLogger(__name__)
 
@@ -220,4 +221,35 @@ class ProgramFilterOptionsAPIView(APIView):
                 'success': False,
                 'error': 'An error occurred while fetching program options.',
                 'details': str(e)
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+class ContactUsAPIView(APIView):
+    permission_classes = [AllowAny]
+    
+    def post(self, request):
+        try:
+            serializer = ContactUsSerializer(data=request.data)
+            
+            if serializer.is_valid():
+                contact_us = serializer.save()
+
+                return Response({
+                    'success': True,
+                    'message': 'Thank you for contacting us! We will get back to you soon.',
+                }, status=status.HTTP_201_CREATED)
+            
+            logger.warning(f"Contact us form validation failed: {serializer.errors}")
+            return Response({
+                'success': False,
+                'message': 'Validation failed',
+                'errors': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
+            
+        except Exception as e:
+            logger.error(f"Error submitting contact us form: {str(e)}")
+            return Response({
+                'success': False,
+                'message': 'An error occurred while submitting the form. Please try again later.',
+                'error': str(e)
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
