@@ -3,10 +3,10 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.core.cache import cache
 from rest_framework.exceptions import ValidationError as DRFValidationError
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from django.core.exceptions import ValidationError
-from account.serializers import ChangePasswordSerializer, NavbarAccountInfoSerializer, AdminAccountDetailSerializer
+from account.serializers import ChangePasswordSerializer, ResetPasswordSerializer, NavbarAccountInfoSerializer, AdminAccountDetailSerializer
 from account.services.user_service import UserService
 from academy.selectors import academy_selector_v2
 from student.selectors import student_selector
@@ -64,7 +64,51 @@ class ChangePasswordView(APIView):
         except Exception as e:
             logger.error(f'Unexpected error in ChangePasswordView: {str(e)}')
             return Response({'detail': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-        
+
+class ResetPasswordView(APIView):
+    """
+    API endpoint for authenticated users to reset their password.
+    """
+    permission_classes = [AllowAny]
+    # authentication_classes = [JWTAuthentication]
+
+    user_service = UserService()
+
+    def post(self, request) -> Response:
+        """
+        Change the password for the authenticated user.
+
+        Returns:
+            Response with success or error message.
+        """
+        #TODO otp validation check
+        serializer = ResetPasswordSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        new_password = serializer.validated_data['new_password']
+        confirm_password = serializer.validated_data['confirm_password']
+
+        if new_password != confirm_password:
+            return Response(
+                {'detail': 'New password and confirm password do not match.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        phone_number = serializer.validated_data['phone_number']
+        user = self.user_service.get_user_by_phone_number(phone_number)
+
+        if not user:
+            return Response({'detail': 'User not found.'}, status=status.HTTP_404_NOT_FOUND)
+
+        try:
+            self.user_service.set_password(user, new_password)
+            return Response({'detail': 'Password changed successfully.'}, status=status.HTTP_200_OK)
+        except ValidationError as e:
+            logger.error(f'Password change error: {str(e)}')
+            return Response({'detail': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f'Unexpected error in ChangePasswordView: {str(e)}')
+            return Response({'detail': 'An unexpected error occurred.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class AccountDetailView(APIView):
     """Get academy account details by ID."""

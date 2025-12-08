@@ -276,6 +276,23 @@ class ChangePasswordSerializer(serializers.Serializer):
         if len(attrs['new_password']) < 8:
             raise serializers.ValidationError('New password must be at least 8 characters.')
         return attrs
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    """
+    Serializer for password change requests.
+    """
+    otp = serializers.IntegerField(write_only=True, required=False)
+    phone_number = serializers.CharField(write_only=True, required=True)
+    new_password = serializers.CharField(write_only=True, min_length=8, required=True)
+    confirm_password = serializers.CharField(write_only=True, required=True)
+
+    def validate(self, attrs) -> dict:
+        if attrs['new_password'] != attrs['confirm_password']:
+            raise serializers.ValidationError('New password and confirm password do not match.')
+        if len(attrs['new_password']) < 8:
+            raise serializers.ValidationError('New password must be at least 8 characters.')
+        return attrs
     
 
 class UserSerializer(serializers.Serializer):

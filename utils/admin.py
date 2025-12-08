@@ -5,16 +5,17 @@ from utils.models import SMSHistory, OTPVerification, Division, District, Upazil
 
 @admin.register(OTPVerification)
 class OTPVerificationAdmin(admin.ModelAdmin):
-    list_display = ('phone_number', 'otp', 'created_at', 'expires_at', 'is_verified', 'is_expired_display')
+    # list_display = ('phone_number', 'otp', 'created_at', 'expires_at', 'is_verified', 'is_expired_display')
+    list_display = ('phone_number', 'otp', 'created_at', 'expires_at', 'is_verified')
     search_fields = ('phone_number', 'otp')
     list_filter = ('is_verified', ('created_at', admin.DateFieldListFilter))
-    readonly_fields = ('created_at', 'expires_at', 'is_expired_display')
+    # readonly_fields = ('created_at', 'expires_at', 'is_expired_display')
     ordering = ('-created_at',)
 
-    def is_expired_display(self, obj):
-        return obj.is_expired()
-    is_expired_display.boolean = True
-    is_expired_display.short_description = "Is Expired?"
+    # def is_expired_display(self, obj):
+    #     return obj.is_expired()
+    # is_expired_display.boolean = True
+    # is_expired_display.short_description = "Is Expired?"
 
 
 @admin.register(SMSHistory)

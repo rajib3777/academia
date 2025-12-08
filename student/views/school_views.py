@@ -139,31 +139,31 @@ class PublicSchoolListView(APIView):
 
     def get(self, request) -> Response:
         try:
-            page = int(request.GET.get('page', 1))
-            page_size = int(request.GET.get('page_size', 1000))
-            search_query = request.GET.get('search', '').strip()
+            # Extract query parameters
+            search = request.query_params.get('search')
 
-            pagination_info = self.school_selector.list_schools(
-                search_query=search_query,
-                page=page,
-                page_size=page_size
+            # Get schools using selector with role-based filtering
+            schools = school_selector.SchoolSelector().get_schools_for_dropdown(
+                search=search
             )
 
-            serializer = self.serializer_class(
-                pagination_info['results'],
-                context={'request': request},
-                many=True
-            )
-
-            response_data = {
+            # Serialize and return the data
+            serializer = SchoolDropdownSerializer(schools, many=True)
+            return Response({
                 'success': True,
                 'data': serializer.data,
-                'pagination': pagination_info['pagination'],
-                'filters_applied': dict(request.GET),
-                'total_count': pagination_info['pagination']['total_items']
-            }
-
-            return Response(response_data, status=status.HTTP_200_OK)
+                'count': len(serializer.data)
+            })
+        
+        except ValidationError as e:
+            return Response(
+                {
+                    'success': False,
+                    'error': 'Invalid parameters',
+                    'details': str(e)
+                },
+                status=status.HTTP_400_BAD_REQUEST
+            )
         except Exception as e:
             logger.error(f'Error in PublicSchoolListView: {str(e)}')
             return Response(

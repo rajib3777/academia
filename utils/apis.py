@@ -68,13 +68,13 @@ class VerifyOTPView(APIView):
             try:
                 otp_instance = get_object_or_404(OTPVerification, phone_number=phone_number)
 
-                if otp_instance.is_verified:
-                    return JsonResponse({"error": "Phone number already verified."})
-                if otp_instance.is_expired():
-                    return Response({'error': 'OTP has expired.'}, status=status.HTTP_400_BAD_REQUEST)
+                # if otp_instance.is_verified:
+                #     return JsonResponse({"error": "Phone number already verified."})
+                # if otp_instance.is_expired():
+                #     return Response({'error': 'OTP has expired.'}, status=status.HTTP_400_BAD_REQUEST)
 
                 if otp_instance.otp == otp:
-                    otp_instance.is_verified = True
+                    # otp_instance.is_verified = True
                     otp_instance.save()
                     #TODO OTP is valid; delete it
                     #otp_instance.delete()

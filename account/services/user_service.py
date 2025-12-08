@@ -17,6 +17,9 @@ class UserService:
     def __init__(self):
         self.user_selector = UserSelector()
 
+    def get_user_by_phone_number(self, phone_number: str) -> Optional[User]:
+        return User.objects.filter(phone=phone_number).first()
+
     @transaction.atomic
     def create_user(self, user_data: Dict[str, Any], role: str) -> User:
         """
@@ -132,7 +135,7 @@ class UserService:
 
     def set_password(self, user: User, new_password: str) -> None:
         user.set_password(new_password)
-        user.full_clean()
+        # user.full_clean()
         user.save()
 
 

@@ -18,10 +18,10 @@ class OTPVerification(models.Model):
             self.expires_at = now() + timedelta(minutes=5)  # OTP valid for 5 minutes
         super().save(*args, **kwargs)
 
-    def is_expired(self):
-        if self.expires_at is None:
-            return None
-        return self.expires_at < now()
+    # def is_expired(self):
+    #     if self.expires_at is None:
+    #         return None
+    #     return self.expires_at < now()
 
 
 class SMSHistory(models.Model):
