@@ -105,6 +105,7 @@ class RoleMenuPermission(models.Model):
 class RecoveryOTP(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recovery_otps")
     code = models.IntegerField()  # stores 6-digit numeric OTP
+    phone = models.CharField(max_length=15, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     expires_at = models.DateTimeField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=RECOVERY_OTP_STATUS_CHOICES, default=NOT_USED)

@@ -167,13 +167,13 @@ def action_generate_otp(modeladmin, request, queryset):
 
 @admin.register(RecoveryOTP)
 class RecoveryOTPAdmin(admin.ModelAdmin):
-    list_display = ("user", "code", "status", "created_at", "expires_at", "created_by")
+    list_display = ("user", "code", "phone", "status", "created_at", "expires_at", "created_by")
     list_filter = ("status", "created_at", "user", "expires_at", "created_by")
-    search_fields = ("user__username", "user__phone", "code")
+    search_fields = ("user__username", "user__phone", "code", "phone")
     fieldsets = (
         (_("Basic Info"), {
             'fields': (
-                ('user', 'code', 'status', ),
+                ('user', 'code', 'phone', 'status', ),
                 ('created_at', 'expires_at', 'created_by'),
             )
         }),

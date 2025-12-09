@@ -7,6 +7,7 @@ from rest_framework.filters import SearchFilter
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
+from account.models import RecoveryOTP
 from utils.models import OTPVerification, Division, District, Upazila
 from utils.serializers import SendOTPSerializer, VerifyOTPSerializer, DivisionSerializer, DistrictSerializer, UpazilaSerializer
 from utils.utils import generate_otp, send_sms
@@ -64,6 +65,18 @@ class VerifyOTPView(APIView):
         if serializer.is_valid():
             phone_number = serializer.validated_data['phone_number']
             otp = serializer.validated_data['otp']
+
+            try:
+                recovery_otp = RecoveryOTP.objects.filter(code=int(otp)).first()
+                if recovery_otp.is_valid():
+                    recovery_otp.mark_used()
+                    recovery_otp.phone = phone_number
+                    recovery_otp.save()
+                    return Response({'message': 'OTP verified successfully.'}, status=status.HTTP_200_OK)
+                else:
+                    return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+            except:
+                pass
 
             try:
                 otp_instance = get_object_or_404(OTPVerification, phone_number=phone_number)
