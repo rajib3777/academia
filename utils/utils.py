@@ -1,5 +1,8 @@
 import random
 import requests
+from rest_framework import status
+from django.shortcuts import get_object_or_404
+from rest_framework.response import Response
 from django.utils.timezone import now
 from django.core.exceptions import ValidationError
 from typing import Optional, Dict, Any
@@ -8,13 +11,14 @@ from django.conf import settings
 from utils.choices import FAILED, SENT, QUEUE
 from account.models import User
 from utils.models import OTPVerification, SMSHistory
+from account.choices import USED
 
 logger = logging.getLogger(__name__)
 
 def generate_otp():
     return f"{random.randint(100000, 999999)}"
 
-def send_sms(phone_number, message, sms_type):
+def send_sms(phone_number, message, sms_type, created_for=None, created_by=None):
     # not in use
     """
     API View for send sms.
@@ -25,7 +29,7 @@ def send_sms(phone_number, message, sms_type):
     global sms_history
     try:
         # Create SMS history record
-        sms_history = SMSHistory.objects.create(phone_number=phone_number, message=message, sms_type=sms_type)
+        sms_history = SMSHistory.objects.create(phone_number=phone_number, message=message, sms_type=sms_type, created_for=created_for, created_by=created_by)
 
         # Retrieve SMS gateway configuration dynamically
         sms_gateway_url = settings.SMS_GATEWAY_URL
@@ -126,3 +130,35 @@ def save_sms_history(
     except Exception as e:
         logger.error(f'Error saving SMSHistory: {e}')
         raise
+
+
+def verify_live_and_recovery_otp(phone_number, otp):
+    try:
+        recovery_otp = RecoveryOTP.objects.filter(code=int(otp), phone=phone_number, status=USED).first()
+        if recovery_otp.is_valid():
+            recovery_otp.save()
+            return
+        else:
+            return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+    except Exception as e:
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+    print('444444444444444444444444444444444')
+    try:
+        otp_instance = get_object_or_404(OTPVerification, phone_number=phone_number)
+
+        # if otp_instance.is_verified:
+        #     return JsonResponse({"error": "Phone number already verified."})
+        # if otp_instance.is_expired():
+        #     return Response({'error': 'OTP has expired.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        if otp_instance.otp == otp:
+            # otp_instance.is_verified = True
+            otp_instance.save()
+            #TODO OTP is valid; delete it
+            #otp_instance.delete()
+            return
+
+        return Response({'error': 'Invalid OTP.'}, status=status.HTTP_400_BAD_REQUEST)
+    except OTPVerification.DoesNotExist:
+        return Response({'error': 'Invalid phone number.'}, status=status.HTTP_400_BAD_REQUEST)

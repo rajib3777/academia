@@ -9,7 +9,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
-from utils.utils import send_sms
+from utils.utils import verify_live_and_recovery_otp
 from utils.choices import ACCOUNT
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
@@ -344,19 +344,12 @@ class StudentSignupView(APIView):
         serializer = student_serializers.StudentSignUpSerializer(data=request.data)
 
         if serializer.is_valid(raise_exception=True):
+            # Verify OTP
+            otp_code = serializer.validated_data.pop('otp')
+            verify_live_and_recovery_otp(serializer.validated_data['phone'], otp_code)
+
             try:
-                serializer.is_valid(raise_exception=True)
                 student = self.service_class.student_signup(serializer.validated_data)
-
-                try:
-                    send_sms(
-                        phone_number=student.user.phone,
-                        message=f"Your student account credentials. \nStudent ID: {student.student_id}\nUsername: {student.user.phone}\nPassword: {request.data['password']}",
-                        sms_type=ACCOUNT,
-                    )
-                except Exception as e:
-                    logger.error(f"Error sending SMS: {str(e)}")
-
                 return Response({'success': True, 'data': student}, status=status.HTTP_201_CREATED)
             
             except ValidationError as e:

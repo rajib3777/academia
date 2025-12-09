@@ -5,6 +5,7 @@ from functools import cached_property
 from account.choices import STUDENT
 from account.services.user_service import UserService
 from utils.services.sms_service import SMSService
+from utils.utils import send_sms
 from account.models import User
 from student.models import Student, School
 from student.selectors.student_selector import StudentSelector
@@ -137,13 +138,15 @@ class StudentService:
 
     @transaction.atomic
     def student_signup(self, data: Dict[str, Any]) -> Student:
+        password = data.pop('password', None)
+
         user_data = {
             'username': data.get('phone'),
             'email': None,
             'first_name': data.pop('first_name'),
             'last_name': data.pop('last_name'),
             'phone': data.pop('phone'),
-            'password': data.pop('password', None),
+            'password': password,
         }
 
         # Create user
@@ -156,13 +159,21 @@ class StudentService:
         )
 
         # Send SMS with login credentials
-        self.sms_service.save_sms_history(
-            created_by=None,
-            created_for=user,
-            phone_number=user.phone,
-            message=f"Your student account has been created. Phone Number: {user.username}, Password: {password}",
+        # self.sms_service.save_sms_history(
+        #     created_by=None,
+        #     created_for=user,
+        #     phone_number=user.phone,
+        #     message=f"Your student account has been created. Phone Number: {user.username}, Password: {password}",
+        #     sms_type=ACCOUNT,
+        #     status=QUEUE
+        # )
+
+        send_sms(
+            phone_number=student.user.phone,
+            message=f"Your student account credentials. \nStudent ID: {student.student_id}\nUsername: {student.user.phone}\nPassword: {password}",
             sms_type=ACCOUNT,
-            status=QUEUE
+            created_for=user,
+            created_by=None,
         )
 
         response = {
