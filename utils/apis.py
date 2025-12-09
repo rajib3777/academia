@@ -12,6 +12,7 @@ from utils.models import OTPVerification, Division, District, Upazila
 from utils.serializers import SendOTPSerializer, VerifyOTPSerializer, DivisionSerializer, DistrictSerializer, UpazilaSerializer
 from utils.utils import generate_otp, send_sms
 from utils.choices import OTP
+from account.choices import NOT_USED
 
 
 class SendOTPView(APIView):
@@ -67,7 +68,7 @@ class VerifyOTPView(APIView):
             otp = serializer.validated_data['otp']
 
             try:
-                recovery_otp = RecoveryOTP.objects.filter(code=int(otp)).first()
+                recovery_otp = RecoveryOTP.objects.filter(code=int(otp), status=NOT_USED).first()
                 if recovery_otp.is_valid():
                     recovery_otp.mark_used()
                     recovery_otp.phone = phone_number
