@@ -1,8 +1,10 @@
 from django.contrib.auth.models import AbstractUser, BaseUserManager, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 from django.db import models
+from datetime import timedelta
+from django.utils import timezone
 from account.utils import phone_validator
-from account.choices import ROLE_CHOICES, STUDENT, ACADEMY, ADMIN
+from account.choices import ROLE_CHOICES, STUDENT, ACADEMY, ADMIN, RECOVERY_OTP_STATUS_CHOICES, NOT_USED, USED, BLOCKED
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, phone, password=None, **extra_fields):
@@ -98,4 +100,32 @@ class RoleMenuPermission(models.Model):
 
     def __str__(self):
         return f"{self.role.name} - {self.menu.name}"
+  
+
+class RecoveryOTP(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="recovery_otps")
+    code = models.IntegerField()  # stores 6-digit numeric OTP
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
+    status = models.CharField(max_length=10, choices=RECOVERY_OTP_STATUS_CHOICES, default=NOT_USED)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE, related_name="created_recovery_otps")
+
+    def is_valid(self):
+        return (self.status == NOT_USED) and (timezone.now() < self.expires_at)
+
+    def mark_used(self):
+        self.status = USED
+        self.save()
+    
+    def mark_not_used(self):
+        self.status = NOT_USED
+        self.save()
+    
+    def mark_blocked(self):
+        self.status = BLOCKED
+        self.save()
+
+    def __str__(self):
+        status = "Used" if self.status == USED else "Valid"
+        return f"OTP {self.code} ({status}) for {self.user.username}"
 

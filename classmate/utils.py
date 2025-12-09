@@ -7,6 +7,10 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework import status
 from django.conf import settings
+from rest_framework.exceptions import Throttled
+from django.core.cache import cache
+from django.utils.timezone import now
+
 class StandardResultsSetPagination(PageNumberPagination):
     page_size = 10
     page_size_query_param = 'page_size'
@@ -92,3 +96,37 @@ def convert_date_to_dhaka(date_obj):
     dhaka_tz = pytz.timezone('Asia/Dhaka')
     date_dhaka = date_obj.astimezone(dhaka_tz)
     return date_dhaka.strftime('%Y-%m-%d')
+
+
+def get_client_ip(request):
+    """Extracts client IP address from request headers."""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
+
+
+def check_contact_us_rate_limit(request):
+    """Enforces a rate limit of 2 requests per IP per day."""
+    client_ip = get_client_ip(request)
+    cache_key = f"contact_us_{client_ip}_{now().date()}"
+    request_count = cache.get(cache_key, 0)
+
+    if request_count >= 2:
+        raise Throttled(detail="You have reached the daily limit of 2 requests.")
+
+    cache.set(cache_key, request_count + 1, timeout=86400)  # 24 hours
+
+
+def check_student_signup_rate_limit(request):
+    """Enforces a rate limit of 30 requests per IP per day."""
+    client_ip = get_client_ip(request)
+    cache_key = f"student_signup_{client_ip}_{now().date()}"
+    request_count = cache.get(cache_key, 0)
+
+    if request_count >= 30:
+        raise Throttled(detail="You have reached the daily limit of 30 requests.")
+
+    cache.set(cache_key, request_count + 1, timeout=86400)  # 24 hours

@@ -1,6 +1,7 @@
 from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework.authentication import SessionAuthentication, BasicAuthentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -8,10 +9,16 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.generics import ListAPIView, UpdateAPIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
-from account.utils import UserListPaginationClass
+from account.utils import UserListPaginationClass, generate_otp
+from django.http import JsonResponse
+from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_GET
+from django.core.exceptions import PermissionDenied
+from datetime import timedelta, datetime
 from account.serializers import (LoginSerializer, UserUpdateSerializer, UserListSerializer, 
                                  RegistrationSerializer, RoleSerializer, MenuWithSubmenusSerializer, MenuRecursiveSerializer)
-from account.models import User, Role, Menu, Role, RoleMenuPermission
+from account.models import User, Role, Menu, Role, RoleMenuPermission, RecoveryOTP
 
 
 class RegistrationAPIView(APIView):
@@ -110,4 +117,45 @@ class RoleMenuPermissionNestedListView(APIView):
         menus = Menu.objects.filter(id__in=menu_ids).order_by('order', 'id').prefetch_related('submenus')
         serializer = MenuRecursiveSerializer(menus, many=True, context={'role': role})
         return Response(serializer.data)
+
+
+
+class GenerateRecoveryOTPAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication, SessionAuthentication, BasicAuthentication]
     
+    def get(self, request):
+        # super admin check
+        if not request.user.is_superuser and not request.user.is_admin():
+            raise PermissionDenied("Only super-admins can generate OTP.")
+
+        academy_id = request.GET.get("academy_id")
+        if not academy_id:
+            return JsonResponse({"error": "academy_id is required"}, status=400)
+
+        try:
+            from academy.models import Academy
+            academy = Academy.objects.get(academy_id=academy_id)
+            target_user = academy.user
+        except Academy.DoesNotExist:
+            return JsonResponse({"error": "academy not found"}, status=404)
+
+        # Set expiry to end of this year
+        now = timezone.now()
+        current_year = now.year
+        expires_at = timezone.make_aware(datetime(current_year, 12, 31, 23, 59, 59))
+
+        for _ in range(50):
+            otp_code = generate_otp()
+            otp_obj = RecoveryOTP.objects.create(
+                user=target_user,
+                code=otp_code,
+                expires_at=expires_at,
+                created_by=request.user,
+                status="not_used"
+            )
+
+        return JsonResponse({
+            "message": "OTP generated successfully",
+            "user": target_user.username
+        })

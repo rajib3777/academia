@@ -467,6 +467,7 @@ class StudentSignUpSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=255)
     last_name = serializers.CharField(max_length=255)
     phone = serializers.CharField(max_length=20)
+    otp = serializers.CharField(max_length=6)
     password = serializers.CharField(write_only=True, min_length=5, required=True)
     confirm_password = serializers.CharField(write_only=True, min_length=5, required=True)
     school_id = serializers.IntegerField()

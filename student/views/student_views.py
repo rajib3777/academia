@@ -9,6 +9,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import transaction
+from utils.utils import send_sms
+from utils.choices import ACCOUNT
 from django.core.exceptions import ValidationError
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from student.serializers.student_serializers import (SchoolNameListSerializer, StudentSerializer, 
@@ -17,7 +19,7 @@ from student.serializers.student_serializers import (SchoolNameListSerializer, S
                                  StudentAccountUpdateSerializer, StudentAccountDetailSerializer)
 from student.serializers import student_serializers
 from classmate.permissions import AuthenticatedGenericView
-from classmate.utils import StandardResultsSetPagination
+from classmate.utils import StandardResultsSetPagination, check_student_signup_rate_limit
 from functools import cached_property
 from student.selectors import student_selector
 from student.services import student_service
@@ -336,12 +338,24 @@ class StudentSignupView(APIView):
         self.selector_class = student_selector.StudentSelector()
 
     def post(self, request, format=None):
+        # Check student signup rate limit
+        check_student_signup_rate_limit(request)
+
         serializer = student_serializers.StudentSignUpSerializer(data=request.data)
 
         if serializer.is_valid(raise_exception=True):
             try:
                 serializer.is_valid(raise_exception=True)
                 student = self.service_class.student_signup(serializer.validated_data)
+
+                try:
+                    send_sms(
+                        phone_number=student.user.phone,
+                        message=f"Your student account credentials. \nStudent ID: {student.student_id}\nUsername: {student.user.phone}\nPassword: {request.data['password']}",
+                        sms_type=ACCOUNT,
+                    )
+                except Exception as e:
+                    logger.error(f"Error sending SMS: {str(e)}")
 
                 return Response({'success': True, 'data': student}, status=status.HTTP_201_CREATED)
             

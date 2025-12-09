@@ -150,14 +150,14 @@ class TeacherReviewAdmin(admin.ModelAdmin):
 
 @admin.register(ContactUs)
 class ContactUsAdmin(admin.ModelAdmin):
-    list_display = ['first_name', 'last_name', 'email', 'phone', 'subject', 'created_at']
-    list_filter = ['created_at']
+    list_display = ['first_name', 'last_name', 'email', 'phone', 'subject', 'status', 'created_at']
+    list_filter = ['created_at', 'status']
     search_fields = ['first_name', 'last_name', 'email', 'phone', 'subject']
     readonly_fields = ['created_at', 'updated_at']
 
     fieldsets = (
         ('Contact Information', {
-            'fields': (('first_name', 'last_name', 'email', 'phone', 'subject', ), ('message'))
+            'fields': (('first_name', 'last_name', 'email', 'phone', 'subject', 'status'), ('message'))
         }),
         ('Timestamps', {
             'fields': (('created_at', 'updated_at')),

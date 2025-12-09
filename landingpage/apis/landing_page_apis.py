@@ -10,6 +10,10 @@ from landingpage.serializers.landing_page_serializers import (
     ProgramFilterSerializer,
     ContactUsSerializer
 )
+from landingpage.models import ContactUs
+from landingpage.choice_fields import PENDING
+from rest_framework.exceptions import ValidationError
+from classmate.utils import check_contact_us_rate_limit
 logger = logging.getLogger(__name__)
 
 class FeaturedAcademiesAPIView(APIView):
@@ -228,28 +232,36 @@ class ContactUsAPIView(APIView):
     permission_classes = [AllowAny]
     
     def post(self, request):
-        try:
-            serializer = ContactUsSerializer(data=request.data)
-            
-            if serializer.is_valid():
-                contact_us = serializer.save()
+        # try:
 
-                return Response({
-                    'success': True,
-                    'message': 'Thank you for contacting us! We will get back to you soon.',
-                }, status=status.HTTP_201_CREATED)
-            
-            logger.warning(f"Contact us form validation failed: {serializer.errors}")
+        pending_lead = ContactUs.objects.filter(phone=request.data['phone'], status=PENDING).first()
+
+        if pending_lead:
+            raise ValidationError("You have already requested a call. Please wait for our response.")
+        
+        check_contact_us_rate_limit(request)  # Check daily request limit
+
+        serializer = ContactUsSerializer(data=request.data)
+        
+        if serializer.is_valid():
+            contact_us = serializer.save()
+
             return Response({
-                'success': False,
-                'message': 'Validation failed',
-                'errors': serializer.errors
-            }, status=status.HTTP_400_BAD_REQUEST)
+                'success': True,
+                'message': 'Thank you for contacting us! We will get back to you soon.',
+            }, status=status.HTTP_201_CREATED)
+        
+        logger.warning(f"Contact us form validation failed: {serializer.errors}")
+        return Response({
+            'success': False,
+            'message': 'Validation failed',
+            'errors': serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
             
-        except Exception as e:
-            logger.error(f"Error submitting contact us form: {str(e)}")
-            return Response({
-                'success': False,
-                'message': 'An error occurred while submitting the form. Please try again later.',
-                'error': str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        # except Exception as e:
+        #     logger.error(f"Error submitting contact us form: {str(e)}")
+        #     return Response({
+        #         'success': False,
+        #         'message': 'An error occurred while submitting the form. Please try again later.',
+        #         'error': str(e)
+        #     }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

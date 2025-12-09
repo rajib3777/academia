@@ -102,3 +102,7 @@ def generate_secure_password(length=10):
     random.shuffle(password)
     
     return ''.join(password)
+
+
+def generate_otp():
+    return random.randint(100000, 999999)  # 6-digit integer

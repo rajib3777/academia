@@ -1,6 +1,7 @@
 from django.db import models
 from academy.choices_fields import SUBJECT_TYPE_CHOICES, YEAR_CHOICES
 from django.core.validators import MinValueValidator, MaxValueValidator
+from landingpage.choice_fields import CONTACT_US_STATUS, PENDING
 
 # Create your models here.
 class AcademyGallery(models.Model):
@@ -346,6 +347,7 @@ class ContactUs(models.Model):
     message = models.TextField(
         help_text="Message content"
     )
+    status = models.CharField(max_length=20, null=True, blank=True, choices=CONTACT_US_STATUS, default=PENDING)
     created_at = models.DateTimeField(
         auto_now_add=True,
         help_text="Contact us submission timestamp"

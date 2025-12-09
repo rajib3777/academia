@@ -1,6 +1,6 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
-from account.apis import LoginAPIView, UserUpdateAPIView, UserListAPIView, RegistrationAPIView, RoleListAPIView, RoleMenuPermissionListView, RoleMenuPermissionNestedListView
+from account.apis import LoginAPIView, UserUpdateAPIView, UserListAPIView, RegistrationAPIView, RoleListAPIView, RoleMenuPermissionListView, RoleMenuPermissionNestedListView, GenerateRecoveryOTPAPIView
 from account.views import ChangePasswordView, ResetPasswordView, AccountDetailView, AccountUpdateView, NavbarAccountInfoView
 
 app_name = "users"
@@ -18,4 +18,5 @@ urlpatterns = [
     path('navbar-account-info/', NavbarAccountInfoView.as_view(), name='navbar-account-info'),
     path('change-password/', ChangePasswordView.as_view(), name='change-password'),
     path('reset-password/', ResetPasswordView.as_view(), name='reset-password'),
+    path('generate-recovery-otp/', GenerateRecoveryOTPAPIView.as_view(), name="generate_recovery_otp"),
 ]

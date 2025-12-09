@@ -20,3 +20,14 @@ ROLE_CHOICES = [
     (STUDENT, 'Student'),
     (ACADEMY, 'Academy'),
 ]
+
+
+USED = 'used'
+NOT_USED = 'not_used'
+BLOCKED = 'blocked'
+
+RECOVERY_OTP_STATUS_CHOICES = [
+    (USED, 'Used'),
+    (NOT_USED, 'Not Used'),
+    (BLOCKED, 'Blocked'),
+]
