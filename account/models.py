@@ -35,7 +35,7 @@ class Role(models.Model):
 class User(AbstractUser):
     """Custom user model that uses phone number as the unique identifier."""
     email = models.EmailField(_("email address"), unique=True, null=True, blank=True)
-    role = models.ForeignKey(Role, on_delete=models.PROTECT)
+    role = models.ForeignKey(Role, on_delete=models.PROTECT, null=True)
     phone = models.CharField(_("Mobile number"), max_length=15, unique=True, validators=[phone_validator])
     otp = models.CharField(max_length=6, null=True, blank=True)
     is_active = models.BooleanField(default=True)
