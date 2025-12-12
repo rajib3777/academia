@@ -10,7 +10,7 @@ class School(models.Model):
     eiin = models.PositiveIntegerField(null=True, blank=True)
     address = models.TextField()
     email = models.EmailField(null=True, blank=True)
-    contact_number = models.CharField(max_length=15, null=True, blank=True)
+    contact_number = models.CharField(max_length=50, null=True, blank=True)
     website = models.URLField(null=True, blank=True)
     logo = models.ImageField(upload_to='school_logos/', null=True, blank=True)
 
