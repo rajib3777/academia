@@ -99,7 +99,7 @@ class RoleMenuPermissionListView(APIView):
             return Response({"detail": "Role not found."}, status=404)
         
         # Only top-level menus assigned to this role
-        menu_ids = RoleMenuPermission.objects.filter(role=role, menu__parent__isnull=True).values_list('menu_id', flat=True)
+        menu_ids = RoleMenuPermission.objects.filter(role=role, menu__parent__isnull=True, is_active=True).values_list('menu_id', flat=True)
         menus = Menu.objects.filter(id__in=menu_ids).order_by('order', 'id').prefetch_related('submenus')
         serializer = MenuWithSubmenusSerializer(menus, many=True, context={'role': role})
         return Response(serializer.data)
