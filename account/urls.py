@@ -1,11 +1,13 @@
 from django.urls import path
 from rest_framework_simplejwt.views import TokenRefreshView
-from account.apis import LoginAPIView, UserUpdateAPIView, UserListAPIView, RegistrationAPIView, RoleListAPIView, RoleMenuPermissionListView, RoleMenuPermissionNestedListView, GenerateRecoveryOTPAPIView
+from account.apis import LoginAPIView, UserUpdateAPIView, UserListAPIView, RegistrationAPIView, RoleListAPIView, RoleMenuPermissionListView, RoleMenuPermissionNestedListView, GenerateRecoveryOTPAPIView, cookie_login_view, me
 from account.views import ChangePasswordView, ResetPasswordView, AccountDetailView, AccountUpdateView, NavbarAccountInfoView
 
 app_name = "users"
 urlpatterns = [
     path('login/', LoginAPIView.as_view(), name='login'),
+    path('cookie-login/', cookie_login_view, name='cookie-login'),
+    path('me/', me, name='me'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('users/', UserListAPIView.as_view(), name='user-list'),
     path('user/<int:pk>/', UserUpdateAPIView.as_view(), name='user-update'),

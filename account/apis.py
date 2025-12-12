@@ -1,4 +1,3 @@
-from rest_framework.decorators import action
 from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.authentication import SessionAuthentication, BasicAuthentication
@@ -16,6 +15,10 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
 from django.core.exceptions import PermissionDenied
 from datetime import timedelta, datetime
+from rest_framework_simplejwt.tokens import RefreshToken
+from django.contrib.auth import authenticate
+from django.conf import settings
+from rest_framework.decorators import action, api_view, permission_classes
 from account.serializers import (LoginSerializer, UserUpdateSerializer, UserListSerializer, 
                                  RegistrationSerializer, RoleSerializer, MenuWithSubmenusSerializer, MenuRecursiveSerializer)
 from account.models import User, Role, Menu, Role, RoleMenuPermission, RecoveryOTP
@@ -159,3 +162,59 @@ class GenerateRecoveryOTPAPIView(APIView):
             "message": "OTP generated successfully",
             "user": target_user.username
         })
+
+
+def cookie_login_view(request):
+    phone = request.data.get("phone")
+    password = request.data.get("password")
+
+    user = authenticate(username=phone, password=password)
+    if not user:
+        return Response({"detail": "Invalid credentials"}, status=status.HTTP_401_UNAUTHORIZED)
+
+    refresh = RefreshToken.for_user(user)
+    access_token = str(refresh.access_token)
+
+    response = Response({"success": True}, status=status.HTTP_200_OK)
+
+    # -------------------------
+    # SET CROSS-DOMAIN COOKIE
+    # -------------------------
+    response.set_cookie(
+        key="access",
+        value=access_token,
+        max_age=24 * 60 * 60,
+        secure=True,
+        httponly=True,
+        samesite="None",
+        domain=".classmatespro.com",    # IMPORTANT!
+    )
+
+    response.set_cookie(
+        key="refresh",
+        value=str(refresh),
+        max_age=7 * 24 * 60 * 60,
+        secure=True,
+        httponly=True,
+        samesite="None",
+        domain=".classmatespro.com",
+    )
+
+    return response
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def me(request):
+    user = request.user
+    refresh = RefreshToken.for_user(user)
+
+    return Response({
+        "userID": user.id,
+        "name": user.get_full_name(),
+        "username": user.username,
+        "phone": user.phone,
+        "role": user.role.name,
+        "access": str(refresh.access_token),
+        "refresh": str(refresh),
+    })
