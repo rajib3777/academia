@@ -94,6 +94,7 @@ class RoleMenuPermission(models.Model):
     menu = models.ForeignKey(Menu, on_delete=models.CASCADE)
     permissions = models.ManyToManyField(Permission, blank=True)
     remarks = models.TextField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         unique_together = ('role', 'menu')
