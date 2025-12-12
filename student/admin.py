@@ -1,5 +1,5 @@
 from django.contrib import admin
-from student.models import Student, School
+from student.models import Student, School, TempSchool
 from classmate.admin import ClassMateAdmin
 
 
@@ -27,3 +27,4 @@ class StudentAdmin(ClassMateAdmin):
     # raw_id_fields = ('user', 'school')
 
 
+admin.site.register(TempSchool)

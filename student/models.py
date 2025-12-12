@@ -7,6 +7,7 @@ from classmate.models import ClassMateModel
 
 class School(models.Model):
     name = models.CharField(max_length=255, unique=True)
+    eiin = models.PositiveIntegerField(null=True, blank=True)
     address = models.TextField()
     email = models.EmailField(null=True, blank=True)
     contact_number = models.CharField(max_length=15, null=True, blank=True)
@@ -40,6 +41,82 @@ class Student(ClassMateModel):
             models.Index(fields=['student_id']),
             models.Index(fields=['school_id']),
         ]
+
+
+from django.db import models
+from django.core.exceptions import ValidationError
+import pandas as pd
+from io import BytesIO
+
+class TempSchool(models.Model):    
+    # Excel upload field for importing participant data
+    excel_upload = models.FileField(
+        upload_to='temp_schools/uploads/', 
+        verbose_name="Upload Excel for Participants",
+        null=True,
+        blank=True,
+        help_text="Upload Excel file with columns: Name, Department, Score"
+    )
+
+
+    class Meta:
+        verbose_name = "Temp School"
+        verbose_name_plural = "Temp Schools"
+
+    def save(self, *args, **kwargs):
+        self.process_excel_file()
+
+    def process_excel_file(self):
+        """Process the uploaded Excel file and create ArchivedExamParticipant records"""
+        try:
+            # Read Excel file from the file object, not path
+            self.excel_upload.seek(0)  # Reset file pointer to beginning
+            df = pd.read_excel(BytesIO(self.excel_upload.read()))
+            
+            # Expected columns: Name, Department, Score
+            required_columns = ['eiin', 'name', 'address', 'mobile']
+            
+            # Normalize column names (case-insensitive)
+            df.columns = df.columns.str.strip().str.lower()
+            
+            # Check if required columns exist
+            missing_columns = [col for col in required_columns if col not in df.columns]
+            if missing_columns:
+                raise ValidationError(
+                    f"Missing required columns: {', '.join(missing_columns)}. "
+                    f"Excel should have columns: eiin, name, address, mobile"
+                )
+
+            # Create participants from Excel data
+            participants_created = 0
+            for index, row in df.iterrows():
+                # Skip rows with empty name
+                if pd.isna(row['name']) or str(row['name']).strip() == '' or pd.isna(row['eiin']) or str(row['eiin']).strip() == '':
+                    continue
+                
+                eiin = str(row['eiin']).strip()
+                name = str(row['name']).strip()
+                address = str(row['address']).strip() if not pd.isna(row['address']) else ''
+                mobile = str(row['mobile']).strip() if not pd.isna(row['mobile']) else ''
+                
+                
+                # Create participant (update if exists)
+                # participant, created = ArchivedExamParticipant.objects.update_or_create(
+                created, school = School.objects.update_or_create(
+                    eiin=int(eiin),
+                    defaults={
+                        'name': name,
+                        'address': address,
+                        'contact_number': mobile,
+                    }
+                )
+                if created:
+                    participants_created += 1
+            
+            print(f"Successfully imported {participants_created} participants from Excel")
+            
+        except Exception as e:
+            raise ValidationError(f"Error processing Excel file: {str(e)}")
 
 
 @receiver(pre_save, sender=Student)
