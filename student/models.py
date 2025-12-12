@@ -99,19 +99,23 @@ class TempSchool(models.Model):
                 address = str(row['address']).strip() if not pd.isna(row['address']) else ''
                 mobile = str(row['mobile']).strip() if not pd.isna(row['mobile']) else ''
                 
+                if mobile and not mobile.startswith('0'):
+                    mobile = '0' + mobile
                 
                 # Create participant (update if exists)
-                # participant, created = ArchivedExamParticipant.objects.update_or_create(
-                created, school = School.objects.update_or_create(
-                    eiin=int(eiin),
-                    defaults={
-                        'name': name,
-                        'address': address,
-                        'contact_number': mobile,
-                    }
-                )
-                if created:
-                    participants_created += 1
+                try:
+                    school, created = School.objects.update_or_create(
+                        eiin=int(eiin),
+                        defaults={
+                            'name': name,
+                            'address': address,
+                            'contact_number': mobile[:15],
+                        }
+                    )
+                    if created:
+                        participants_created += 1
+                except Exception as e:
+                    print(f"Error creating participant {name}: {str(e)}")
             
             print(f"Successfully imported {participants_created} participants from Excel")
             
