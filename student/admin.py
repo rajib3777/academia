@@ -5,8 +5,8 @@ from classmate.admin import ClassMateAdmin
 
 @admin.register(School)
 class SchoolAdmin(admin.ModelAdmin):
-    list_display = ('name', 'contact_number', 'website', 'address')
-    search_fields = ('name__icontains', 'website', 'address__icontains')
+    list_display = ('name', 'eiin', 'contact_number', 'website', 'address')
+    search_fields = ('name__icontains', 'eiin', 'website', 'contact_number__icontains', 'address__icontains')
     ordering = ('name',)
 
 
