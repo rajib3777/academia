@@ -108,14 +108,27 @@ class TempSchool(models.Model):
             if mobile and not mobile.startswith('0'):
                 mobile = '0' + mobile
 
-            school, created = School.objects.update_or_create(
-                eiin=eiin,
-                defaults={
-                    'name': name,
-                    'address': address,
-                    'contact_number': mobile[:15],
-                }
-            )
+            from django.db import IntegrityError
+
+            try:
+                school, created = School.objects.update_or_create(
+                    eiin=eiin,
+                    defaults={
+                        'name': name,
+                        'address': address,
+                        'contact_number': mobile[:15],
+                    }
+                )
+
+                if created:
+                    participants_created += 1
+
+            except IntegrityError as e:
+                # Ignore duplicate school name constraint violation
+                if 'student_school_name_key' in str(e):
+                    continue
+                else:
+                    raise
 
             if created:
                 participants_created += 1
