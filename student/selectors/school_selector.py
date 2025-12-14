@@ -99,4 +99,4 @@ class SchoolSelector:
             )
         
         # Order by name for better usability
-        return query.order_by('name')
+        return query.order_by('name')[:500]
