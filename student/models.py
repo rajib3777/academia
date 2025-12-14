@@ -67,18 +67,18 @@ class TempSchool(models.Model):
         self.process_excel_file()
 
     def process_excel_file(self):
-        """Process the uploaded Excel file and create ArchivedExamParticipant records"""
-            # Read Excel file from the file object, not path
-        self.excel_upload.seek(0)  # Reset file pointer to beginning
+        """Process the uploaded Excel file and create School records"""
+
+        # Read Excel file from the file object, not path
+        self.excel_upload.seek(0)
         df = pd.read_excel(BytesIO(self.excel_upload.read()))
-        
-        # Expected columns: Name, Department, Score
+
         required_columns = ['eiin', 'name', 'address', 'mobile']
-        
-        # Normalize column names (case-insensitive)
+
+        # Normalize column names
         df.columns = df.columns.str.strip().str.lower()
-        
-        # Check if required columns exist
+
+        # Check required columns
         missing_columns = [col for col in required_columns if col not in df.columns]
         if missing_columns:
             raise ValidationError(
@@ -86,35 +86,42 @@ class TempSchool(models.Model):
                 f"Excel should have columns: eiin, name, address, mobile"
             )
 
-        # Create participants from Excel data
         participants_created = 0
+
         for index, row in df.iterrows():
-            # Skip rows with empty name
-            if pd.isna(row['name']) or str(row['name']).strip() == '' or pd.isna(row['eiin']) or str(row['eiin']).strip() == '':
+            # Skip invalid rows
+            if (
+                pd.isna(row['name']) or str(row['name']).strip() == '' or
+                pd.isna(row['eiin']) or str(row['eiin']).strip() == ''
+            ):
                 continue
-            
-            eiin = str(row['eiin']).strip()
+
+            # ---- FIX FOR EIIN FLOAT ISSUE ----
+            eiin_raw = str(row['eiin']).strip()
+            eiin = int(eiin_raw.split('.')[0])  # take only integer part
+            # ---------------------------------
+
             name = str(row['name']).strip()
             address = str(row['address']).strip() if not pd.isna(row['address']) else ''
             mobile = str(row['mobile']).strip() if not pd.isna(row['mobile']) else ''
-            
+
             if mobile and not mobile.startswith('0'):
                 mobile = '0' + mobile
-            
-            # Create participant (update if exists)
 
             school, created = School.objects.update_or_create(
-                eiin=int(eiin),
+                eiin=eiin,
                 defaults={
                     'name': name,
                     'address': address,
                     'contact_number': mobile[:15],
                 }
             )
+
             if created:
                 participants_created += 1
-        
+
         print(f"Successfully imported {participants_created} participants from Excel")
+
 
 
 @receiver(pre_save, sender=Student)
