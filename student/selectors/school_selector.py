@@ -91,6 +91,9 @@ class SchoolSelector:
             'id', 'name'
         )
 
+        if not search:
+            query = query.filter(name__icontains='rajshahi')
+
         # Apply search filter if provided
         if search:
             query = query.filter(
