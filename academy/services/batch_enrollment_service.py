@@ -37,7 +37,9 @@ class BatchEnrollmentService:
                 student_id=enrollment_data['student_id'],
                 is_active=enrollment_data.get('is_active', True),
                 remarks=enrollment_data.get('remarks', ''),
-                discount_fee=enrollment_data.get('discount_fee', 0.0)
+                discount_fee=enrollment_data.get('discount_fee', 0.0),
+                followup_date=enrollment_data.get('followup_date', None),
+                followup_remarks=enrollment_data.get('followup_remarks', None)
             )
 
             # Create payments if provided
@@ -60,7 +62,7 @@ class BatchEnrollmentService:
         try:
             self._validate_permission(request_user)
 
-            for field in ['batch_id', 'student_id', 'is_active', 'discount_fee', 'remarks']:
+            for field in ['batch_id', 'student_id', 'is_active', 'discount_fee', 'remarks', 'followup_date', 'followup_remarks']:
                 if field in enrollment_data:
                     setattr(enrollment, field, enrollment_data[field])
             enrollment.save()

@@ -88,7 +88,9 @@ class BatchEnrollmentCreateAPI(AuthenticatedGenericView, APIView):
                 'batch_id': serializer.validated_data['batch_id'],
                 'is_active': serializer.validated_data['is_active'],
                 'remarks': serializer.validated_data['remarks'],
-                'discount_fee': serializer.validated_data['discount_fee']
+                'discount_fee': serializer.validated_data['discount_fee'],
+                'followup_date': serializer.validated_data['followup_date'],
+                'followup_remarks': serializer.validated_data['followup_remarks']
             }
 
             payments_data = serializer.validated_data.get('payments', None)
@@ -138,7 +140,9 @@ class BatchEnrollmentUpdateAPI(AuthenticatedGenericView, APIView):
                 'batch_id': serializer.validated_data['batch_id'],
                 'is_active': serializer.validated_data['is_active'],
                 'discount_fee': serializer.validated_data['discount_fee'],
-                'remarks': serializer.validated_data['remarks']
+                'remarks': serializer.validated_data['remarks'],
+                'followup_date': serializer.validated_data['followup_date'],
+                'followup_remarks': serializer.validated_data['followup_remarks']
             }
             payments_data = serializer.validated_data.get('payments', None)
         
@@ -146,7 +150,7 @@ class BatchEnrollmentUpdateAPI(AuthenticatedGenericView, APIView):
                 request_user=request.user,
                 enrollment=enrollment,
                 enrollment_data=enrollment_data,
-                payments_data=payments_data
+                payments_data=payments_data,
             )
             return Response(self.serializer_class(updated).data, status=status.HTTP_200_OK)
         except ValidationError as e:

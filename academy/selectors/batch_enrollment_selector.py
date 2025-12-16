@@ -102,6 +102,10 @@ class BatchEnrollmentSelector:
             queryset = queryset.filter(completion_date__gte=filters['completion_date_from'])
         if filters.get('completion_date_to'):
             queryset = queryset.filter(completion_date__lte=filters['completion_date_to'])
+        if filters.get('followup_date_from'):
+            queryset = queryset.filter(followup_date__gte=filters['followup_date_from'])
+        if filters.get('followup_date_to'):
+            queryset = queryset.filter(followup_date__lte=filters['followup_date_to'])
         if filters.get('is_active') is not None:
             is_active = filters['is_active'].lower() == 'true'
             queryset = queryset.filter(is_active=is_active)

@@ -198,7 +198,9 @@ class BatchEnrollment(ClassMateModel):
         default=0.0,
         help_text='Discount fee for this student. If null, uses the course default fee.'
     )
-
+    followup_date = models.DateField(null=True, blank=True)
+    followup_remarks = models.TextField(null=True, blank=True)
+    
     class Meta:
         unique_together = ('student', 'batch')
         verbose_name = "Student Enrollment"

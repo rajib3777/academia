@@ -12,6 +12,8 @@ class BatchEnrollmentSerializer(serializers.Serializer):
     batch_id = serializers.IntegerField()
     enrollment_date = serializers.DateField(read_only=True)
     completion_date = serializers.DateField(required=False, allow_null=True)
+    followup_date = serializers.DateField(required=False, allow_null=True)
+    followup_remarks = serializers.CharField(required=False, allow_blank=True, allow_null=True)
     is_active = serializers.BooleanField(default=True)
     attendance_percentage = serializers.DecimalField(
         max_digits=5, decimal_places=2, required=False, allow_null=True
@@ -69,6 +71,8 @@ class BatchEnrollmentSerializer(serializers.Serializer):
             'is_active': instance.is_active,
             'discount_fee': instance.discount_fee,
             'remarks': instance.remarks,
+            'followup_date': instance.followup_date,
+            'followup_remarks': instance.followup_remarks,
             'payments': [
                 StudentPaymentSerializer(payment).data for payment in instance.student_payments.all()
             ],

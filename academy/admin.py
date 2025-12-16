@@ -121,13 +121,14 @@ class BatchEnrollmentAdmin(ClassMateAdmin):
     list_display = (
         'student',
         'batch',
+        'followup_date',
         'enrollment_date',
         'completion_date',
         'is_active',
         'attendance_percentage',
         'modified_by',
     )
-    list_filter = ('is_active', 'batch', 'enrollment_date', 'completion_date')
+    list_filter = ('is_active', 'batch', 'followup_date', 'enrollment_date', 'completion_date')
     search_fields = (
         'student__user__first_name',
         'student__user__last_name',
@@ -147,6 +148,7 @@ class BatchEnrollmentAdmin(ClassMateAdmin):
                 ('student', 'batch'),
                 ('discount_fee', 'enrollment_date', 'completion_date'),
                 ('is_active', 'attendance_percentage', ),
+                ('followup_date', 'followup_remarks'),
                 'remarks',
             ),
         }),
