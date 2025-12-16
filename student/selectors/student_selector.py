@@ -321,6 +321,7 @@ class StudentSelector:
             query = query.filter(
                 Q(user__first_name__icontains=search) |
                 Q(user__last_name__icontains=search) |
+                Q(user__phone__icontains=search) |
                 Q(student_id__icontains=search)
             )
         
