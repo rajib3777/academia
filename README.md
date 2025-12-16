@@ -96,3 +96,4 @@ pm2 stop classmate-web
 or kill all: pm2 stop all
 pm2 kill
 restart: pm2 start classmate-web
+
