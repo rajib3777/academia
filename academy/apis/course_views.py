@@ -25,25 +25,6 @@ class CourseCreateView(AuthenticatedGenericView, APIView):
         return CourseService(request_user=self.request.user)
     
     def post(self, request):
-        """
-        Create a course with optional batches.
-        
-        Request body:
-        {
-            "name": "Course Name",
-            "description": "Course description",
-            "fee": 1000.00,
-            "batches": [  // Optional
-                {
-                    "name": "Batch 1",
-                    "start_date": "2023-01-01",
-                    "end_date": "2023-06-30",
-                    "description": "Batch description",
-                    "is_active": true
-                }
-            ]
-        }
-        """
         try:
             # Validate request data
             serializer = self.serializer_class(data=request.data, context={'request': request})
@@ -118,30 +99,6 @@ class CourseUpdateView(AuthenticatedGenericView, APIView):
         return CourseSelector()
     
     def put(self, request, course_id: int):
-        """
-        Update a course with optional batches.
-        
-        Request body:
-        {
-            "name": "Updated Course Name",
-            "description": "Updated description",
-            "fee": 1200.00,
-            "academy_id": 1,
-            "batches": [  // Optional
-                {
-                    "id": 1,  // Include ID for existing batches
-                    "name": "Updated Batch 1",
-                    "start_date": "2023-02-01",
-                    "end_date": "2023-07-30"
-                },
-                {
-                    "name": "New Batch",  // No ID means create new
-                    "start_date": "2023-08-01",
-                    "end_date": "2023-12-31"
-                }
-            ]
-        }
-        """
         try:
             # Check if course exists
             course = self.course_selector.get_course_by_id(course_id)
@@ -150,6 +107,14 @@ class CourseUpdateView(AuthenticatedGenericView, APIView):
                     'success': False,
                     'error': 'Course not found'
                 }, status=status.HTTP_404_NOT_FOUND)
+
+            academy = course.academy
+
+            if request.user != academy.user:
+                return Response({
+                    'success': False,
+                    'error': 'You are not authorized to update this course'
+                }, status=status.HTTP_401_UNAUTHORIZED)
             
             # Validate request data
             serializer = self.serializer_class(data=request.data, context={'request': request})
@@ -164,7 +129,7 @@ class CourseUpdateView(AuthenticatedGenericView, APIView):
                 'name': serializer.validated_data['name'],
                 'description': serializer.validated_data['description'],
                 'fee': serializer.validated_data['fee'],
-                'academy_id': serializer.validated_data['academy_id'],
+                'academy_id': academy.id,
                 'subject': serializer.validated_data['subject']
             }
 
