@@ -68,10 +68,11 @@ class MenuAdmin(admin.ModelAdmin):
 
 @admin.register(RoleMenuPermission)
 class RoleMenuPermissionAdmin(admin.ModelAdmin):
-    list_display = ('role', 'menu', 'remarks')
+    list_display = ('role', 'menu', 'is_active', 'remarks')
     filter_horizontal = ('permissions',)
     search_fields = ('role__name', 'menu__name')
-    list_filter = ('role', )
+    list_filter = ('role', 'is_active')
+    list_editable = ('is_active',)
 
 
 @admin.action(description="Block selected OTPs")
